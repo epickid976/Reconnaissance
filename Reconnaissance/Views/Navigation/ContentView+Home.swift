@@ -12,6 +12,7 @@ import NavigationTransitions
 //MARK: Content View - App Entry Point
 
 struct ContentView: View {
+
     var body: some View {
         HomeTabView() // Your tab view becomes the root container
     }
@@ -32,14 +33,18 @@ struct HomeTabView: View {
                     GratitudeListView(path: $path)
                         .tag(0)
                 } else if selectedTab == 1 {
-                    VStack {
-                        Text("Settings View Placeholder") // Placeholder
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        Spacer()
+                    NavigationStack {
+                        VStack {
+                            Text("Settings View Placeholder") // Placeholder
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .frame(maxHeight: .infinity)
+                        .tag(2)
+                        .navigationTitle("Settings View")
+                        .navigationBarTitleDisplayMode(.large)
                     }
-                    .frame(maxHeight: .infinity)
-                    .tag(2)
                 }
 
                 // Custom Tab Bar

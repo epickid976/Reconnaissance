@@ -20,6 +20,7 @@
 		82D07FED2D08E695000A3179 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FEC2D08E695000A3179 /* SwipeActions */; };
 		82D07FEF2D08E698000A3179 /* MijickPopups in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FEE2D08E698000A3179 /* MijickPopups */; };
 		82D07FF12D08E69B000A3179 /* Toasts in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FF02D08E69B000A3179 /* Toasts */; };
+		82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D080B92D09BECD000A3179 /* KeyboardExt.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		82D07FDD2D08E5CA000A3179 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		82D07FDE2D08E5CA000A3179 /* UIDeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
 		82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
+		82D080B92D09BECD000A3179 /* KeyboardExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardExt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -138,6 +140,7 @@
 		82D07FE02D08E5CA000A3179 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				82D080B92D09BECD000A3179 /* KeyboardExt.swift */,
 				82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */,
 				82D07FDB2D08E5CA000A3179 /* ResultExtensions.swift */,
 				82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */,
@@ -287,6 +290,7 @@
 				82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */,
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
+				82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */,
 				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,
 			);

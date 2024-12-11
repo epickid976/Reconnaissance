@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import SwiftData
+import MijickPopups
 
 //MARK: - List View
 
@@ -15,6 +16,9 @@ struct GratitudeListView: View {
     @Binding var path: NavigationPath
 
     @State private var selectedDate = Date()
+    @State private var noteText: String = ""
+    @State private var isEditingEntry = false // Controls sheet presentation
+
     @Query(sort: \DailyGratitude.date, order: .reverse)
     private var gratitudes: [DailyGratitude]
 
@@ -23,244 +27,264 @@ struct GratitudeListView: View {
         gratitudes.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
 
-    @State private var isCalendarCompacted: Bool = false // Track compacted state
-    @State private var calendarHeight: CGFloat = 300 // Initial height of the calendar
-    @State private var noteText: String = "" // Text for the note section
-
     public init(path: Binding<NavigationPath>) {
-            _path = path
-        }
-    
+        _path = path
+    }
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Calendar View
-                CalendarView(selectedDate: $selectedDate, isCompacted: $isCalendarCompacted)
-                    .frame(height: isCalendarCompacted ? 100 : 300)
-                    .background(Color.primary.colorInvert())
-                    .padding()
-                    //.zIndex(1) // Keep calendar above content
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                withAnimation {
-                                    if value.translation.height < -50 {
-                                        isCalendarCompacted = true
-                                    } else if value.translation.height > 50 {
-                                        isCalendarCompacted = false
+            NavigationStack {
+                GeometryReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 22) {
+                        // Section for Today's Gratitude
+                        Section {
+                            if let gratitude = todayGratitude {
+                                GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                                    .onTapGesture {
+                                        selectedDate = gratitude.date
+                                        noteText = gratitude.notes
+                                        isEditingEntry = true
+                                    }
+                            } else {
+                                // Placeholder Cell
+                                VStack {
+                                    HStack {
+                                        Text("No entry for today")
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
+                                        Spacer()
+                                    }
+                                    HStack {
+                                        Text("Tap to add something you're grateful for.")
+                                            .font(.subheadline)
+                                            .foregroundColor(.blue)
+                                        Spacer()
+                                    }
+                                }
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.blue.opacity(0.1))
+                                )
+                                .onTapGesture {
+                                    Task {
+                                        await CentrePopup_AddGratitudeEntry {
+                                            
+                                        }.present()
                                     }
                                 }
                             }
-                    )
-                    .vSpacing(.top)
-
-                // Gratitude Cell for Today's Entry
-                if let gratitude = todayGratitude {
-                    ScrollView {
-                        if isCalendarCompacted {
-                            Spacer()
-                                .frame(height: 20)
-                        } else {
-                            Spacer()
                         }
-                        VStack(spacing: 16) {
-                            GratitudeCell(gratitude: gratitude, mainWindowSize: CGSize(width: UIScreen.main.bounds.width, height: 300))
-                                .modifier(ScrollTransitionModifier())
-                                .transition(.customBackInsertion)
-                            
-                            ZStack(alignment: .topLeading) {
-                                TextField("Notes. Write something here...", text: $noteText, axis: .vertical)
-                                    .lineLimit(1...6)  // Allow 3-6 lines before scrolling
-                                    .textFieldStyle(PlainTextFieldStyle())
-                                    .scrollContentBackground(.hidden)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 12)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .fill(.ultraThinMaterial)
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(noteText.isEmpty ? Color.secondary.opacity(0.3) : Color.blue.opacity(0.8), lineWidth: 1)
-                                    )
-                                    .cornerRadius(20)
-                                    .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
-                            }
-                            .padding(.horizontal, 16)
-                            .animation(.spring(), value: noteText)
+                        .padding(.horizontal, 16)
+                        
+                        // Past Gratitude Entries
+                        ForEach(gratitudes) { gratitude in
+                            GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                                .onTapGesture {
+                                    selectedDate = gratitude.date
+                                    noteText = gratitude.notes
+                                    isEditingEntry = true
+                                }
                         }
                     }
-                    .vSpacing(.top)
-                } else {
-                    Text("No entry for today.")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .vSpacing(.top)
+                    .padding(.horizontal, 16)
+                    .navigationTitle("Gratitude Journal")
+                    .navigationBarTitleDisplayMode(.large)
+                    .sheet(isPresented: $isEditingEntry) {
+                        GratitudeEditorView(date: selectedDate, noteText: $noteText) { savedNote in
+                            saveNoteForDate(selectedDate, note: savedNote)
+                            isEditingEntry = false
+                        }
+                    }
                 }
             }
-            .navigationTitle("Today's Gratitude")
-            .navigationBarTitleDisplayMode(.large)
-            //.padding(.vertical, 16)
         }
     }
 
-    private func saveNoteForToday(gratitude: DailyGratitude) {
-        // Save the note to the gratitude entry
-        gratitude.notes = noteText
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save note: \(error)")
+    private func saveNoteForDate(_ date: Date, note: String) {
+        // Save or update the gratitude entry for the selected date
+        var newEntry: DailyGratitude
+        
+        if let entry = gratitudes.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
+            entry.notes = note
+            newEntry = entry
+        } else {
+            let newEntry1 = DailyGratitude(entry1: "", entry2: "", entry3: "", notes: note)
+            newEntry = newEntry1
         }
+
+        modelContext.insert(newEntry)
     }
 }
 
-struct CalendarView: View {
-    @Binding var selectedDate: Date
-    @Binding var isCompacted: Bool // Binding for compacted state
-
-    private let currentDate = Date()
-    private let calendar = Calendar.current
-    private let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 7)
-
-    @State private var animatingMonth: Bool = false // Controls month animation
+struct GratitudeEditorView: View {
+    let date: Date
+    @Binding var noteText: String
+    var onSave: (String) -> Void
 
     var body: some View {
-        VStack(spacing: isCompacted ? 8 : 16) {
-            // Month and Year Header
-            HStack {
-                Button(action: isCompacted ? previousWeek : previousMonth) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-                Spacer()
-                Text(isCompacted ? weekRange(for: selectedDate) : monthAndYear(for: selectedDate))
-                    .font(isCompacted ? .headline : .title3)
-                    .bold()
-                    .foregroundColor(.primary)
-                    .opacity(animatingMonth ? 0.5 : 1)
-                    .animation(.easeInOut, value: animatingMonth)
-                Spacer()
-                Button(action: isCompacted ? nextWeek : nextMonth) {
-                    Image(systemName: "chevron.right")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-            }
-            .padding(.horizontal)
+        NavigationStack {
+            VStack(spacing: 16) {
+                Text("Entry for \(formattedDate(date))")
+                    .font(.headline)
 
-            // Weekday Header
-            LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(weekdays(), id: \.self) { day in
-                    Text(day)
-                        .font(.footnote)
-                        .bold()
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity)
-                }
-            }
+                TextField("What are you grateful for?", text: $noteText, axis: .vertical)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
 
-            // Dates Grid: Month or Week
-            LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(isCompacted ? daysInWeek(for: selectedDate) : daysInMonth(for: selectedDate), id: \.self) { date in
-                    Text("\(calendar.component(.day, from: date))")
-                        .font(.body)
-                        .bold()
-                        .foregroundColor(isSameDay(date, selectedDate) ? .white : .primary)
-                        .frame(maxWidth: .infinity, maxHeight: 40)
-                        .background(
-                            Circle()
-                                .fill(isSameDay(date, selectedDate) ? Color.blue : Color.clear)
-                        )
-                        .clipShape(Circle())
-                        .onTapGesture {
-                            withAnimation(.easeInOut) {
-                                selectedDate = date
-                            }
-                        }
-                        .opacity(isCompacted || isSameMonth(date, selectedDate) ? 1 : 0.4) // Dim out-of-month dates in full view
-                        .disabled(!isSameMonth(date, selectedDate) && !isCompacted) // Disable out-of-month dates in full view
+                Spacer()
+
+                Button("Save") {
+                    onSave(noteText)
+                }
+                .buttonStyle(.borderedProminent)
+                .padding()
+            }
+            .navigationTitle("Edit Gratitude")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        onSave(noteText) // Optionally pass the unsaved note
+                    }
                 }
             }
-            .padding(.horizontal)
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.thinMaterial)
-        )
-        .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 4)
-        .animation(.easeInOut, value: selectedDate)
     }
 
-    // Helper Functions
-    private func monthAndYear(for date: Date) -> String {
+    private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
+        formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
+}
 
-    private func weekRange(for date: Date) -> String {
-        guard let startOfWeek = calendar.dateInterval(of: .weekOfMonth, for: date)?.start else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
-        return "\(formatter.string(from: startOfWeek)) - \(formatter.string(from: endOfWeek))"
+struct CentrePopup_AddGratitudeEntry: CenterPopup {
+    @Environment(\.modelContext) var modelContext
+    @Environment(\.mainWindowSize) var mainWindowSize
+    @Environment(\.colorScheme) var colorScheme
+    
+    var onDone: () -> Void
+    
+    @State private var entry1: String = ""
+    @State private var entry2: String = ""
+    @State private var entry3: String = ""
+    @State private var notes: String = ""
+    
+    init(onDone: @escaping () -> Void) {
+        self.onDone = onDone
     }
-
-    private func weekdays() -> [String] {
-        let formatter = DateFormatter()
-        formatter.locale = Locale.current
-        return formatter.shortWeekdaySymbols
+    
+    var body: some View {
+        createContent()
     }
+    
+    func createContent() -> some View {
+        VStack(spacing: 16) {
+            // Title
+            Text("🌟 Add Gratitude Entry")
+                .font(.headline)
+                .padding(.bottom, 8)
+            
+            // Entry TextFields
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Entries")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                createStyledTextField("🌟 Gratitude Entry 1", text: $entry1)
+                createStyledTextField("❤️ Gratitude Entry 2", text: $entry2)
+                createStyledTextField("🍃 Gratitude Entry 3", text: $entry3)
+            }
+            
+            // Notes Section
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Notes")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                createStyledTextField("Notes. Write something here...", text: $notes, isMultiline: true)
+            }
+            
+            // Action Buttons
+            HStack(spacing: 16) {
+                Button("Cancel") {
+                    Task { await dismissLastPopup() }
+                }
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.red.opacity(0.1)) // Subtle red tint
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                )
+                .foregroundColor(.red)
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
 
-    private func daysInMonth(for date: Date) -> [Date] {
-        guard let range = calendar.range(of: .day, in: .month, for: date),
-              let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))
-        else { return [] }
-        return range.compactMap { calendar.date(byAdding: .day, value: $0 - 1, to: startOfMonth) }
-    }
-
-    private func daysInWeek(for date: Date) -> [Date] {
-        guard let startOfWeek = calendar.dateInterval(of: .weekOfMonth, for: date)?.start else { return [] }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfWeek) }
-    }
-
-    private func isSameDay(_ date1: Date, _ date2: Date) -> Bool {
-        calendar.isDate(date1, inSameDayAs: date2)
-    }
-
-    private func isSameMonth(_ date1: Date, _ date2: Date) -> Bool {
-        calendar.isDate(date1, equalTo: date2, toGranularity: .month)
-    }
-
-    private func previousWeek() {
-        guard let newDate = calendar.date(byAdding: .day, value: -7, to: selectedDate) else { return }
-        withAnimation(.easeInOut) {
-            selectedDate = newDate
+                Button("Save") {
+                    saveGratitudeEntry()
+                    Task { await dismissLastPopup() }
+                    onDone()
+                }
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.blue.opacity(0.2))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+                )
+                .foregroundColor(.blue)
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
         }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .hideKeyboardOnDrag()
     }
 
-    private func nextWeek() {
-        guard let newDate = calendar.date(byAdding: .day, value: 7, to: selectedDate) else { return }
-        withAnimation(.easeInOut) {
-            selectedDate = newDate
+    // Helper for Styled Text Fields
+    func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
+        Group {
+            if isMultiline {
+                TextField(placeholder, text: text, axis: .vertical)
+                    .lineLimit(3...6)
+            } else {
+                TextField(placeholder, text: text)
+            }
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.gray.opacity(colorScheme == .dark ? 0.2 : 0.1)) // Subtle tint for visibility
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(text.wrappedValue.isEmpty ? Color.secondary.opacity(0.3) : Color.blue.opacity(0.8), lineWidth: 1)
+        )
+        .cornerRadius(20)
+        .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+        .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Ensure text color adapts
     }
-
-    private func previousMonth() {
-        guard let newDate = calendar.date(byAdding: .month, value: -1, to: selectedDate) else { return }
-        withAnimation(.easeInOut) {
-            selectedDate = newDate
-        }
+    
+    func saveGratitudeEntry() {
+        let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
+        modelContext.insert(newEntry)
     }
-
-    private func nextMonth() {
-        guard let newDate = calendar.date(byAdding: .month, value: 1, to: selectedDate) else { return }
-        withAnimation(.easeInOut) {
-            selectedDate = newDate
-        }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config.popupHorizontalPadding(24)
     }
 }
 

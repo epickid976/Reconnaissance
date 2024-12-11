@@ -44,7 +44,7 @@ class DailyGratitude {
     
     // Helper to adjust the date
     func withDateAdjusted(by days: Int) -> DailyGratitude {
-        var adjusted = self
+        let adjusted = self
         adjusted.date = Calendar.current.date(byAdding: .day, value: days, to: Date()) ?? Date()
         return adjusted
     }
