@@ -20,7 +20,15 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
                 .onTapGesture {
-                    modelContext.insert(DailyGratitude(entry1: "entry1", entry2: "entry2", entry3: "entry3"))
+                    modelContext
+                        .insert(
+                            DailyGratitude(
+                                entry1: "entry1",
+                                entry2: "entry2",
+                                entry3: "entry3",
+                                notes: "notes"
+                            )
+                        )
                 }
             Text("Hello, world!")
             List {

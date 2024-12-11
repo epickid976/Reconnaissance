@@ -10,6 +10,16 @@
 		82D07F7B2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
 		82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
+		82D07FE22D08E5CA000A3179 /* AppVersionHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */; };
+		82D07FE32D08E5CA000A3179 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
+		82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */; };
+		82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDD2D08E5CA000A3179 /* Extensions.swift */; };
+		82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDB2D08E5CA000A3179 /* ResultExtensions.swift */; };
+		82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDE2D08E5CA000A3179 /* UIDeviceExtension.swift */; };
+		82D07FEB2D08E638000A3179 /* NavigationTransitions in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FEA2D08E638000A3179 /* NavigationTransitions */; };
+		82D07FED2D08E695000A3179 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FEC2D08E695000A3179 /* SwipeActions */; };
+		82D07FEF2D08E698000A3179 /* MijickPopups in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FEE2D08E698000A3179 /* MijickPopups */; };
+		82D07FF12D08E69B000A3179 /* Toasts in Frameworks */ = {isa = PBXBuildFile; productRef = 82D07FF02D08E69B000A3179 /* Toasts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +50,12 @@
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Reconnaissance Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F802D07D714000A3179 /* GratitudeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntry.swift; sourceTree = "<group>"; };
+		82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color Extensions.swift"; sourceTree = "<group>"; };
+		82D07FDB2D08E5CA000A3179 /* ResultExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultExtensions.swift; sourceTree = "<group>"; };
+		82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionHelpers.swift; sourceTree = "<group>"; };
+		82D07FDD2D08E5CA000A3179 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		82D07FDE2D08E5CA000A3179 /* UIDeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
+		82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -73,6 +89,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82D07FF12D08E69B000A3179 /* Toasts in Frameworks */,
+				82D07FEF2D08E698000A3179 /* MijickPopups in Frameworks */,
+				82D07FEB2D08E638000A3179 /* NavigationTransitions in Frameworks */,
+				82D07FED2D08E695000A3179 /* SwipeActions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,10 +109,12 @@
 		82D07F502D07D6C8000A3179 = {
 			isa = PBXGroup;
 			children = (
+				82D07FE12D08E5CA000A3179 /* Helpers */,
 				82D07F5B2D07D6C8000A3179 /* Reconnaissance */,
 				82D07F6F2D07D6ED000A3179 /* Reconnaissance Watch Watch App */,
 				82D07F5A2D07D6C8000A3179 /* Products */,
 				82D07F812D07D714000A3179 /* Shared */,
+				82D07FE92D08E638000A3179 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,6 +133,34 @@
 				82D07F802D07D714000A3179 /* GratitudeEntry.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		82D07FE02D08E5CA000A3179 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */,
+				82D07FDB2D08E5CA000A3179 /* ResultExtensions.swift */,
+				82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */,
+				82D07FDD2D08E5CA000A3179 /* Extensions.swift */,
+				82D07FDE2D08E5CA000A3179 /* UIDeviceExtension.swift */,
+				82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		82D07FE12D08E5CA000A3179 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				82D07FE02D08E5CA000A3179 /* Extensions */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		82D07FE92D08E638000A3179 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,6 +185,10 @@
 			);
 			name = Reconnaissance;
 			packageProductDependencies = (
+				82D07FEA2D08E638000A3179 /* NavigationTransitions */,
+				82D07FEC2D08E695000A3179 /* SwipeActions */,
+				82D07FEE2D08E698000A3179 /* MijickPopups */,
+				82D07FF02D08E69B000A3179 /* Toasts */,
 			);
 			productName = Reconnaissance;
 			productReference = 82D07F592D07D6C8000A3179 /* Reconnaissance.app */;
@@ -189,6 +243,12 @@
 			);
 			mainGroup = 82D07F502D07D6C8000A3179;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				82D07FD52D08E2E4000A3179 /* XCRemoteSwiftPackageReference "swiftui-navigation-transitions" */,
+				82D07FD62D08E2F8000A3179 /* XCRemoteSwiftPackageReference "swiftui-toasts" */,
+				82D07FD72D08E304000A3179 /* XCRemoteSwiftPackageReference "SwipeActions" */,
+				82D07FD82D08E310000A3179 /* XCRemoteSwiftPackageReference "Popups" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 82D07F5A2D07D6C8000A3179 /* Products */;
 			projectDirPath = "";
@@ -222,6 +282,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82D07FE22D08E5CA000A3179 /* AppVersionHelpers.swift in Sources */,
+				82D07FE32D08E5CA000A3179 /* ViewModifiers.swift in Sources */,
+				82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */,
+				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
+				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
+				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -385,6 +451,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -420,6 +487,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -464,7 +532,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -498,7 +566,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.1;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -533,6 +601,64 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		82D07FD52D08E2E4000A3179 /* XCRemoteSwiftPackageReference "swiftui-navigation-transitions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/davdroman/swiftui-navigation-transitions";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.14.0;
+			};
+		};
+		82D07FD62D08E2F8000A3179 /* XCRemoteSwiftPackageReference "swiftui-toasts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sunghyun-k/swiftui-toasts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+		82D07FD72D08E304000A3179 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aheze/SwipeActions";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+		82D07FD82D08E310000A3179 /* XCRemoteSwiftPackageReference "Popups" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Mijick/Popups";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		82D07FEA2D08E638000A3179 /* NavigationTransitions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82D07FD52D08E2E4000A3179 /* XCRemoteSwiftPackageReference "swiftui-navigation-transitions" */;
+			productName = NavigationTransitions;
+		};
+		82D07FEC2D08E695000A3179 /* SwipeActions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82D07FD72D08E304000A3179 /* XCRemoteSwiftPackageReference "SwipeActions" */;
+			productName = SwipeActions;
+		};
+		82D07FEE2D08E698000A3179 /* MijickPopups */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82D07FD82D08E310000A3179 /* XCRemoteSwiftPackageReference "Popups" */;
+			productName = MijickPopups;
+		};
+		82D07FF02D08E69B000A3179 /* Toasts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82D07FD62D08E2F8000A3179 /* XCRemoteSwiftPackageReference "swiftui-toasts" */;
+			productName = Toasts;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 82D07F512D07D6C8000A3179 /* Project object */;
 }
