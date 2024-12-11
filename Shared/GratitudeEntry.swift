@@ -19,10 +19,11 @@ class DailyGratitude {
     var streak: Int = 0 // Add a streak property
     var notes: String = "" // Add a notes property
     
-    init(entry1: String, entry2: String, entry3: String, notes: String) {
+    init(entry1: String, entry2: String, entry3: String, date: Date = Date(), notes: String) {
         self.entry1 = entry1
         self.entry2 = entry2
         self.entry3 = entry3
+        self.date = date
         self.notes = notes
     }
     
@@ -47,6 +48,30 @@ class DailyGratitude {
         let adjusted = self
         adjusted.date = Calendar.current.date(byAdding: .day, value: days, to: Date()) ?? Date()
         return adjusted
+    }
+}
+
+extension DailyGratitude {
+    
+    @MainActor
+    static var preview: ModelContainer {
+        let container = try! ModelContainer(for: DailyGratitude.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        
+        let gratitude = DailyGratitude.example
+        let yesterday = DailyGratitude.exampleYesterday
+        let another = DailyGratitude(
+            entry1: "Grateful for a good book",
+            entry2: "Thankful for a warm meal",
+            entry3: "Appreciative of a good night's sleep",
+            date: Date().addingTimeInterval(-60 * 60 * 24 * 2),
+            notes: "Had a great day today"
+        )
+        
+        container.mainContext.insert(gratitude)
+        container.mainContext.insert(yesterday)
+        container.mainContext.insert(another)
+        
+        return container
     }
 }
 

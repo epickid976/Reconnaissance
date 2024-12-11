@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import SwiftData
+import Charts
 import MijickPopups
 
 //MARK: - List View
@@ -17,8 +18,9 @@ struct GratitudeListView: View {
 
     @State private var selectedDate = Date()
     @State private var noteText: String = ""
-    @State private var isEditingEntry = false // Controls sheet presentation
-
+    @State private var isShowingHistory = false
+    @State private var isScrollAtTop = true
+    
     @Query(sort: \DailyGratitude.date, order: .reverse)
     private var gratitudes: [DailyGratitude]
 
@@ -32,132 +34,235 @@ struct GratitudeListView: View {
     }
 
     var body: some View {
-            NavigationStack {
-                GeometryReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 22) {
-                        // Section for Today's Gratitude
-                        Section {
-                            if let gratitude = todayGratitude {
-                                GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
-                                    .onTapGesture {
-                                        selectedDate = gratitude.date
-                                        noteText = gratitude.notes
-                                        isEditingEntry = true
-                                    }
-                            } else {
-                                // Placeholder Cell
-                                VStack {
-                                    HStack {
-                                        Text("No entry for today")
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                                        Spacer()
-                                    }
-                                    HStack {
-                                        Text("Tap to add something you're grateful for.")
-                                            .font(.subheadline)
-                                            .foregroundColor(.blue)
-                                        Spacer()
-                                    }
+        NavigationStack {
+            GeometryReader { proxy in
+                ZStack {
+                    // Today View
+                    if !isShowingHistory {
+                        VStack {
+                            headerSection(proxy: proxy)
+                                .padding(.top, 16)
+                            Spacer()
+                            Button(action: {
+                                withAnimation {
+                                    isShowingHistory = true
                                 }
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.blue.opacity(0.1))
-                                )
-                                .onTapGesture {
-                                    Task {
-                                        await CentrePopup_AddGratitudeEntry {
-                                            
-                                        }.present()
-                                    }
-                                }
+                            }) {
+                                Label("See History", systemImage: "chevron.down")
+                                    .font(.subheadline)
+                                    .padding()
+                                    .opacity(isScrollAtTop ? 1 : 0) // Show only when at the top
                             }
                         }
-                        .padding(.horizontal, 16)
-                        
-                        // Past Gratitude Entries
-                        ForEach(gratitudes) { gratitude in
-                            GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
-                                .onTapGesture {
-                                    selectedDate = gratitude.date
-                                    noteText = gratitude.notes
-                                    isEditingEntry = true
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .contentShape(Rectangle()) // Make the entire view swipeable
+                        .gesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    if value.translation.height < -100 {
+                                        withAnimation {
+                                            isShowingHistory = true
+                                        }
+                                    }
                                 }
-                        }
+                        )
                     }
-                    .padding(.horizontal, 16)
-                    .navigationTitle("Gratitude Journal")
-                    .navigationBarTitleDisplayMode(.large)
-                    .sheet(isPresented: $isEditingEntry) {
-                        GratitudeEditorView(date: selectedDate, noteText: $noteText) { savedNote in
-                            saveNoteForDate(selectedDate, note: savedNote)
-                            isEditingEntry = false
+
+                    // History View
+                    if isShowingHistory {
+                        VStack {
+                            Button(action: {
+                                withAnimation {
+                                    isShowingHistory = false
+                                }
+                            }) {
+                                Label("See Today", systemImage: "chevron.up")
+                                    .font(.subheadline)
+                                    .padding()
+                            }
+
+                            ScrollViewReader { scrollViewProxy in
+                                ScrollView {
+                                    Spacer()
+                                    
+                                    // Gratitude Streaks (Heatmap)
+                                    VStack(alignment: .leading) {
+                                        Text("Gratitude Streaks")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                        HeatmapView(dailyGratitudes: gratitudes)
+                                    }
+                                    .padding(.top, 8)
+                                    .padding(.horizontal)
+                                    
+                                    LazyVStack(spacing: 22) {
+                                        ForEach(gratitudes) { gratitude in
+                                            GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                                        }
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .background(GeometryReader {
+                                                    Color.clear.preference(key: ViewOffsetKey.self,
+                                                        value: -$0.frame(in: .named("scroll")).origin.y)
+                                                })
+                                    .onPreferenceChange(ViewOffsetKey.self) {
+                                        print("offset >> \($0)")
+                                        isScrollAtTop = $0 < 10
+                                    }
+                                    
+                                }.coordinateSpace(name: "scroll")
+                            }
                         }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .contentShape(Rectangle()) // Make the entire view swipeable
+                        .simultaneousGesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    if value.translation.height > 100 && isScrollAtTop {
+                                        withAnimation {
+                                            isShowingHistory = false
+                                        }
+                                    }
+                                }
+                        )
                     }
                 }
             }
+            .navigationTitle(isShowingHistory ? "History" : "Today")
         }
     }
 
-    private func saveNoteForDate(_ date: Date, note: String) {
-        // Save or update the gratitude entry for the selected date
-        var newEntry: DailyGratitude
-        
-        if let entry = gratitudes.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
-            entry.notes = note
-            newEntry = entry
-        } else {
-            let newEntry1 = DailyGratitude(entry1: "", entry2: "", entry3: "", notes: note)
-            newEntry = newEntry1
-        }
-
-        modelContext.insert(newEntry)
-    }
-}
-
-struct GratitudeEditorView: View {
-    let date: Date
-    @Binding var noteText: String
-    var onSave: (String) -> Void
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                Text("Entry for \(formattedDate(date))")
-                    .font(.headline)
-
-                TextField("What are you grateful for?", text: $noteText, axis: .vertical)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                Spacer()
-
-                Button("Save") {
-                    onSave(noteText)
+    @ViewBuilder
+    func headerSection(proxy: GeometryProxy) -> some View {
+        Section {
+            // Today’s Gratitude Entry or Placeholder
+            if let gratitude = todayGratitude {
+                GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+            } else {
+                VStack {
+                    HStack {
+                        Text("No entry for today")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    HStack {
+                        Text("Tap to add something you're grateful for.")
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                        Spacer()
+                    }
                 }
-                .buttonStyle(.borderedProminent)
                 .padding()
-            }
-            .navigationTitle("Edit Gratitude")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        onSave(noteText) // Optionally pass the unsaved note
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.blue.opacity(0.1))
+                )
+                .onTapGesture {
+                    Task {
+                        await CentrePopup_AddGratitudeEntry {
+                        }
+                        .present()
                     }
                 }
             }
-        }
-    }
 
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+
+            // Milestones & Weekly Progress in a Single Compact Section
+            VStack(alignment: .center, spacing: 12) {
+                // Milestones
+                if gratitudes.count > 0 {
+                    Text("Milestones")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    if gratitudes.count % 10 == 0 {
+                        HStack {
+                            Text("🎉 \(gratitudes.count) entries!")
+                                .font(.footnote)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    Text("Logged \(gratitudes.count) entries so far.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("Your gratitude journey begins today!")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+
+                // Weekly Progress
+                HStack {
+                    ProgressView(value: Double(gratitudes.count), total: 7.0)
+                        .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                        .frame(width: 80)
+
+                    Text("\(gratitudes.count)/7 entries this week")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.vertical, 8)
+
+
+            // Reflection Summary
+            VStack(alignment: .center) {
+                if let firstEntry = gratitudes.last {
+                    Text("Reflection Summary")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        
+                    Text("You started your gratitude journey on \(firstEntry.date, style: .date).")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                    if let mostRecent = gratitudes.first {
+                        Text("Your last entry was \(mostRecent.date, style: .relative).")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    Text("Start your gratitude journey today!")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.top, 8)
+
+           
+
+            // Memory of Gratitude
+            if let randomGratitude = gratitudes.randomElement() {
+                VStack(alignment: .center) {
+                    Text("Memory of Gratitude")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Text("On \(randomGratitude.date, style: .date), you wrote:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                    Text("“\(randomGratitude.entry1)”")
+                        .font(.body) // Regular font instead of italic
+                        .padding(.top, 4)
+                }
+            }
+
+            // Quote of the Day
+            HStack {
+                Text("“Gratitude turns what we have into enough.”")
+                    .font(.subheadline)
+                    .italic()
+                    .foregroundColor(.secondary)
+                    .hSpacing(.center)
+            }
+            .padding(.top, 8)
+        }
+        .padding(.horizontal, 16)
     }
 }
+
+//MARK: - Add Popup
 
 struct CentrePopup_AddGratitudeEntry: CenterPopup {
     @Environment(\.modelContext) var modelContext
@@ -170,6 +275,8 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     @State private var entry2: String = ""
     @State private var entry3: String = ""
     @State private var notes: String = ""
+    
+    @State private var error: String?
     
     init(onDone: @escaping () -> Void) {
         self.onDone = onDone
@@ -225,9 +332,15 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
 
                 Button("Save") {
-                    saveGratitudeEntry()
-                    Task { await dismissLastPopup() }
-                    onDone()
+                    Task {
+                        let result = await saveGratitudeEntry()
+                        if result.isSuccess {
+                            await dismissLastPopup()
+                            onDone()
+                        } else {
+                            error = "Error saving entry. Please try again."
+                        }
+                    }
                 }
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
@@ -278,9 +391,16 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Ensure text color adapts
     }
     
-    func saveGratitudeEntry() {
+    func saveGratitudeEntry() async-> Result<Void, Error> {
         let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
         modelContext.insert(newEntry)
+        do {
+            try modelContext.save()
+            return .success(())
+        } catch {
+            print("Error saving new gratitude entry: \(error)")
+            return .failure(error)
+        }
     }
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
@@ -288,8 +408,37 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     }
 }
 
+//MARK: Heatmap
+
+struct HeatmapView: View {
+    var dailyGratitudes: [DailyGratitude]
+
+    var body: some View {
+        Chart {
+            ForEach(dailyGratitudes, id: \.id) { gratitude in
+                RectangleMark(
+                    x: .value("Date", gratitude.date, unit: .day),
+                    y: .value("Streak", 1) // Keep y constant for a grid-like look
+                )
+                .foregroundStyle(by: .value("Streak", gratitude.streak))
+            }
+        }
+        .chartForegroundStyleScale(range: [.gray, .blue]) // Adjust colors for streak levels
+        .frame(height: 100) // Compact heatmap
+        .padding()
+    }
+}
+
+
+
 
 //MARK: - Preview
+
+#Preview {
+    @Previewable @State var path = NavigationPath()
+    GratitudeListView(path: $path)
+        .modelContainer(DailyGratitude.preview)
+}
 
 #Preview {
     ScrollView {
