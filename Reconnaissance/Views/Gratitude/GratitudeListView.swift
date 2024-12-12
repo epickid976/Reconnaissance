@@ -8,6 +8,7 @@ import SwiftUI
 import SwiftData
 import Charts
 import MijickPopups
+import SwipeActions
 
 //MARK: - List View
 
@@ -50,33 +51,35 @@ struct GratitudeListView: View {
                 ZStack {
                     // Today View
                     if !isShowingHistory {
-                        VStack {
-                            headerSection(proxy: proxy)
-                                .padding(.top, 16)
-                            Spacer()
-                            Button(action: {
-                                withAnimation {
-                                    isShowingHistory = true
+                        SwipeViewGroup {
+                            VStack {
+                                headerSection(proxy: proxy)
+                                    .padding(.top, 16)
+                                Spacer()
+                                Button(action: {
+                                    withAnimation {
+                                        isShowingHistory = true
+                                    }
+                                }) {
+                                    Label("See History", systemImage: "chevron.down")
+                                        .font(.subheadline)
+                                        .padding()
+                                        .opacity(isScrollAtTop ? 1 : 0) // Show only when at the top
                                 }
-                            }) {
-                                Label("See History", systemImage: "chevron.down")
-                                    .font(.subheadline)
-                                    .padding()
-                                    .opacity(isScrollAtTop ? 1 : 0) // Show only when at the top
                             }
-                        }
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .contentShape(Rectangle()) // Make the entire view swipeable
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    if value.translation.height < -100 {
-                                        withAnimation {
-                                            isShowingHistory = true
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .contentShape(Rectangle()) // Make the entire view swipeable
+                            .gesture(
+                                DragGesture()
+                                    .onEnded { value in
+                                        if value.translation.height < -100 {
+                                            withAnimation {
+                                                isShowingHistory = true
+                                            }
                                         }
                                     }
-                                }
-                        )
+                            )
+                        }
                     }
 
                     // History View
@@ -91,37 +94,102 @@ struct GratitudeListView: View {
                                     .font(.subheadline)
                                     .padding()
                             }
-
-                            ScrollViewReader { scrollViewProxy in
-                                ScrollView {
-                                    Spacer()
-                                    
-                                    // Gratitude Streaks (Heatmap)
-                                    VStack(alignment: .leading) {
-                                        Text("Gratitude Streaks")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                        HeatmapView(dailyGratitudes: gratitudes)
-                                    }
-                                    .padding(.top, 8)
-                                    .padding(.horizontal)
-                                    
-                                    LazyVStack(spacing: 22) {
-                                        ForEach(gratitudes) { gratitude in
-                                            GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                            SwipeViewGroup {
+                                ScrollViewReader { scrollViewProxy in
+                                    ScrollView {
+                                        Spacer()
+                                        if gratitudes.isEmpty {
+                                            VStack {
+                                                Text("No entries yet.")
+                                                    .font(.headline)
+                                                    .foregroundColor(.secondary)
+                                                    .padding()
+                                                    .hSpacing(.center)
+                                                Button {
+                                                    Task {
+                                                        await CentrePopup_AddGratitudeEntry(modelContext: modelContext) {
+                                                        }
+                                                        .present()
+                                                    }
+                                                } label: {
+                                                    Image(systemName: "square.and.pencil")
+                                                        .font(.system(size: 60))
+                                                        .foregroundColor(.secondary)
+                                                }
+                                            }
+                                        } else {
+                                            // Gratitude Streaks (Heatmap)
+                                            VStack(alignment: .leading) {
+                                                Text("Gratitude Streaks")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
+                                                HeatmapView(dailyGratitudes: gratitudes)
+                                            }
+                                            .padding(.top, 8)
+                                            .padding(.horizontal)
+                                            
+                                            LazyVStack(spacing: 22) {
+                                                ForEach(gratitudes) { gratitude in
+                                                    SwipeView {
+                                                        GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                                                    } trailingActions: { context in
+                                                        SwipeAction(
+                                                            systemImage: "trash",
+                                                            backgroundColor: .red
+                                                        ) {
+                                                            HapticManager.shared.trigger(.lightImpact)
+                                                            context.state.wrappedValue = .closed
+                                                            Task {
+                                                                await CentrePopup_DeleteGratitudeEntry(
+                                                                    modelContext: modelContext,
+                                                                    entry: gratitude,
+                                                                    onDelete: { }
+                                                                ).present()
+                                                            }
+                                                        }
+                                                        .font(.title.weight(.semibold))
+                                                        .foregroundColor(.white)
+                                                        
+                                                        SwipeAction(
+                                                            systemImage: "pencil",
+                                                            backgroundColor: Color.teal
+                                                        ) {
+                                                            HapticManager.shared.trigger(.lightImpact)
+                                                            context.state.wrappedValue = .closed
+                                                            Task {
+                                                                await CentrePopup_AddGratitudeEntry(
+                                                                    modelContext: modelContext,
+                                                                    entry: gratitude
+                                                                ) {
+                                                                }
+                                                                .present()
+                                                            }
+                                                        }
+                                                        .allowSwipeToTrigger()
+                                                        .font(.title.weight(.semibold))
+                                                        .foregroundColor(.white)
+                                                    }
+                                                    .swipeActionCornerRadius(16)
+                                                    .swipeSpacing(5)
+                                                    .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                                                    .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                                                    .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                                                    .swipeMinimumDistance(25)
+                                                }
+                                            }
+                                            .padding(.horizontal, 16)
+                                            .background(GeometryReader {
+                                                Color.clear.preference(key: ViewOffsetKey.self,
+                                                                       value: -$0.frame(in: .named("scroll")).origin.y)
+                                            })
+                                            .onPreferenceChange(ViewOffsetKey.self) {
+                                                print("offset >> \($0)")
+                                                isScrollAtTop = $0 < 10
+                                            }
                                         }
-                                    }
-                                    .padding(.horizontal, 16)
-                                    .background(GeometryReader {
-                                                    Color.clear.preference(key: ViewOffsetKey.self,
-                                                        value: -$0.frame(in: .named("scroll")).origin.y)
-                                                })
-                                    .onPreferenceChange(ViewOffsetKey.self) {
-                                        print("offset >> \($0)")
-                                        isScrollAtTop = $0 < 10
-                                    }
-                                    
-                                }.coordinateSpace(name: "scroll")
+                                    }.coordinateSpace(name: "scroll")
+                                        
+                                }
                             }
                         }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -150,7 +218,51 @@ struct GratitudeListView: View {
         Section {
             // Today’s Gratitude Entry or Placeholder
             if let gratitude = todayGratitude {
-                GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                SwipeView {
+                    GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                } trailingActions: { context in
+                    SwipeAction(
+                        systemImage: "trash",
+                        backgroundColor: .red
+                    ) {
+                        HapticManager.shared.trigger(.lightImpact)
+                        context.state.wrappedValue = .closed
+                        Task {
+                            await CentrePopup_DeleteGratitudeEntry(
+                                modelContext: modelContext,
+                                entry: gratitude,
+                                onDelete: { }
+                            ).present()
+                        }
+                    }
+                    .font(.title.weight(.semibold))
+                    .foregroundColor(.white)
+                    
+                    SwipeAction(
+                        systemImage: "pencil",
+                        backgroundColor: Color.teal
+                    ) {
+                        HapticManager.shared.trigger(.lightImpact)
+                        context.state.wrappedValue = .closed
+                        Task {
+                            await CentrePopup_AddGratitudeEntry(
+                                modelContext: modelContext,
+                                entry: gratitude
+                            ) {
+                            }
+                            .present()
+                        }
+                    }
+                    .allowSwipeToTrigger()
+                    .font(.title.weight(.semibold))
+                    .foregroundColor(.white)
+                }
+                .swipeActionCornerRadius(16)
+                .swipeSpacing(5)
+                .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                .swipeMinimumDistance(25)
             } else {
                 VStack {
                     HStack {
@@ -173,7 +285,7 @@ struct GratitudeListView: View {
                 )
                 .onTapGesture {
                     Task {
-                        await CentrePopup_AddGratitudeEntry {
+                        await CentrePopup_AddGratitudeEntry(modelContext: modelContext) {
                         }
                         .present()
                     }
@@ -199,7 +311,7 @@ struct GratitudeListView: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 } else {
-                    Text("Your gratitude journey begins today!")
+                    Text("🏞️ Your gratitude journey begins today!")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
@@ -225,10 +337,10 @@ struct GratitudeListView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
                         
-                    Text("You started your gratitude journey on \(firstEntry.date, style: .date).")
+                    Text("You started your gratitude journey on \n\(firstEntry.date, style: .date).")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(2, reservesSpace: true)
                         .multilineTextAlignment(.center)
                     if let mostRecent = gratitudes.first {
                         Text("Your last entry was \(mostRecent.date, style: .relative).")
@@ -236,7 +348,7 @@ struct GratitudeListView: View {
                             .foregroundColor(.secondary)
                     }
                 } else {
-                    Text("Start your gratitude journey today!")
+                    Text("🎬 Start your gratitude journey today!")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -254,10 +366,8 @@ struct GratitudeListView: View {
                     Text("On \(randomGratitude.date, style: .date), you wrote:")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                        .padding(.top, 4)
                     Text("\(randomGratitude.entry1)")
                         .font(.body)
-                        .padding(.top, 4)
                 }
                 .transition(.identity) // Explicitly set no transition
             }
@@ -276,21 +386,30 @@ struct GratitudeListView: View {
 //MARK: - Add Popup
 
 struct CentrePopup_AddGratitudeEntry: CenterPopup {
-    @Environment(\.modelContext) var modelContext
+    @State var modelContext: ModelContext
     @Environment(\.mainWindowSize) var mainWindowSize
     @Environment(\.colorScheme) var colorScheme
     
     var onDone: () -> Void
     
-    @State private var entry1: String = ""
-    @State private var entry2: String = ""
-    @State private var entry3: String = ""
-    @State private var notes: String = ""
-    
+    @State private var entry1: String
+    @State private var entry2: String
+    @State private var entry3: String
+    @State private var notes: String
     @State private var error: String?
-    
-    init(onDone: @escaping () -> Void) {
+
+    private var existingEntry: DailyGratitude?
+
+    init(modelContext: ModelContext, entry: DailyGratitude? = nil, onDone: @escaping () -> Void) {
+        self.modelContext = modelContext
+        self.existingEntry = entry
         self.onDone = onDone
+        
+        // Prepopulate fields if editing, otherwise leave them empty
+        _entry1 = State(initialValue: entry?.entry1 ?? "")
+        _entry2 = State(initialValue: entry?.entry2 ?? "")
+        _entry3 = State(initialValue: entry?.entry3 ?? "")
+        _notes = State(initialValue: entry?.notes ?? "")
     }
     
     var body: some View {
@@ -299,8 +418,8 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     func createContent() -> some View {
         VStack(spacing: 16) {
-            // Title
-            Text("Add Gratitude Entry")
+            // Dynamic Title
+            Text(existingEntry == nil ? "Add Gratitude Entry" : "Edit Gratitude Entry")
                 .font(.headline)
                 .padding(.bottom, 8)
             
@@ -370,7 +489,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                         }
                     }
                 }) {
-                    Text("Save")
+                    Text(existingEntry == nil ? "Save" : "Update")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -422,22 +541,29 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Ensure text color adapts
     }
     
+    
     func saveGratitudeEntry() async -> Result<Void, Error> {
         guard !entry1.isEmpty && !entry2.isEmpty && !entry3.isEmpty else {
             print("Cannot save: One or more entries are empty")
             return .failure(ValidationError.emptyEntries)
         }
         
-        let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
-        
         do {
-            modelContext.insert(newEntry)
+            if let existingEntry = existingEntry {
+                // Update the existing entry
+                existingEntry.entry1 = entry1
+                existingEntry.entry2 = entry2
+                existingEntry.entry3 = entry3
+                existingEntry.notes = notes
+            } else {
+                // Create a new entry
+                let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
+                modelContext.insert(newEntry)
+            }
+            
             try modelContext.save()
-            print("Gratitude entry saved successfully: \(newEntry)")
             return .success(())
         } catch {
-            print("Detailed Error saving new gratitude entry: \(error)")
-            print("Error description: \(error.localizedDescription)")
             return .failure(error)
         }
     }
@@ -448,6 +574,137 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
         config.popupHorizontalPadding(24)
+    }
+}
+
+//MARK: - Delete Popup
+
+struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
+    @State var modelContext: ModelContext
+    @Environment(\.mainWindowSize) var mainWindowSize
+    @Environment(\.colorScheme) var colorScheme
+    
+    var entry: DailyGratitude
+    var onDelete: () -> Void
+    
+    var body: some View {
+        createContent()
+    }
+    
+    func createContent() -> some View {
+        VStack(spacing: 16) {
+            // Title
+            Text("Delete Gratitude Entry")
+                .font(.headline)
+                .padding(.bottom, 8)
+            
+            // Warning Message
+            Text("Are you sure you want to delete this entry? This action cannot be undone.")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .padding(.bottom, 16)
+            
+            // Display entry content for reference
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("🌟")
+                        .font(.title2)
+                    Text(entry.entry1)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+                
+                HStack {
+                    Text("❤️")
+                        .font(.title2)
+                    Text(entry.entry2)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+                
+                HStack {
+                    Text("🍃")
+                        .font(.title2)
+                    Text(entry.entry3)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                }
+                
+                if !entry.notes.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Notes:")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Text(entry.notes)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            
+            // Action Buttons
+            HStack(spacing: 16) {
+                Button(action: {
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.gray.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.gray.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+
+                Button(action: {
+                    deleteGratitudeEntry()
+                    Task { await dismissLastPopup() }
+                    
+                    onDelete()
+                }) {
+                    Text("Delete")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.red.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    func deleteGratitudeEntry() {
+        modelContext.delete(entry)
+        do {
+            try modelContext.save()
+            print("Gratitude entry deleted successfully.")
+        } catch {
+            print("Error deleting gratitude entry: \(error)")
+        }
     }
 }
 
@@ -506,7 +763,10 @@ struct HeatmapView: View {
 }
 
 #Preview {
-    CentrePopup_AddGratitudeEntry {
+   
+    CentrePopup_AddGratitudeEntry(
+        modelContext: DailyGratitude.preview.mainContext
+    ) {
         
     }
 }
