@@ -189,7 +189,23 @@ struct GratitudeListView: View {
                                                         chipView(title: "Custom Range", isSelected: selectedDateRange == .custom) {
                                                             withAnimation(.easeInOut(duration: 0.3)) {
                                                                 selectedDateRange = .custom
-                                                                showDatePicker = true
+                                                                Task {
+                                                                    // Use a default value in case `onDone` isn't triggered
+                                                                    let calendar = Calendar.current
+                                                                    let todayStartOfDay = calendar.startOfDay(for: Date())
+                                                                    let todayEndOfDay = calendar.date(byAdding: .day, value: 1, to: todayStartOfDay)!.addingTimeInterval(-1)
+                                                                    
+                                                                    customDateRange = todayStartOfDay...todayEndOfDay
+                                                                    
+                                                                    await CalendarPopup(startDate: $startDate, endDate: $endDate) {
+                                                                        // Ensure `customDateRange` is updated only if `onDone` is called
+                                                                        let startOfDay = calendar.startOfDay(for: startDate ?? Date())
+                                                                        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
+
+                                                                        customDateRange = startOfDay...endOfDay
+                                                                    }
+                                                                    .present()
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -281,21 +297,6 @@ struct GratitudeListView: View {
                                     }
                                 }
                         )
-                        .onChange(of: showDatePicker) { value, _ in
-                            if showDatePicker {
-                                Task {
-                                    await CalendarPopup(startDate: $startDate, endDate: $endDate) {
-                                        // Default to today's date if startDate or endDate is nil
-                                        let calendar = Calendar.current
-                                        let startOfDay = calendar.startOfDay(for: startDate ?? Date())
-                                        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
-
-                                        customDateRange = startOfDay...endOfDay
-                                        showDatePicker = false
-                                    }.present()
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -751,6 +752,13 @@ struct CalendarPopup: CenterPopup {
         .background(.ultraThinMaterial)
         .cornerRadius(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .popupHorizontalPadding(24)
+            .tapOutsideToDismissPopup(true)
+        
     }
 }
 
