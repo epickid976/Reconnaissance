@@ -12,27 +12,38 @@ import MijickPopups
 //MARK: - List View
 
 struct GratitudeListView: View {
+    
+    //MARK: - Environment
+    
     @Environment(\.modelContext) var modelContext
     @Environment(\.colorScheme) var colorScheme
     @Binding var path: NavigationPath
 
+    //MARK: - Properties
+    
     @State private var selectedDate = Date()
     @State private var noteText: String = ""
     @State private var isShowingHistory = false
     @State private var isScrollAtTop = true
     
-    @Query(sort: \DailyGratitude.date, order: .reverse)
-    private var gratitudes: [DailyGratitude]
-
     private var calendar = Calendar.current
     private var todayGratitude: DailyGratitude? {
         gratitudes.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
+    
+    //MARK: - Query & SwiftData
+    
+    @Query(sort: \DailyGratitude.date, order: .reverse)
+    private var gratitudes: [DailyGratitude]
+    
+    //MARK: - Initializer
 
     public init(path: Binding<NavigationPath>) {
         _path = path
     }
 
+    //MARK: - Body
+    
     var body: some View {
         NavigationStack {
             GeometryReader { proxy in
@@ -132,6 +143,8 @@ struct GratitudeListView: View {
         }
     }
 
+    //MARK: - Header Section
+    
     @ViewBuilder
     func headerSection(proxy: GeometryProxy) -> some View {
         Section {
@@ -172,7 +185,7 @@ struct GratitudeListView: View {
             VStack(alignment: .center, spacing: 12) {
                 // Milestones
                 if gratitudes.count > 0 {
-                    Text("Milestones")
+                    Text("🎯 Milestones")
                         .font(.headline)
                         .foregroundColor(.primary)
                     if gratitudes.count % 10 == 0 {
@@ -208,7 +221,7 @@ struct GratitudeListView: View {
             // Reflection Summary
             VStack(alignment: .center) {
                 if let firstEntry = gratitudes.last {
-                    Text("Reflection Summary")
+                    Text("📝 Reflection Summary")
                         .font(.headline)
                         .foregroundColor(.primary)
                         
@@ -235,28 +248,26 @@ struct GratitudeListView: View {
             // Memory of Gratitude
             if let randomGratitude = gratitudes.randomElement() {
                 VStack(alignment: .center) {
-                    Text("Memory of Gratitude")
+                    Text("🧠 Memory of Gratitude")
                         .font(.headline)
                         .foregroundColor(.primary)
                     Text("On \(randomGratitude.date, style: .date), you wrote:")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding(.top, 4)
-                    Text("“\(randomGratitude.entry1)”")
-                        .font(.body) // Regular font instead of italic
+                    Text("\(randomGratitude.entry1)")
+                        .font(.body)
                         .padding(.top, 4)
                 }
+                .transition(.identity) // Explicitly set no transition
             }
 
-            // Quote of the Day
-            HStack {
                 Text("“Gratitude turns what we have into enough.”")
                     .font(.subheadline)
                     .italic()
                     .foregroundColor(.secondary)
                     .hSpacing(.center)
-            }
-            .padding(.top, 8)
+                    .vSpacing(.bottom)
         }
         .padding(.horizontal, 16)
     }
@@ -289,7 +300,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     func createContent() -> some View {
         VStack(spacing: 16) {
             // Title
-            Text("🌟 Add Gratitude Entry")
+            Text("Add Gratitude Entry")
                 .font(.headline)
                 .padding(.bottom, 8)
             
@@ -299,9 +310,23 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                createStyledTextField("🌟 Gratitude Entry 1", text: $entry1)
-                createStyledTextField("❤️ Gratitude Entry 2", text: $entry2)
-                createStyledTextField("🍃 Gratitude Entry 3", text: $entry3)
+                HStack {
+                    Text("🌟")
+                        .font(.title2)
+                    createStyledTextField("Gratitude Entry 1", text: $entry1)
+                }
+                
+                HStack {
+                    Text("❤️")
+                        .font(.title2)
+                    createStyledTextField("Gratitude Entry 2", text: $entry2)
+                }
+                
+                HStack {
+                    Text("🍃")
+                        .font(.title2)
+                    createStyledTextField("Gratitude Entry 3", text: $entry3)
+                }
             }
             
             // Notes Section
@@ -315,23 +340,26 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
             
             // Action Buttons
             HStack(spacing: 16) {
-                Button("Cancel") {
+                Button(action: {
                     Task { await dismissLastPopup() }
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.red.opacity(0.1)) // Subtle red tint
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
                 }
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.red.opacity(0.1)) // Subtle red tint
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.red.opacity(0.8), lineWidth: 1)
-                )
-                .foregroundColor(.red)
+                .buttonStyle(PlainButtonStyle())
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
 
-                Button("Save") {
+                Button(action: {
                     Task {
                         let result = await saveGratitudeEntry()
                         if result.isSuccess {
@@ -341,18 +369,21 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                             error = "Error saving entry. Please try again."
                         }
                     }
+                }) {
+                    Text("Save")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.blue.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.blue)
                 }
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.blue.opacity(0.2))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.blue.opacity(0.8), lineWidth: 1)
-                )
-                .foregroundColor(.blue)
+                .buttonStyle(PlainButtonStyle())
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
             }
             .padding(.horizontal, 16)
@@ -391,16 +422,28 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Ensure text color adapts
     }
     
-    func saveGratitudeEntry() async-> Result<Void, Error> {
+    func saveGratitudeEntry() async -> Result<Void, Error> {
+        guard !entry1.isEmpty && !entry2.isEmpty && !entry3.isEmpty else {
+            print("Cannot save: One or more entries are empty")
+            return .failure(ValidationError.emptyEntries)
+        }
+        
         let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
-        modelContext.insert(newEntry)
+        
         do {
+            modelContext.insert(newEntry)
             try modelContext.save()
+            print("Gratitude entry saved successfully: \(newEntry)")
             return .success(())
         } catch {
-            print("Error saving new gratitude entry: \(error)")
+            print("Detailed Error saving new gratitude entry: \(error)")
+            print("Error description: \(error.localizedDescription)")
             return .failure(error)
         }
+    }
+
+    enum ValidationError: Error {
+        case emptyEntries
     }
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
@@ -430,9 +473,7 @@ struct HeatmapView: View {
 }
 
 
-
-
-//MARK: - Preview
+//MARK: - Previews
 
 #Preview {
     @Previewable @State var path = NavigationPath()
@@ -461,5 +502,11 @@ struct HeatmapView: View {
             )
         }
         .padding()
+    }
+}
+
+#Preview {
+    CentrePopup_AddGratitudeEntry {
+        
     }
 }
