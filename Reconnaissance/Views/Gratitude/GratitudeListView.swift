@@ -19,7 +19,7 @@ struct GratitudeListView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.colorScheme) var colorScheme
     @Binding var path: NavigationPath
-
+    
     //MARK: - Properties
     
     @State private var selectedDate = Date()
@@ -32,17 +32,48 @@ struct GratitudeListView: View {
         gratitudes.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
     
+    enum DateRange {
+        case today, yesterday, thisWeek, lastWeek, custom
+    }
+    
+    @State private var selectedDateRange: DateRange = .today
+    @State private var customDateRange: ClosedRange<Date> = Date()...Date()
+    @State private var showDatePicker = false
+    @State private var startDate: Date? = nil
+    @State private var endDate: Date? = nil
+    @State private var showCustomDatePicker = false
+    
+    var filteredGratitudes: [DailyGratitude] {
+        switch selectedDateRange {
+        case .today:
+            return gratitudes.filter { calendar.isDateInToday($0.date) }
+        case .yesterday:
+            return gratitudes.filter { calendar.isDateInYesterday($0.date) }
+        case .thisWeek:
+            return gratitudes.filter {
+                calendar.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear)
+            }
+        case .lastWeek:
+            return gratitudes.filter {
+                let lastWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: Date())
+                return calendar.isDate($0.date, equalTo: lastWeek ?? Date(), toGranularity: .weekOfYear)
+            }
+        case .custom:
+            return gratitudes.filter { customDateRange.contains($0.date) }
+        }
+    }
+    
     //MARK: - Query & SwiftData
     
     @Query(sort: \DailyGratitude.date, order: .reverse)
     private var gratitudes: [DailyGratitude]
     
     //MARK: - Initializer
-
+    
     public init(path: Binding<NavigationPath>) {
         _path = path
     }
-
+    
     //MARK: - Body
     
     var body: some View {
@@ -63,6 +94,7 @@ struct GratitudeListView: View {
                                 }) {
                                     Label("See History", systemImage: "chevron.down")
                                         .font(.subheadline)
+                                        .bold()
                                         .padding()
                                         .opacity(isScrollAtTop ? 1 : 0) // Show only when at the top
                                 }
@@ -81,7 +113,7 @@ struct GratitudeListView: View {
                             )
                         }
                     }
-
+                    
                     // History View
                     if isShowingHistory {
                         VStack {
@@ -92,6 +124,7 @@ struct GratitudeListView: View {
                             }) {
                                 Label("See Today", systemImage: "chevron.up")
                                     .font(.subheadline)
+                                    .bold()
                                     .padding()
                             }
                             SwipeViewGroup {
@@ -128,53 +161,97 @@ struct GratitudeListView: View {
                                             .padding(.top, 8)
                                             .padding(.horizontal)
                                             
+                                            
                                             LazyVStack(spacing: 22) {
-                                                ForEach(gratitudes) { gratitude in
-                                                    SwipeView {
-                                                        GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
-                                                    } trailingActions: { context in
-                                                        SwipeAction(
-                                                            systemImage: "trash",
-                                                            backgroundColor: .red
-                                                        ) {
-                                                            HapticManager.shared.trigger(.lightImpact)
-                                                            context.state.wrappedValue = .closed
-                                                            Task {
-                                                                await CentrePopup_DeleteGratitudeEntry(
-                                                                    modelContext: modelContext,
-                                                                    entry: gratitude,
-                                                                    onDelete: { }
-                                                                ).present()
+                                                
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 10) {
+                                                        chipView(title: "Today", isSelected: selectedDateRange == .today) {
+                                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                                selectedDateRange = .today
                                                             }
                                                         }
-                                                        .font(.title.weight(.semibold))
-                                                        .foregroundColor(.white)
-                                                        
-                                                        SwipeAction(
-                                                            systemImage: "pencil",
-                                                            backgroundColor: Color.teal
-                                                        ) {
-                                                            HapticManager.shared.trigger(.lightImpact)
-                                                            context.state.wrappedValue = .closed
-                                                            Task {
-                                                                await CentrePopup_AddGratitudeEntry(
-                                                                    modelContext: modelContext,
-                                                                    entry: gratitude
-                                                                ) {
-                                                                }
-                                                                .present()
+                                                        chipView(title: "Yesterday", isSelected: selectedDateRange == .yesterday) {
+                                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                                selectedDateRange = .yesterday
                                                             }
                                                         }
-                                                        .allowSwipeToTrigger()
-                                                        .font(.title.weight(.semibold))
-                                                        .foregroundColor(.white)
+                                                        chipView(title: "This Week", isSelected: selectedDateRange == .thisWeek) {
+                                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                                selectedDateRange = .thisWeek
+                                                            }
+                                                        }
+                                                        chipView(title: "Last Week", isSelected: selectedDateRange == .lastWeek) {
+                                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                                selectedDateRange = .lastWeek
+                                                            }
+                                                        }
+                                                        chipView(title: "Custom Range", isSelected: selectedDateRange == .custom) {
+                                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                                selectedDateRange = .custom
+                                                                showDatePicker = true
+                                                            }
+                                                        }
                                                     }
-                                                    .swipeActionCornerRadius(16)
-                                                    .swipeSpacing(5)
-                                                    .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
-                                                    .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
-                                                    .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
-                                                    .swipeMinimumDistance(25)
+                                                    .padding(.horizontal, 16) // Add sufficient padding here
+                                                    .padding(.vertical, 8)   // Optional vertical padding for spacing
+                                                }
+                                                
+                                                if filteredGratitudes.isEmpty {
+                                                    Text("No entries.")
+                                                        .font(.headline)
+                                                        .foregroundColor(.secondary)
+                                                        .padding()
+                                                        .hSpacing(.center)
+                                                } else {
+                                                    ForEach(filteredGratitudes) { gratitude in
+                                                        SwipeView {
+                                                            GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
+                                                        } trailingActions: { context in
+                                                            SwipeAction(
+                                                                systemImage: "trash",
+                                                                backgroundColor: .red
+                                                            ) {
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                context.state.wrappedValue = .closed
+                                                                Task {
+                                                                    await CentrePopup_DeleteGratitudeEntry(
+                                                                        modelContext: modelContext,
+                                                                        entry: gratitude,
+                                                                        onDelete: { }
+                                                                    ).present()
+                                                                }
+                                                            }
+                                                            .font(.title.weight(.semibold))
+                                                            .foregroundColor(.white)
+                                                            
+                                                            SwipeAction(
+                                                                systemImage: "pencil",
+                                                                backgroundColor: Color.teal
+                                                            ) {
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                context.state.wrappedValue = .closed
+                                                                Task {
+                                                                    await CentrePopup_AddGratitudeEntry(
+                                                                        modelContext: modelContext,
+                                                                        entry: gratitude
+                                                                    ) {
+                                                                        
+                                                                    }
+                                                                    .present()
+                                                                }
+                                                            }
+                                                            .allowSwipeToTrigger()
+                                                            .font(.title.weight(.semibold))
+                                                            .foregroundColor(.white)
+                                                        }
+                                                        .swipeActionCornerRadius(16)
+                                                        .swipeSpacing(5)
+                                                        .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                                                        .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                                                        .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                                                        .swipeMinimumDistance(25)
+                                                    }
                                                 }
                                             }
                                             .padding(.horizontal, 16)
@@ -188,7 +265,7 @@ struct GratitudeListView: View {
                                             }
                                         }
                                     }.coordinateSpace(name: "scroll")
-                                        
+                                    
                                 }
                             }
                         }
@@ -204,13 +281,28 @@ struct GratitudeListView: View {
                                     }
                                 }
                         )
+                        .onChange(of: showDatePicker) { value, _ in
+                            if showDatePicker {
+                                Task {
+                                    await CalendarPopup(startDate: $startDate, endDate: $endDate) {
+                                        // Default to today's date if startDate or endDate is nil
+                                        let calendar = Calendar.current
+                                        let startOfDay = calendar.startOfDay(for: startDate ?? Date())
+                                        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
+
+                                        customDateRange = startOfDay...endOfDay
+                                        showDatePicker = false
+                                    }.present()
+                                }
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle(isShowingHistory ? "History" : "Today")
         }
     }
-
+    
     //MARK: - Header Section
     
     @ViewBuilder
@@ -291,8 +383,8 @@ struct GratitudeListView: View {
                     }
                 }
             }
-
-
+            
+            
             // Milestones & Weekly Progress in a Single Compact Section
             VStack(alignment: .center, spacing: 12) {
                 // Milestones
@@ -315,28 +407,28 @@ struct GratitudeListView: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
-
+                
                 // Weekly Progress
                 HStack {
                     ProgressView(value: Double(gratitudes.count), total: 7.0)
                         .progressViewStyle(LinearProgressViewStyle(tint: .blue))
                         .frame(width: 80)
-
+                    
                     Text("\(gratitudes.count)/7 entries this week")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
             }
             .padding(.vertical, 8)
-
-
+            
+            
             // Reflection Summary
             VStack(alignment: .center) {
                 if let firstEntry = gratitudes.last {
                     Text("📝 Reflection Summary")
                         .font(.headline)
                         .foregroundColor(.primary)
-                        
+                    
                     Text("You started your gratitude journey on \n\(firstEntry.date, style: .date).")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -353,10 +445,10 @@ struct GratitudeListView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .padding(.top, 8)
-
-           
-
+            .padding(.vertical, 8)
+            
+            
+            
             // Memory of Gratitude
             if let randomGratitude = gratitudes.randomElement() {
                 VStack(alignment: .center) {
@@ -370,16 +462,295 @@ struct GratitudeListView: View {
                         .font(.body)
                 }
                 .transition(.identity) // Explicitly set no transition
+                .padding(.vertical, 8)
             }
-
-                Text("“Gratitude turns what we have into enough.”")
-                    .font(.subheadline)
-                    .italic()
-                    .foregroundColor(.secondary)
-                    .hSpacing(.center)
-                    .vSpacing(.bottom)
+            
+            
+            Text("“Gratitude turns what we have into enough.”")
+                .font(.subheadline)
+                .italic()
+                .foregroundColor(.secondary)
+                .hSpacing(.center)
+                .vSpacing(.bottom)
         }
         .padding(.horizontal, 16)
+    }
+}
+
+//MARK: - Chip View
+
+@ViewBuilder
+func chipView(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    Text(title)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isSelected ? Color.blue : Color.gray.opacity(0.2))
+                .animation(.easeInOut(duration: 0.3), value: isSelected) // Smooth color transition
+        )
+        .foregroundColor(isSelected ? .white : .primary)
+        .font(.system(size: isSelected ? 16 : 14, weight: .bold)) // Animate font size
+        .scaleEffect(isSelected ? 1.1 : 1.0) // Scale effect for selected chip
+        .animation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 0.3), value: isSelected) // Spring animation
+        .onTapGesture {
+            withAnimation {
+                action()
+            }
+        }
+}
+
+//MARK: - Custom Calendar
+
+struct CustomDateRangePicker: View {
+    @Binding var startDate: Date?
+    @Binding var endDate: Date?
+    var onDone: () -> Void
+    
+    @State private var hoverDate: Date? // For dynamic range previews
+    @State private var currentMonth: Date = Date() // Tracks the displayed month
+    
+    private let calendar = Calendar.current
+
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack {
+                Text("Select Date Range")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                
+                HStack {
+                    dateLabel(title: "Start Date", date: startDate)
+                    Spacer()
+                    dateLabel(title: "End Date", date: endDate)
+                }
+                .padding(.horizontal)
+            }
+            
+            // Calendar
+            VStack(spacing: 10) {
+                calendarHeader()
+                
+                HStack(spacing: 0) {
+                    ForEach(calendar.shortWeekdaySymbols, id: \.self) { symbol in
+                        Text(symbol)
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
+                    ForEach(calendarDays(), id: \.self) { day in
+                        calendarDayView(day: day)
+                    }
+                }
+                .transition(.slide)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.secondary.opacity(0.1))
+            )
+            .padding(.horizontal)
+            
+            // Buttons
+            HStack {
+                Button(action: {
+                    withAnimation {
+                        startDate = nil
+                        endDate = nil
+                    }
+                }) {
+                    Text("Clear")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.red.opacity(0.2))
+                        )
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: {
+                    onDone()
+                }) {
+                    Text("Done")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.blue.opacity(0.2))
+                        )
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding(.horizontal)
+        }
+        .padding()
+    }
+    
+    // MARK: - Components
+    
+    @ViewBuilder
+    func calendarHeader() -> some View {
+        HStack {
+            Button(action: {
+                withAnimation {
+                    currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
+                }
+            }) {
+                Image(systemName: "chevron.left")
+            }
+
+            Spacer()
+
+            Text(currentMonth, formatter: DateFormatter.monthAndYear)
+                .font(.headline)
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            if value.translation.width < 0 { // Swipe left
+                                withAnimation {
+                                    currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
+                                }
+                            } else if value.translation.width > 0 { // Swipe right
+                                withAnimation {
+                                    currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
+                                }
+                            }
+                        }
+                )
+
+            Spacer()
+
+            Button(action: {
+                withAnimation {
+                    currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
+                }
+            }) {
+                Image(systemName: "chevron.right")
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private func calendarDayView(day: Date?) -> some View {
+        Group {
+            if let day = day {
+                Text("\(calendar.component(.day, from: day))")
+                    .font(.subheadline)
+                    .foregroundColor(textColor(for: day))
+                    .frame(width: 40, height: 40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(backgroundColor(for: day))
+                    )
+                    .onTapGesture {
+                        handleDateSelection(day)
+                    }
+                    .scaleEffect(hoverDate == day ? 1.1 : 1) // Slight scale effect on hover
+                    .onHover { isHovering in
+                        hoverDate = isHovering ? day : nil
+                    }
+            } else {
+                Color.clear // Placeholder for empty cells
+            }
+        }
+    }
+
+    private func textColor(for date: Date) -> Color {
+        calendar.isDateInToday(date) ? .white : .primary
+    }
+    
+    private func dateLabel(title: String, date: Date?) -> some View {
+        VStack {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            Text(date.map { DateFormatter.medium.string(from: $0) } ?? "Not selected")
+                .font(.body)
+        }
+    }
+    
+    // MARK: - Logic
+    
+    private func calendarDays() -> [Date?] {
+        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)) else { return [] }
+        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 0
+        let firstDayOffset = calendar.component(.weekday, from: monthStart) - calendar.firstWeekday
+        let prevMonthPadding = firstDayOffset < 0 ? 7 + firstDayOffset : firstDayOffset
+        
+        var days: [Date?] = Array(repeating: nil, count: prevMonthPadding)
+        for day in 1...daysInMonth {
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: monthStart) {
+                days.append(date)
+            }
+        }
+        return days
+    }
+    
+    private func handleDateSelection(_ date: Date) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred() // Add haptic feedback
+        if startDate == nil || (startDate != nil && endDate != nil) {
+            startDate = date
+            endDate = nil
+        } else if let start = startDate, date < start {
+            startDate = date
+        } else {
+            endDate = date
+        }
+    }
+    
+    private func backgroundColor(for date: Date) -> Color {
+        if calendar.isDateInToday(date) {
+            return Color.green.opacity(0.5) // Highlight today's date
+        } else if date == startDate || date == endDate {
+            return Color.blue.opacity(0.5)
+        } else if let start = startDate, let end = endDate, date >= start && date <= end {
+            return Color.blue.opacity(0.2)
+        } else {
+            return Color.clear
+        }
+    }
+}
+
+extension DateFormatter {
+    static let monthAndYear: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter
+    }()
+    
+    static let medium: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
+}
+
+//MARK: - Calendar Popup
+
+struct CalendarPopup: CenterPopup {
+    @Environment(\.mainWindowSize) var mainWindowSize
+    @Environment(\.colorScheme) var colorScheme
+    @Binding var startDate: Date?
+    @Binding var endDate: Date?
+    
+    var onDone: () -> Void
+    
+    var body: some View {
+        VStack {
+            CustomDateRangePicker(startDate: $startDate, endDate: $endDate) {
+                onDone()
+                Task { await dismissLastPopup()}
+            }
+        }
+        .padding()
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -397,9 +768,9 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     @State private var entry3: String
     @State private var notes: String
     @State private var error: String?
-
+    
     private var existingEntry: DailyGratitude?
-
+    
     init(modelContext: ModelContext, entry: DailyGratitude? = nil, onDone: @escaping () -> Void) {
         self.modelContext = modelContext
         self.existingEntry = entry
@@ -477,7 +848,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 }
                 .buttonStyle(PlainButtonStyle())
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
-
+                
                 Button(action: {
                     Task {
                         let result = await saveGratitudeEntry()
@@ -515,7 +886,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .hideKeyboardOnDrag()
     }
-
+    
     // Helper for Styled Text Fields
     func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
         Group {
@@ -567,7 +938,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
             return .failure(error)
         }
     }
-
+    
     enum ValidationError: Error {
         case emptyEntries
     }
@@ -664,7 +1035,7 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
                 }
                 .buttonStyle(PlainButtonStyle())
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
-
+                
                 Button(action: {
                     deleteGratitudeEntry()
                     Task { await dismissLastPopup() }
@@ -712,7 +1083,7 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
 
 struct HeatmapView: View {
     var dailyGratitudes: [DailyGratitude]
-
+    
     var body: some View {
         Chart {
             ForEach(dailyGratitudes, id: \.id) { gratitude in
@@ -732,13 +1103,13 @@ struct HeatmapView: View {
 
 //MARK: - Previews
 
-#Preview {
+#Preview("List") {
     @Previewable @State var path = NavigationPath()
     GratitudeListView(path: $path)
         .modelContainer(DailyGratitude.preview)
 }
 
-#Preview {
+#Preview("Cell") {
     ScrollView {
         LazyVStack(spacing: 20) { // Add spacing to separate cells
             GratitudeCell(
@@ -762,11 +1133,20 @@ struct HeatmapView: View {
     }
 }
 
-#Preview {
-   
+#Preview("Add Popup") {
+    
     CentrePopup_AddGratitudeEntry(
         modelContext: DailyGratitude.preview.mainContext
     ) {
+        
+    }
+}
+
+#Preview("Calendar") {
+    @Previewable @State var startDate: Date? = nil
+    @Previewable @State var endDate: Date? = nil
+    
+    CalendarPopup(startDate: $startDate, endDate: $endDate) {
         
     }
 }
