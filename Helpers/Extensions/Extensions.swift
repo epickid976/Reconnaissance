@@ -441,3 +441,25 @@ public struct MyLazyNavigationLink<Label: View, Destination: View>: View {
 }
 
 
+// MARK: - Global Actors
+@globalActor actor SyncActor: GlobalActor {
+    static var shared = SyncActor()
+}
+
+@globalActor actor BackgroundActor: GlobalActor {
+    static var shared = BackgroundActor()
+}
+
+extension BackgroundActor {
+    // Custom run function
+    static func run<T>(_ operation: @escaping () async -> T) async -> T {
+        await operation()
+    }
+}
+
+@MainActor
+final class GratitudeViewState: ObservableObject {
+    static let shared = GratitudeViewState()
+
+    @Published var isShowingHistory: Bool = false
+}

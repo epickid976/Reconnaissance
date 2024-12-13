@@ -10,7 +10,7 @@ import SwiftData
 import WatchConnectivity
 
 @Model
-class DailyGratitude {
+class DailyGratitude: @unchecked Sendable{
     var id: UUID = UUID() // Default value
     var date: Date = Date() // Default value
     var entry1: String = "" // Default value
@@ -86,7 +86,7 @@ extension DailyGratitude {
 
         // Normalize dates to ensure time components are removed
         let normalizedEntries = allEntries.map { gratitude -> DailyGratitude in
-            var normalizedGratitude = gratitude
+            let normalizedGratitude = gratitude
             normalizedGratitude.date = Calendar.current.startOfDay(for: gratitude.date)
             return normalizedGratitude
         }

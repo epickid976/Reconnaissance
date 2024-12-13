@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 //MARK: Heatmap
 
 struct HeatmapView: View {
-    @ObservedObject var viewModel = HeatmapViewModel.shared // Use the shared instance
+    @State var viewModel = HeatmapViewModel.shared // Use the shared instance
     @State var dailyGratitudes: [DailyGratitude]
+    
     let availableWidth: CGFloat
 
     @State private var showHeatmap = false // Controls entrance animation
@@ -52,20 +54,22 @@ struct HeatmapView: View {
                 }
                 .padding()
                 .onAppear {
-                    if viewModel.heatmapData.isEmpty {
-                        viewModel.calculateHeatmapData(dailyGratitudes: dailyGratitudes)
-                    }
-                    withAnimation {
-                        showHeatmap = true // Trigger grid's fade-in animation
-                    }
-
-                    // Scroll to today's date after data is ready
-                    if let todayIndex = viewModel.heatmapData.firstIndex(where: { calendar.isDate($0.date, inSameDayAs: today) }) {
-                        DispatchQueue.main.async {
-                            proxy.scrollTo(viewModel.heatmapData[todayIndex].date, anchor: .center)
+                    Task {
+                        await viewModel.calculateHeatmapData(dailyGratitudes: dailyGratitudes)
+                        
+                        withAnimation {
+                            showHeatmap = true // Trigger grid's fade-in animation
+                        }
+                        
+                        // Scroll to today's date after data is ready
+                        if let todayIndex = viewModel.heatmapData.firstIndex(where: { calendar.isDate($0.date, inSameDayAs: today) }) {
+                            DispatchQueue.main.async {
+                                proxy.scrollTo(viewModel.heatmapData[todayIndex].date, anchor: .center)
+                            }
                         }
                     }
                 }
+                
             }
         }
     }
@@ -88,25 +92,35 @@ struct HeatmapView: View {
     }
 }
 
-class HeatmapViewModel: ObservableObject {
+@MainActor
+@Observable
+class HeatmapViewModel {
     static let shared = HeatmapViewModel() // Singleton instance
     
-    @Published var heatmapData: [(date: Date, streak: Int)] = []
+    var heatmapData: [(date: Date, streak: Int)] = []
+    
     private let calendar = Calendar.current
 
     // Populate heatmap data
-    func calculateHeatmapData(dailyGratitudes: [DailyGratitude]) {
+    @BackgroundActor
+    func calculateHeatmapData(dailyGratitudes: [DailyGratitude]) async {
         let startOfYear = calendar.date(from: calendar.dateComponents([.year], from: Date()))!
         let daysInYear = calendar.range(of: .day, in: .year, for: startOfYear)?.count ?? 365
 
         let allDates = (0..<daysInYear).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfYear) }
 
-        heatmapData = allDates.map { date -> (date: Date, streak: Int) in
+        // Perform the calculation in the background
+        let calculatedData = allDates.map { date -> (date: Date, streak: Int) in
             if let gratitude = dailyGratitudes.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
                 return (date: date, streak: gratitude.streak)
             } else {
                 return (date: date, streak: 0) // Default gray
             }
+        }
+
+        // Update on the main thread
+        await MainActor.run {
+            heatmapData = calculatedData
         }
     }
 }

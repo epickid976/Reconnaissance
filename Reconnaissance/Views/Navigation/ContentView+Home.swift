@@ -18,6 +18,7 @@ struct ContentView: View {
         HomeTabView() // Your tab view becomes the root container
     }
 
+    //MARK: - Debug Methods
     private func deleteAllEntities() {
         do {
             let fetchDescriptor = FetchDescriptor<DailyGratitude>()

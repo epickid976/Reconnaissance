@@ -35,30 +35,6 @@ final class KeyboardResponder: ObservableObject {
     private var cancellableSet: Set<AnyCancellable> = []
 }
 
-import SwiftUI
-import Combine
-
-class KeyboardResponderSecond: ObservableObject {
-    @Published var currentHeight: CGFloat = 0
-    private var cancellable: AnyCancellable?
-    
-    init() {
-        cancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)
-            .merge(with: NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification))
-            .compactMap { notification in
-                if let endFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                    return endFrame.origin.y >= UIScreen.main.bounds.height ? 0 : endFrame.height
-                }
-                return 0
-            }
-            .assign(to: \.currentHeight, on: self)
-    }
-    
-    deinit {
-        cancellable?.cancel()
-    }
-}
-
 extension View {
     func hideKeyboardOnDrag() -> some View {
         self.modifier(HideKeyboardOnDragModifier())

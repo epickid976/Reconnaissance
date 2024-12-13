@@ -62,18 +62,6 @@ struct GratitudeListView: View {
         }
     }
     
-    var sortedFilteredGratitudes: [DailyGratitude] {
-        let filtered = filteredGratitudes
-        switch selectedSortOption {
-        case .dateAscending:
-            return filtered.sorted(by: { $0.date < $1.date })
-        case .dateDescending:
-            return filtered.sorted(by: { $0.date > $1.date })
-        case .alphabetical:
-            return filtered.sorted(by: { $0.entry1.localizedCompare($1.entry1) == .orderedAscending })
-        }
-    }
-    
     //MARK: - Query & SwiftData
     
     @Query(sort: \DailyGratitude.date, order: .reverse)
@@ -169,7 +157,8 @@ struct GratitudeListView: View {
                                                     .foregroundColor(.primary)
                                                 HeatmapView(
                                                     dailyGratitudes: gratitudes,
-                                                    availableWidth: proxy.size.width)
+                                                    availableWidth: proxy.size.width
+                                                )
                                             }
                                             .padding(.top, 8)
                                             .padding(.horizontal)
@@ -227,14 +216,14 @@ struct GratitudeListView: View {
                                                 }
                                                 
                                                 
-                                                if sortedFilteredGratitudes.isEmpty {
+                                                if filteredGratitudes.isEmpty {
                                                     Text("No entries.")
                                                         .font(.headline)
                                                         .foregroundColor(.secondary)
                                                         .padding()
                                                         .hSpacing(.center)
                                                 } else {
-                                                    ForEach(sortedFilteredGratitudes) { gratitude in
+                                                    ForEach(filteredGratitudes) { gratitude in
                                                         SwipeView {
                                                             GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
                                                         } trailingActions: { context in
@@ -284,7 +273,7 @@ struct GratitudeListView: View {
                                                     }
                                                     .animation(
                                                         .spring(),
-                                                        value: sortedFilteredGratitudes
+                                                        value: filteredGratitudes
                                                     )
                                                 }
                                             }
@@ -543,28 +532,6 @@ func chipView(title: String, isSelected: Bool, action: @escaping () -> Void) -> 
         .font(.system(size: isSelected ? 16 : 14, weight: .bold)) // Animate font size
         .scaleEffect(isSelected ? 1.1 : 1.0) // Scale effect for selected chip
         .animation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 0.3), value: isSelected) // Spring animation
-        .onTapGesture {
-            withAnimation {
-                action()
-            }
-        }
-}
-
-//MARK: - Sorting Chip View
-
-@ViewBuilder
-func sortingChipView(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-    Text(title)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color.blue : Color.gray.opacity(0.2))
-                .animation(.easeInOut(duration: 0.3), value: isSelected)
-        )
-        .foregroundColor(isSelected ? .white : .primary)
-        .fontWeight(isSelected ? .bold : .regular)
-        .clipShape(Capsule())
         .onTapGesture {
             withAnimation {
                 action()
@@ -941,12 +908,6 @@ enum SortOption: String, CaseIterable {
     case dateAscending = "Date (Oldest First)"
     case dateDescending = "Date (Newest First)"
     case alphabetical = "Alphabetical"
-}
-
-final class GratitudeViewState: ObservableObject {
-    static let shared = GratitudeViewState()
-
-    @Published var isShowingHistory: Bool = false
 }
 
 
