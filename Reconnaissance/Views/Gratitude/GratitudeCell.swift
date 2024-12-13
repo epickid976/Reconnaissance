@@ -13,6 +13,7 @@ struct GratitudeCell: View {
     let mainWindowSize: CGSize
 
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.modelContext) var modelContext
 
     @State private var isFlipped = false // Tracks whether the card is flipped
 

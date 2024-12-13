@@ -12,9 +12,53 @@ import NavigationTransitions
 //MARK: Content View - App Entry Point
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         HomeTabView() // Your tab view becomes the root container
+    }
+
+    private func deleteAllEntities() {
+        do {
+            let fetchDescriptor = FetchDescriptor<DailyGratitude>()
+            let allEntities = try modelContext.fetch(fetchDescriptor)
+            for entity in allEntities {
+                modelContext.delete(entity)
+            }
+            try modelContext.save()
+            print("All entities deleted.")
+        } catch {
+            print("Error deleting entities: \(error)")
+        }
+    }
+
+    private func addEntitiesForPastYear() {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        for daysAgo in 0..<365 {
+            if let date = calendar.date(byAdding: .day, value: -daysAgo, to: today) {
+                let gratitude = DailyGratitude(
+                    entry1: "Grateful for day \(daysAgo + 1)",
+                    entry2: "Entry 2",
+                    entry3: "Entry 3",
+                    date: date,
+                    notes: "Notes for day \(daysAgo + 1)"
+                )
+                modelContext.insert(gratitude)
+                DailyGratitude.calculateAndUpdateStreak(
+                    for: gratitude,
+                    in: modelContext
+                )
+            }
+        }
+
+        do {
+            try modelContext.save()
+            print("Entities for the past year added.")
+        } catch {
+            print("Error saving entities: \(error)")
+        }
     }
 }
 

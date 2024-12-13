@@ -68,10 +68,53 @@ extension DailyGratitude {
         )
         
         container.mainContext.insert(gratitude)
+        calculateAndUpdateStreak(for: gratitude, in: container.mainContext)
         container.mainContext.insert(yesterday)
+        calculateAndUpdateStreak(for: yesterday, in: container.mainContext)
         container.mainContext.insert(another)
-        
+        calculateAndUpdateStreak(for: another, in: container.mainContext)
         return container
+    }
+}
+
+extension DailyGratitude {
+    @MainActor
+    static func calculateAndUpdateStreak(for entry: DailyGratitude, in context: ModelContext) {
+        // Fetch all entries from the context and sort by date
+        let allEntries = try! context.fetch(FetchDescriptor<DailyGratitude>())
+            .sorted(by: { $0.date < $1.date })
+
+        // Normalize dates to ensure time components are removed
+        let normalizedEntries = allEntries.map { gratitude -> DailyGratitude in
+            var normalizedGratitude = gratitude
+            normalizedGratitude.date = Calendar.current.startOfDay(for: gratitude.date)
+            return normalizedGratitude
+        }
+
+        // Find the index of the current entry
+        guard let index = normalizedEntries.firstIndex(where: { $0.id == entry.id }) else { return }
+
+        // Calculate the streak for the current entry
+        let previousEntry = index > 0 ? normalizedEntries[index - 1] : nil
+        if let previous = previousEntry {
+            let difference = Calendar.current.dateComponents([.day], from: previous.date, to: entry.date).day ?? 0
+            entry.streak = (difference == 1) ? previous.streak + 1 : 1
+        } else {
+            // No previous entry means streak starts at 1
+            entry.streak = 1
+        }
+
+        // Update subsequent entries to propagate streak
+        for i in (index + 1)..<normalizedEntries.count {
+            let currentEntry = normalizedEntries[i]
+            let previous = normalizedEntries[i - 1]
+            let difference = Calendar.current.dateComponents([.day], from: previous.date, to: currentEntry.date).day ?? 0
+            currentEntry.streak = (difference == 1) ? previous.streak + 1 : 1
+            context.insert(currentEntry) // Insert updates the entry
+        }
+
+        // Insert (update) the current entry in the context
+        context.insert(entry)
     }
 }
 

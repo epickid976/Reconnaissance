@@ -20,20 +20,18 @@ struct GratitudeListView: View {
     @Environment(\.colorScheme) var colorScheme
     @Binding var path: NavigationPath
     
+    // MARK: - ViewState
+    @StateObject private var viewState = GratitudeViewState.shared // Use the shared state
+    
     //MARK: - Properties
     
     @State private var selectedDate = Date()
     @State private var noteText: String = ""
-    @State private var isShowingHistory = false
     @State private var isScrollAtTop = true
     
     private var calendar = Calendar.current
     private var todayGratitude: DailyGratitude? {
         gratitudes.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
-    }
-    
-    enum DateRange {
-        case today, yesterday, thisWeek, lastWeek, custom
     }
     
     @State private var selectedDateRange: DateRange = .today
@@ -42,6 +40,7 @@ struct GratitudeListView: View {
     @State private var startDate: Date? = nil
     @State private var endDate: Date? = nil
     @State private var showCustomDatePicker = false
+    @State private var selectedSortOption: SortOption = .dateDescending
     
     var filteredGratitudes: [DailyGratitude] {
         switch selectedDateRange {
@@ -63,6 +62,18 @@ struct GratitudeListView: View {
         }
     }
     
+    var sortedFilteredGratitudes: [DailyGratitude] {
+        let filtered = filteredGratitudes
+        switch selectedSortOption {
+        case .dateAscending:
+            return filtered.sorted(by: { $0.date < $1.date })
+        case .dateDescending:
+            return filtered.sorted(by: { $0.date > $1.date })
+        case .alphabetical:
+            return filtered.sorted(by: { $0.entry1.localizedCompare($1.entry1) == .orderedAscending })
+        }
+    }
+    
     //MARK: - Query & SwiftData
     
     @Query(sort: \DailyGratitude.date, order: .reverse)
@@ -81,7 +92,7 @@ struct GratitudeListView: View {
             GeometryReader { proxy in
                 ZStack {
                     // Today View
-                    if !isShowingHistory {
+                    if !viewState.isShowingHistory {
                         SwipeViewGroup {
                             VStack {
                                 headerSection(proxy: proxy)
@@ -89,7 +100,7 @@ struct GratitudeListView: View {
                                 Spacer()
                                 Button(action: {
                                     withAnimation {
-                                        isShowingHistory = true
+                                        viewState.isShowingHistory = true
                                     }
                                 }) {
                                     Label("See History", systemImage: "chevron.down")
@@ -106,7 +117,7 @@ struct GratitudeListView: View {
                                     .onEnded { value in
                                         if value.translation.height < -100 {
                                             withAnimation {
-                                                isShowingHistory = true
+                                                viewState.isShowingHistory = true
                                             }
                                         }
                                     }
@@ -115,11 +126,11 @@ struct GratitudeListView: View {
                     }
                     
                     // History View
-                    if isShowingHistory {
+                    if viewState.isShowingHistory {
                         VStack {
                             Button(action: {
                                 withAnimation {
-                                    isShowingHistory = false
+                                    viewState.isShowingHistory = false
                                 }
                             }) {
                                 Label("See Today", systemImage: "chevron.up")
@@ -156,7 +167,9 @@ struct GratitudeListView: View {
                                                 Text("Gratitude Streaks")
                                                     .font(.headline)
                                                     .foregroundColor(.primary)
-                                                HeatmapView(dailyGratitudes: gratitudes)
+                                                HeatmapView(
+                                                    dailyGratitudes: gratitudes,
+                                                    availableWidth: proxy.size.width)
                                             }
                                             .padding(.top, 8)
                                             .padding(.horizontal)
@@ -201,7 +214,7 @@ struct GratitudeListView: View {
                                                                         // Ensure `customDateRange` is updated only if `onDone` is called
                                                                         let startOfDay = calendar.startOfDay(for: startDate ?? Date())
                                                                         let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
-
+                                                                        
                                                                         customDateRange = startOfDay...endOfDay
                                                                     }
                                                                     .present()
@@ -213,14 +226,15 @@ struct GratitudeListView: View {
                                                     .padding(.vertical, 8)   // Optional vertical padding for spacing
                                                 }
                                                 
-                                                if filteredGratitudes.isEmpty {
+                                                
+                                                if sortedFilteredGratitudes.isEmpty {
                                                     Text("No entries.")
                                                         .font(.headline)
                                                         .foregroundColor(.secondary)
                                                         .padding()
                                                         .hSpacing(.center)
                                                 } else {
-                                                    ForEach(filteredGratitudes) { gratitude in
+                                                    ForEach(sortedFilteredGratitudes) { gratitude in
                                                         SwipeView {
                                                             GratitudeCell(gratitude: gratitude, mainWindowSize: proxy.size)
                                                         } trailingActions: { context in
@@ -268,6 +282,10 @@ struct GratitudeListView: View {
                                                         .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
                                                         .swipeMinimumDistance(25)
                                                     }
+                                                    .animation(
+                                                        .spring(),
+                                                        value: sortedFilteredGratitudes
+                                                    )
                                                 }
                                             }
                                             .padding(.horizontal, 16)
@@ -280,6 +298,7 @@ struct GratitudeListView: View {
                                                 isScrollAtTop = $0 < 10
                                             }
                                         }
+                                        Spacer()
                                     }.coordinateSpace(name: "scroll")
                                     
                                 }
@@ -292,15 +311,21 @@ struct GratitudeListView: View {
                                 .onEnded { value in
                                     if value.translation.height > 100 && isScrollAtTop {
                                         withAnimation {
-                                            isShowingHistory = false
+                                            viewState.isShowingHistory = false
                                         }
                                     }
+                                }
+                        )
+                        .gesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    handleDateRangeSwipe(value.translation.width)
                                 }
                         )
                     }
                 }
             }
-            .navigationTitle(isShowingHistory ? "History" : "Today")
+            .navigationTitle(viewState.isShowingHistory ? "History" : "Today")
         }
     }
     
@@ -476,6 +501,30 @@ struct GratitudeListView: View {
         }
         .padding(.horizontal, 16)
     }
+    
+    private func handleDateRangeSwipe(_ translation: CGFloat) {
+        let dateRangeOptions: [DateRange] = [.today, .yesterday, .thisWeek, .lastWeek, .custom]
+        
+        guard let currentIndex = dateRangeOptions.firstIndex(of: selectedDateRange) else {
+            return
+        }
+        
+        var newIndex = currentIndex
+        
+        if translation < -50 {
+            // Swipe left - move to next filter
+            newIndex = min(currentIndex + 1, dateRangeOptions.count - 1)
+        } else if translation > 50 {
+            // Swipe right - move to previous filter
+            newIndex = max(currentIndex - 1, 0)
+        }
+        
+        if newIndex != currentIndex {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                selectedDateRange = dateRangeOptions[newIndex]
+            }
+        }
+    }
 }
 
 //MARK: - Chip View
@@ -501,233 +550,26 @@ func chipView(title: String, isSelected: Bool, action: @escaping () -> Void) -> 
         }
 }
 
-//MARK: - Custom Calendar
+//MARK: - Sorting Chip View
 
-struct CustomDateRangePicker: View {
-    @Binding var startDate: Date?
-    @Binding var endDate: Date?
-    var onDone: () -> Void
-    
-    @State private var hoverDate: Date? // For dynamic range previews
-    @State private var currentMonth: Date = Date() // Tracks the displayed month
-    
-    private let calendar = Calendar.current
-
-    var body: some View {
-        VStack(spacing: 20) {
-            VStack {
-                Text("Select Date Range")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                
-                HStack {
-                    dateLabel(title: "Start Date", date: startDate)
-                    Spacer()
-                    dateLabel(title: "End Date", date: endDate)
-                }
-                .padding(.horizontal)
-            }
-            
-            // Calendar
-            VStack(spacing: 10) {
-                calendarHeader()
-                
-                HStack(spacing: 0) {
-                    ForEach(calendar.shortWeekdaySymbols, id: \.self) { symbol in
-                        Text(symbol)
-                            .font(.subheadline)
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
-                    ForEach(calendarDays(), id: \.self) { day in
-                        calendarDayView(day: day)
-                    }
-                }
-                .transition(.slide)
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.secondary.opacity(0.1))
-            )
-            .padding(.horizontal)
-            
-            // Buttons
-            HStack {
-                Button(action: {
-                    withAnimation {
-                        startDate = nil
-                        endDate = nil
-                    }
-                }) {
-                    Text("Clear")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.red.opacity(0.2))
-                        )
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: {
-                    onDone()
-                }) {
-                    Text("Done")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.blue.opacity(0.2))
-                        )
-                        .foregroundColor(.blue)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            .padding(.horizontal)
-        }
-        .padding()
-    }
-    
-    // MARK: - Components
-    
-    @ViewBuilder
-    func calendarHeader() -> some View {
-        HStack {
-            Button(action: {
-                withAnimation {
-                    currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
-                }
-            }) {
-                Image(systemName: "chevron.left")
-            }
-
-            Spacer()
-
-            Text(currentMonth, formatter: DateFormatter.monthAndYear)
-                .font(.headline)
-                .gesture(
-                    DragGesture()
-                        .onEnded { value in
-                            if value.translation.width < 0 { // Swipe left
-                                withAnimation {
-                                    currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
-                                }
-                            } else if value.translation.width > 0 { // Swipe right
-                                withAnimation {
-                                    currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
-                                }
-                            }
-                        }
-                )
-
-            Spacer()
-
-            Button(action: {
-                withAnimation {
-                    currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
-                }
-            }) {
-                Image(systemName: "chevron.right")
+@ViewBuilder
+func sortingChipView(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    Text(title)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isSelected ? Color.blue : Color.gray.opacity(0.2))
+                .animation(.easeInOut(duration: 0.3), value: isSelected)
+        )
+        .foregroundColor(isSelected ? .white : .primary)
+        .fontWeight(isSelected ? .bold : .regular)
+        .clipShape(Capsule())
+        .onTapGesture {
+            withAnimation {
+                action()
             }
         }
-        .padding(.horizontal)
-    }
-    
-    private func calendarDayView(day: Date?) -> some View {
-        Group {
-            if let day = day {
-                Text("\(calendar.component(.day, from: day))")
-                    .font(.subheadline)
-                    .foregroundColor(textColor(for: day))
-                    .frame(width: 40, height: 40)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(backgroundColor(for: day))
-                    )
-                    .onTapGesture {
-                        handleDateSelection(day)
-                    }
-                    .scaleEffect(hoverDate == day ? 1.1 : 1) // Slight scale effect on hover
-                    .onHover { isHovering in
-                        hoverDate = isHovering ? day : nil
-                    }
-            } else {
-                Color.clear // Placeholder for empty cells
-            }
-        }
-    }
-
-    private func textColor(for date: Date) -> Color {
-        calendar.isDateInToday(date) ? .white : .primary
-    }
-    
-    private func dateLabel(title: String, date: Date?) -> some View {
-        VStack {
-            Text(title)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            Text(date.map { DateFormatter.medium.string(from: $0) } ?? "Not selected")
-                .font(.body)
-        }
-    }
-    
-    // MARK: - Logic
-    
-    private func calendarDays() -> [Date?] {
-        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)) else { return [] }
-        let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 0
-        let firstDayOffset = calendar.component(.weekday, from: monthStart) - calendar.firstWeekday
-        let prevMonthPadding = firstDayOffset < 0 ? 7 + firstDayOffset : firstDayOffset
-        
-        var days: [Date?] = Array(repeating: nil, count: prevMonthPadding)
-        for day in 1...daysInMonth {
-            if let date = calendar.date(byAdding: .day, value: day - 1, to: monthStart) {
-                days.append(date)
-            }
-        }
-        return days
-    }
-    
-    private func handleDateSelection(_ date: Date) {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred() // Add haptic feedback
-        if startDate == nil || (startDate != nil && endDate != nil) {
-            startDate = date
-            endDate = nil
-        } else if let start = startDate, date < start {
-            startDate = date
-        } else {
-            endDate = date
-        }
-    }
-    
-    private func backgroundColor(for date: Date) -> Color {
-        if calendar.isDateInToday(date) {
-            return Color.green.opacity(0.5) // Highlight today's date
-        } else if date == startDate || date == endDate {
-            return Color.blue.opacity(0.5)
-        } else if let start = startDate, let end = endDate, date >= start && date <= end {
-            return Color.blue.opacity(0.2)
-        } else {
-            return Color.clear
-        }
-    }
-}
-
-extension DateFormatter {
-    static let monthAndYear: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter
-    }()
-    
-    static let medium: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter
-    }()
 }
 
 //MARK: - Calendar Popup
@@ -756,7 +598,6 @@ struct CalendarPopup: CenterPopup {
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
         config
-            .popupHorizontalPadding(24)
             .tapOutsideToDismissPopup(true)
         
     }
@@ -938,6 +779,10 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 // Create a new entry
                 let newEntry = DailyGratitude(entry1: entry1, entry2: entry2, entry3: entry3, notes: notes)
                 modelContext.insert(newEntry)
+                DailyGratitude.calculateAndUpdateStreak(
+                    for: newEntry,
+                    in: modelContext
+                )
             }
             
             try modelContext.save()
@@ -1087,25 +932,21 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
     }
 }
 
-//MARK: Heatmap
+//MARK: - Enums for Sort & Filter
 
-struct HeatmapView: View {
-    var dailyGratitudes: [DailyGratitude]
-    
-    var body: some View {
-        Chart {
-            ForEach(dailyGratitudes, id: \.id) { gratitude in
-                RectangleMark(
-                    x: .value("Date", gratitude.date, unit: .day),
-                    y: .value("Streak", 1) // Keep y constant for a grid-like look
-                )
-                .foregroundStyle(by: .value("Streak", gratitude.streak))
-            }
-        }
-        .chartForegroundStyleScale(range: [.gray, .blue]) // Adjust colors for streak levels
-        .frame(height: 100) // Compact heatmap
-        .padding()
-    }
+enum DateRange {
+    case today, yesterday, thisWeek, lastWeek, custom
+}
+enum SortOption: String, CaseIterable {
+    case dateAscending = "Date (Oldest First)"
+    case dateDescending = "Date (Newest First)"
+    case alphabetical = "Alphabetical"
+}
+
+final class GratitudeViewState: ObservableObject {
+    static let shared = GratitudeViewState()
+
+    @Published var isShowingHistory: Bool = false
 }
 
 
