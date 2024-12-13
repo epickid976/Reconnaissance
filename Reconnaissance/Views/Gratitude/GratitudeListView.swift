@@ -311,6 +311,30 @@ struct GratitudeListView: View {
                                     handleDateRangeSwipe(value.translation.width)
                                 }
                         )
+                        .onChange(of: selectedDateRange) { _ , _ in
+                            if selectedDateRange == .custom {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    selectedDateRange = .custom
+                                    Task {
+                                        // Use a default value in case `onDone` isn't triggered
+                                        let calendar = Calendar.current
+                                        let todayStartOfDay = calendar.startOfDay(for: Date())
+                                        let todayEndOfDay = calendar.date(byAdding: .day, value: 1, to: todayStartOfDay)!.addingTimeInterval(-1)
+                                        
+                                        customDateRange = todayStartOfDay...todayEndOfDay
+                                        
+                                        await CalendarPopup(startDate: $startDate, endDate: $endDate) {
+                                            // Ensure `customDateRange` is updated only if `onDone` is called
+                                            let startOfDay = calendar.startOfDay(for: startDate ?? Date())
+                                            let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
+                                            
+                                            customDateRange = startOfDay...endOfDay
+                                        }
+                                        .present()
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
