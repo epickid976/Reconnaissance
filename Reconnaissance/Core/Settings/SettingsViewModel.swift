@@ -111,12 +111,17 @@ final class SettingsViewModel {
             // Decode the JSON into an array of `DailyGratitude`
             let importedData = try decoder.decode([DailyGratitude].self, from: jsonData)
 
-            // Insert the decoded objects into the `modelContext`
             for item in importedData {
-                modelContext.insert(item)
-                // Optionally update the streaks if necessary
-                DailyGratitude
-                    .calculateAndUpdateStreak(for: item, in: modelContext)
+                // Check if an entry for the same day exists
+                let existingEntries = try  modelContext.fetch(FetchDescriptor<DailyGratitude>()).filter {
+                    Calendar.current.isDate($0.date, inSameDayAs: item.date)
+                }
+                
+                // If no entry exists, insert the new item
+                if existingEntries.isEmpty {
+                    modelContext.insert(item)
+                    DailyGratitude.calculateAndUpdateStreak(for: item, in: modelContext)
+                }
             }
 
             // Save the context
@@ -126,7 +131,7 @@ final class SettingsViewModel {
             print("Error importing data from JSON: \(error.localizedDescription)")
         }
     }
-    
+
     func importDataFromCSV(fileURL: URL, modelContext: ModelContext) async {
         do {
             // Request access to the file
@@ -136,28 +141,38 @@ final class SettingsViewModel {
             }
             defer { fileURL.stopAccessingSecurityScopedResource() } // Ensure access is stopped when done
 
+            // Read the CSV data from the file
             let csvData = try String(contentsOf: fileURL, encoding: .utf8)
             let rows = csvData.split(separator: "\n").dropFirst() // Skip the header row
 
             for row in rows {
                 let columns = row.split(separator: ",").map { $0.replacingOccurrences(of: "\"", with: "") }
                 if columns.count >= 6 {
-                    let gratitude = DailyGratitude(
-                        entry1: columns[2],
-                        entry2: columns[3],
-                        entry3: columns[4],
-                        date: ISO8601DateFormatter().date(from: columns[1]) ?? Date(),
-                        notes: columns[5]
-                    )
-                    modelContext.insert(gratitude)
-                    DailyGratitude.calculateAndUpdateStreak(
-                        for: gratitude,
-                        in: modelContext
-                    )
+                    let entryDate = ISO8601DateFormatter().date(from: columns[1]) ?? Date()
+                    
+                    // Check if an entry for the same day exists
+                    let existingEntries = try modelContext.fetch(FetchDescriptor<DailyGratitude>()).filter {
+                        Calendar.current.isDate($0.date, inSameDayAs: entryDate)
+                    }
+                    
+                    // If no entry exists, insert the new item
+                    if existingEntries.isEmpty {
+                        let gratitude = DailyGratitude(
+                            entry1: columns[2],
+                            entry2: columns[3],
+                            entry3: columns[4],
+                            date: entryDate,
+                            notes: columns[5]
+                        )
+                        modelContext.insert(gratitude)
+                        DailyGratitude.calculateAndUpdateStreak(for: gratitude, in: modelContext)
+                    }
                 }
             }
 
-            try modelContext.save() // Save the inserted records
+            // Save the context
+            try modelContext.save()
+            print("Successfully imported data from CSV.")
         } catch {
             print("Error importing data from CSV: \(error.localizedDescription)")
         }

@@ -16,15 +16,15 @@ struct SettingsView: View {
     
     //MARK: - Environment
     
-    @Environment(\.modelContext) var modelContext
-    @Environment(\.presentationMode) var presentationMode
-    @Environment(\.sizeCategory) var sizeCategory
-    @Environment(\.requestReview) var requestReview
-    @Environment(\.presentToast) var presentToast
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.sizeCategory) private var sizeCategory
+    @Environment(\.requestReview) private var requestReview
+    @Environment(\.presentToast) private var presentToast
     
     //MARK: - Dependencies
     
-    @State var viewModel = SettingsViewModel()
+    @State private var viewModel = SettingsViewModel()
     @StateObject private var preferencesViewModel = ColumnViewModel()
     
     //MARK: - Properties
@@ -52,7 +52,6 @@ struct SettingsView: View {
     @ViewBuilder
     private func headerView(name: String) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Background Container
             ZStack {
                 // Decorative Gradient Background
                 LinearGradient(
@@ -64,14 +63,36 @@ struct SettingsView: View {
                 .cornerRadius(20)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
 
-                // Content
                 VStack(alignment: .leading, spacing: 8) {
-                    // Welcome Text
-                    Text("Hello, \(name) 👋")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-
+                    HStack {
+                        // Welcome Text
+                        Text("Hello, \(name) 👋")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        // Edit Button
+                        Button(action: {
+                            HapticManager.shared.trigger(.lightImpact)
+                            Task {
+                                await CentrePopup_EditName(
+                                    name: $preferencesViewModel.name,
+                                    onSave: { newName in
+                                        preferencesViewModel.name = newName
+                                    },
+                                    usingLargeText: sizeCategory.isAccessibilityCategory
+                                ).present()
+                            }
+                        }) {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Circle().fill(Color.white.opacity(0.2)))
+                        }
+                    }
+                    
                     // Subtitle
                     Text("Here are your preferences")
                         .font(.title3)
@@ -83,7 +104,6 @@ struct SettingsView: View {
             .padding(.horizontal, 10)
             .fixedSize(horizontal: false, vertical: true)
 
-            // Divider for visual separation
             Divider()
                 .padding(.horizontal)
                 .background(Color.primary.opacity(0.2))
@@ -420,6 +440,107 @@ struct CentrePopup_AboutApp: CenterPopup {
     }
 }
 
+//MARK: - Edit Name
+
+struct CentrePopup_EditName: CenterPopup {
+    @Binding var name: String
+    var onSave: (String) -> Void
+    var usingLargeText: Bool
+    
+    @State private var editedName: String
+    
+    @FocusState private var textfieldFocus: Bool
+    
+    @Environment(\.mainWindowSize) var mainWindowSize
+    @Environment(\.colorScheme) var colorScheme
+    
+    init(name: Binding<String>, onSave: @escaping (String) -> Void, usingLargeText: Bool) {
+        self._name = name
+        self.onSave = onSave
+        self.usingLargeText = usingLargeText
+        self._editedName = State(initialValue: name.wrappedValue)
+    }
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Title
+            Text("Edit Name")
+                .font(.system(size: usingLargeText ? 22 : 18, weight: .bold))
+                .foregroundColor(.primary)
+            
+            // Text Field for Name
+            createStyledTextField("Enter your name", text: $editedName)
+            
+            // Buttons
+            HStack(spacing: 12) {
+                Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.red.opacity(0.2))
+                        .cornerRadius(12)
+                        .foregroundColor(.red)
+                }
+
+                Button(action: {
+                    HapticManager.shared.trigger(.success)
+                    onSave(editedName)
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Save")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(12)
+                        .foregroundColor(.blue)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+    }
+    
+    func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
+        Group {
+            if isMultiline {
+                TextField(placeholder, text: text, axis: .vertical)
+                    .lineLimit(3...6)
+                    .focused( $textfieldFocus) // Use appropriate field enum
+            } else {
+                TextField(placeholder, text: text)
+                    .focused($textfieldFocus) // Use appropriate field enum
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.gray.opacity(colorScheme == .dark ? 0.2 : 0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(text.wrappedValue.isEmpty ? Color.secondary.opacity(0.3) : Color.blue.opacity(0.8), lineWidth: 1)
+        )
+        .cornerRadius(20)
+        .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        .onTapGesture {
+            textfieldFocus = true // Use appropriate field enum
+        }
+    }
+}
+
 //MARK: - Delete Data Popup
 
 struct CentrePopup_DeleteAllData: CenterPopup {
@@ -511,6 +632,8 @@ struct CentrePopup_DeleteAllData: CenterPopup {
         config
             .tapOutsideToDismissPopup(true)
     }
+    
+    
 }
 
 //MARK: - Import / Export Data Popup
@@ -552,80 +675,94 @@ struct CentrePopup_ImportExport: CenterPopup {
                 .foregroundColor(.blue.opacity(0.8))
                 .padding(.bottom, 10)
             
-            // Description
-            Text("""
+            if isProcessingImport {
+                            // Importing View
+                            VStack(spacing: 16) {
+                                ProgressView("Importing...")
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                    .padding()
+
+                                Text("Please wait while your data is being imported.")
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.primary)
+                                    .font(usingLargeText ? .headline : .body)
+                            }
+                            .transition(.opacity)
+                        }  else {
+                // Description
+                Text("""
             Choose your preferred file format for importing or exporting your gratitude data. You can select either JSON or CSV.
             """)
-            .font(usingLargeText ? .footnote : .body)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
-            .lineSpacing(5)
-            
-            // Import and Export Options
-            VStack(spacing: 16) {
-                // Import Section
-                Text("Import")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                .font(usingLargeText ? .footnote : .body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(5)
                 
-                HStack(spacing: 16) {
-                    // JSON Import Button
-                    Button(action: {
-                        importData(format: "json")
-                    }) {
-                        formatButton(
-                            title: "JSON",
-                            isProcessing: isProcessingImport && selectedImportFormat == "json",
-                            color: .green
-                        )
-                    }
-                    .disabled(isProcessingImport)
+                // Import and Export Options
+                VStack(spacing: 16) {
+                    // Import Section
+                    Text("Import")
+                        .font(.headline)
+                        .foregroundColor(.primary)
                     
-                    // CSV Import Button
-                    Button(action: {
-                        importData(format: "csv")
-                    }) {
-                        formatButton(
-                            title: "CSV",
-                            isProcessing: isProcessingImport && selectedImportFormat == "csv",
-                            color: .green
-                        )
+                    HStack(spacing: 16) {
+                        // JSON Import Button
+                        Button(action: {
+                            importData(format: "json")
+                        }) {
+                            formatButton(
+                                title: "JSON",
+                                isProcessing: isProcessingImport && selectedImportFormat == "json",
+                                color: .green
+                            )
+                        }
+                        .disabled(isProcessingImport)
+                        
+                        // CSV Import Button
+                        Button(action: {
+                            importData(format: "csv")
+                        }) {
+                            formatButton(
+                                title: "CSV",
+                                isProcessing: isProcessingImport && selectedImportFormat == "csv",
+                                color: .green
+                            )
+                        }
+                        .disabled(isProcessingImport)
                     }
-                    .disabled(isProcessingImport)
-                }
-                
-                // Export Section
-                Text("Export")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                HStack(spacing: 16) {
-                    // JSON Export Button
-                    Button(action: {
-                        exportData(format: "json")
-                    }) {
-                        formatButton(
-                            title: "JSON",
-                            isProcessing: isProcessingExport && selectedExportFormat == "json",
-                            color: .blue
-                        )
-                    }
-                    .disabled(isProcessingExport)
                     
-                    // CSV Export Button
-                    Button(action: {
-                        exportData(format: "csv")
-                    }) {
-                        formatButton(
-                            title: "CSV",
-                            isProcessing: isProcessingExport && selectedExportFormat == "csv",
-                            color: .blue
-                        )
+                    // Export Section
+                    Text("Export")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    HStack(spacing: 16) {
+                        // JSON Export Button
+                        Button(action: {
+                            exportData(format: "json")
+                        }) {
+                            formatButton(
+                                title: "JSON",
+                                isProcessing: isProcessingExport && selectedExportFormat == "json",
+                                color: .blue
+                            )
+                        }
+                        .disabled(isProcessingExport)
+                        
+                        // CSV Export Button
+                        Button(action: {
+                            exportData(format: "csv")
+                        }) {
+                            formatButton(
+                                title: "CSV",
+                                isProcessing: isProcessingExport && selectedExportFormat == "csv",
+                                color: .blue
+                            )
+                        }
+                        .disabled(isProcessingExport)
                     }
-                    .disabled(isProcessingExport)
                 }
             }
-            
             // Error Message
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -656,6 +793,7 @@ struct CentrePopup_ImportExport: CenterPopup {
             .buttonStyle(PlainButtonStyle())
             .shadow(color: Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
         }
+        //.animation(.spring(), value: isProcessingImport)
         .padding(16)
         .background(Color.secondarySystemBackground)
         .background(.ultraThinMaterial)
@@ -664,13 +802,21 @@ struct CentrePopup_ImportExport: CenterPopup {
         .sheet(isPresented: $showDocumentPicker) {
             DocumentPicker(format: documentPickerFormat) { url in
                 Task {
+                    await MainActor.run { isProcessingImport = true}
                     onImport(url, documentPickerFormat)
                     await MainActor.run {
                         isProcessingImport = false
                         selectedImportFormat = ""
-                        Task { await dismissLastPopup() }
                     }
+                    Task { await dismissLastPopup() }
                 }
+            }
+        }
+        .onChange(of: showDocumentPicker) { newValue, _ in
+            if !newValue {
+                // The sheet was dismissed, reset import processing state
+                isProcessingImport = false
+                selectedImportFormat = ""
             }
         }
     }
@@ -721,9 +867,11 @@ struct CentrePopup_ImportExport: CenterPopup {
     private func importData(format: String) {
         guard !isProcessingImport else { return }
         selectedImportFormat = format
-        isProcessingImport = true
         documentPickerFormat = format
         showDocumentPicker = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            isProcessingImport = true
+        }
     }
     
     private func createFileToExport(format: String) async -> URL {
