@@ -34,6 +34,10 @@ struct GratitudeListView: View {
         gratitudes.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
     
+    private var thisWeeksGratitudes: [DailyGratitude] {
+        gratitudes.filter { calendar.isDate($0.date, equalTo: Date(), toGranularity: .weekOfYear) }
+    }
+    
     @State private var selectedDateRange: DateRange = .today
     @State private var customDateRange: ClosedRange<Date> = Date()...Date()
     @State private var showDatePicker = false
@@ -41,6 +45,9 @@ struct GratitudeListView: View {
     @State private var endDate: Date? = nil
     @State private var showCustomDatePicker = false
     @State private var selectedSortOption: SortOption = .dateDescending
+    @State private var currentCardIndex = 0
+    
+    @State var randomGratitude: DailyGratitude?
     
     var filteredGratitudes: [DailyGratitude] {
         switch selectedDateRange {
@@ -89,6 +96,7 @@ struct GratitudeListView: View {
                                 Button(action: {
                                     withAnimation {
                                         viewState.isShowingHistory = true
+                                        HapticManager.shared.trigger(.lightImpact)
                                     }
                                 }) {
                                     Label("See History", systemImage: "chevron.down")
@@ -106,6 +114,7 @@ struct GratitudeListView: View {
                                         if value.translation.height < -100 {
                                             withAnimation {
                                                 viewState.isShowingHistory = true
+                                                HapticManager.shared.trigger(.lightImpact)
                                             }
                                         }
                                     }
@@ -119,6 +128,7 @@ struct GratitudeListView: View {
                             Button(action: {
                                 withAnimation {
                                     viewState.isShowingHistory = false
+                                    HapticManager.shared.trigger(.lightImpact)
                                 }
                             }) {
                                 Label("See Today", systemImage: "chevron.up")
@@ -139,6 +149,7 @@ struct GratitudeListView: View {
                                                     .hSpacing(.center)
                                                 Button {
                                                     Task {
+                                                        HapticManager.shared.trigger(.lightImpact)
                                                         await CentrePopup_AddGratitudeEntry(modelContext: modelContext) {
                                                         }
                                                         .present()
@@ -165,56 +176,90 @@ struct GratitudeListView: View {
                                             
                                             
                                             LazyVStack(spacing: 22) {
-                                                
-                                                ScrollView(.horizontal, showsIndicators: false) {
-                                                    HStack(spacing: 10) {
-                                                        chipView(title: "Today", isSelected: selectedDateRange == .today) {
-                                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                                selectedDateRange = .today
-                                                            }
-                                                        }
-                                                        chipView(title: "Yesterday", isSelected: selectedDateRange == .yesterday) {
-                                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                                selectedDateRange = .yesterday
-                                                            }
-                                                        }
-                                                        chipView(title: "This Week", isSelected: selectedDateRange == .thisWeek) {
-                                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                                selectedDateRange = .thisWeek
-                                                            }
-                                                        }
-                                                        chipView(title: "Last Week", isSelected: selectedDateRange == .lastWeek) {
-                                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                                selectedDateRange = .lastWeek
-                                                            }
-                                                        }
-                                                        chipView(title: "Custom Range", isSelected: selectedDateRange == .custom) {
-                                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                                selectedDateRange = .custom
-                                                                Task {
-                                                                    // Use a default value in case `onDone` isn't triggered
-                                                                    let calendar = Calendar.current
-                                                                    let todayStartOfDay = calendar.startOfDay(for: Date())
-                                                                    let todayEndOfDay = calendar.date(byAdding: .day, value: 1, to: todayStartOfDay)!.addingTimeInterval(-1)
-                                                                    
-                                                                    customDateRange = todayStartOfDay...todayEndOfDay
-                                                                    
-                                                                    await CalendarPopup(startDate: $startDate, endDate: $endDate) {
-                                                                        // Ensure `customDateRange` is updated only if `onDone` is called
-                                                                        let startOfDay = calendar.startOfDay(for: startDate ?? Date())
-                                                                        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
-                                                                        
-                                                                        customDateRange = startOfDay...endOfDay
-                                                                    }
-                                                                    .present()
+                                                ScrollViewReader { proxy in
+                                                    ScrollView(.horizontal, showsIndicators: false) {
+                                                        HStack(spacing: 10) {
+                                                            chipView(title: "Today", isSelected: selectedDateRange == .today) {
+                                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                                    selectedDateRange = .today
+                                                                    proxy.scrollTo("Today", anchor: .center)
                                                                 }
+                                                            }
+                                                            .id("Today")
+                                                            
+                                                            chipView(title: "Yesterday", isSelected: selectedDateRange == .yesterday) {
+                                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                                    selectedDateRange = .yesterday
+                                                                    proxy.scrollTo("Yesterday", anchor: .center)
+                                                                }
+                                                            }
+                                                            .id("Yesterday")
+                                                            
+                                                            chipView(title: "This Week", isSelected: selectedDateRange == .thisWeek) {
+                                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                                    selectedDateRange = .thisWeek
+                                                                    proxy.scrollTo("This Week", anchor: .center)
+                                                                }
+                                                            }
+                                                            .id("This Week")
+                                                            
+                                                            chipView(title: "Last Week", isSelected: selectedDateRange == .lastWeek) {
+                                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                                    selectedDateRange = .lastWeek
+                                                                    proxy.scrollTo("Last Week", anchor: .center)
+                                                                }
+                                                            }
+                                                            .id("Last Week")
+                                                            
+                                                            chipView(title: "Custom Range", isSelected: selectedDateRange == .custom) {
+                                                                withAnimation(.easeInOut(duration: 0.3)) {
+                                                                    selectedDateRange = .custom
+                                                                    Task {
+                                                                        let calendar = Calendar.current
+                                                                        let todayStartOfDay = calendar.startOfDay(for: Date())
+                                                                        let todayEndOfDay = calendar.date(byAdding: .day, value: 1, to: todayStartOfDay)!.addingTimeInterval(-1)
+                                                                        
+                                                                        customDateRange = todayStartOfDay...todayEndOfDay
+                                                                        
+                                                                        await CalendarPopup(startDate: $startDate, endDate: $endDate) {
+                                                                            let startOfDay = calendar.startOfDay(for: startDate ?? Date())
+                                                                            let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate ?? Date()))!.addingTimeInterval(-1)
+                                                                            
+                                                                            customDateRange = startOfDay...endOfDay
+                                                                        }
+                                                                        .present()
+                                                                    }
+                                                                    proxy.scrollTo("Custom Range", anchor: .center)
+                                                                }
+                                                            }
+                                                            .id("Custom Range")
+                                                        }
+                                                        .padding(.horizontal, 16)
+                                                        .padding(.vertical, 8)
+                                                    }
+                                                    // Add this `.onChange` modifier to automatically scroll to the selected chip
+                                                    .onChange(of: selectedDateRange) { newValue, _ in
+                                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                                            switch newValue {
+                                                            case .today:
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                proxy.scrollTo("Today", anchor: .center)
+                                                            case .yesterday:
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                proxy.scrollTo("Yesterday", anchor: .center)
+                                                            case .thisWeek:
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                proxy.scrollTo("This Week", anchor: .center)
+                                                            case .lastWeek:
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                proxy.scrollTo("Last Week", anchor: .center)
+                                                            case .custom:
+                                                                HapticManager.shared.trigger(.lightImpact)
+                                                                proxy.scrollTo("Custom Range", anchor: .center)
                                                             }
                                                         }
                                                     }
-                                                    .padding(.horizontal, 16) // Add sufficient padding here
-                                                    .padding(.vertical, 8)   // Optional vertical padding for spacing
                                                 }
-                                                
                                                 
                                                 if filteredGratitudes.isEmpty {
                                                     Text("No entries.")
@@ -300,6 +345,7 @@ struct GratitudeListView: View {
                                 .onEnded { value in
                                     if value.translation.height > 100 && isScrollAtTop {
                                         withAnimation {
+                                            HapticManager.shared.trigger(.lightImpact)
                                             viewState.isShowingHistory = false
                                         }
                                     }
@@ -311,7 +357,7 @@ struct GratitudeListView: View {
                                     handleDateRangeSwipe(value.translation.width)
                                 }
                         )
-                        .onChange(of: selectedDateRange) { _ , _ in
+                        .onChange(of: selectedDateRange) { newRange , _ in
                             if selectedDateRange == .custom {
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     selectedDateRange = .custom
@@ -334,11 +380,15 @@ struct GratitudeListView: View {
                                     }
                                 }
                             }
+                            //proxy.scrollTo(newRange.rawValue, anchor: .center)
                         }
                     }
                 }
             }
             .navigationTitle(viewState.isShowingHistory ? "History" : "Today")
+            .onAppear {
+                randomGratitude = gratitudes.randomElement()
+            }
         }
     }
     
@@ -416,103 +466,124 @@ struct GratitudeListView: View {
                 )
                 .onTapGesture {
                     Task {
+                        HapticManager.shared.trigger(.lightImpact)
                         await CentrePopup_AddGratitudeEntry(modelContext: modelContext) {
+                            ConfettiController.showConfettiOverlay()
                         }
                         .present()
                     }
                 }
+                .padding()
             }
             
-            
-            // Milestones & Weekly Progress in a Single Compact Section
-            VStack(alignment: .center, spacing: 12) {
-                // Milestones
-                if gratitudes.count > 0 {
-                    Text("🎯 Milestones")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    if gratitudes.count % 10 == 0 {
-                        HStack {
+            VStack(alignment: .leading, spacing: 12) {
+                // Milestones & Weekly Progress
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("🎯 Milestones")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                        
+                        if gratitudes.count > 0 {
                             Text("🎉 \(gratitudes.count) entries!")
-                                .font(.footnote)
+                                .font(.caption)
                                 .foregroundColor(.blue)
                         }
-                    }
-                    Text("Logged \(gratitudes.count) entries so far.")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text("🏞️ Your gratitude journey begins today!")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                }
-                
-                // Weekly Progress
-                HStack {
-                    ProgressView(value: Double(gratitudes.count), total: 7.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .blue))
-                        .frame(width: 80)
-                    
-                    Text("\(gratitudes.count)/7 entries this week")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding(.vertical, 8)
-            
-            
-            // Reflection Summary
-            VStack(alignment: .center) {
-                if let firstEntry = gratitudes.last {
-                    Text("📝 Reflection Summary")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
-                    Text("You started your gratitude journey on \n\(firstEntry.date, style: .date).")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2, reservesSpace: true)
-                        .multilineTextAlignment(.center)
-                    if let mostRecent = gratitudes.first {
-                        Text("Your last entry was \(mostRecent.date, style: .relative).")
-                            .font(.subheadline)
+                        
+                        Text("Logged \(gratitudes.count) entries so far.")
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    
+                    Spacer()
+                    
+                    VStack {
+                        CircularProgressView(
+                            progress: Double(thisWeeksGratitudes.count) / 7.0,
+                            color: .blue,
+                            lineWidth: 5
+                        )
+                        .frame(width: 50, height: 50)
+                        
+                        VStack(spacing: 2) {
+                            Text("\(thisWeeksGratitudes.count)/7")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("Week Progress")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.secondarySystemBackground))
+                )
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                
+                // Conditional Rendering Based on Screen Size
+                if UIScreen.main.bounds.width <= 375 {
+                    // iPhone SE-like Devices: Swipeable ZStack Carousel
+                    ZStack {
+                        // Reflection Card with Right Arrow
+                        HStack(spacing: 0) {
+                            reflectionCard
+                                .offset(x: currentCardIndex == 0 ? 0 : -UIScreen.main.bounds.width) // Move card off-screen
+                                .animation(.spring(), value: currentCardIndex)
+                                .zIndex(currentCardIndex == 0 ? 1 : 0)
+                            // Right Arrow (only visible when `currentCardIndex == 1`)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .opacity(currentCardIndex == 0 ? 1 : 0) // Visible when the first card is shown
+                                .animation(.easeInOut, value: currentCardIndex) // Smoothly fade in/out
+                        }
+                        
+                        // Memory Card with Left Arrow
+                        HStack(spacing: 0) {
+                            // Left Arrow (only visible when `currentCardIndex == 0`)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.secondary)
+                                .opacity(currentCardIndex == 1 ? 1 : 0) // Visible when the second card is shown
+                                .animation(.easeInOut, value: currentCardIndex) // Smoothly fade in/out
+                            memoryCard
+                                .offset(x: currentCardIndex == 1 ? 0 : UIScreen.main.bounds.width) // Move card off-screen
+                                .animation(.spring(), value: currentCardIndex)
+                                .zIndex(currentCardIndex == 1 ? 1 : 0)
+                            
+                        }
+                    }
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                if value.translation.width < 0 {
+                                    currentCardIndex = min(currentCardIndex + 1, 1)
+                                } else if value.translation.width > 0 {
+                                    currentCardIndex = max(currentCardIndex - 1, 0)
+                                }
+                            }
+                    )
                 } else {
-                    Text("🎬 Start your gratitude journey today!")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    // Other Devices: Standard VStack
+                    VStack(alignment: .leading, spacing: 12) {
+                        reflectionCard
+                        memoryCard
+                    }
                 }
+                
+                
+                Text("“Gratitude turns what we have into enough.”")
+                    .font(.subheadline)
+                    .italic()
+                    .foregroundColor(.secondary)
+                    .hSpacing(.center)
+                    .vSpacing(.bottom)
             }
-            .padding(.vertical, 8)
-            
-            
-            
-            // Memory of Gratitude
-            if let randomGratitude = gratitudes.randomElement() {
-                VStack(alignment: .center) {
-                    Text("🧠 Memory of Gratitude")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    Text("On \(randomGratitude.date, style: .date), you wrote:")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Text("\(randomGratitude.entry1)")
-                        .font(.body)
-                }
-                .transition(.identity) // Explicitly set no transition
-                .padding(.vertical, 8)
-            }
-            
-            
-            Text("“Gratitude turns what we have into enough.”")
-                .font(.subheadline)
-                .italic()
-                .foregroundColor(.secondary)
-                .hSpacing(.center)
-                .vSpacing(.bottom)
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, 16)
     }
     
     private func handleDateRangeSwipe(_ translation: CGFloat) {
@@ -538,6 +609,70 @@ struct GratitudeListView: View {
             }
         }
     }
+    
+    // Reflection Card View
+        private var reflectionCard: some View {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("📝 Reflection Summary")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                if let firstEntry = gratitudes.last {
+                    Text("Started: \(firstEntry.date, style: .date)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    if let mostRecent = gratitudes.first {
+                        Text("Last entry: \(mostRecent.date, style: .relative)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    Text("Start your gratitude journey today!")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.secondarySystemBackground))
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        }
+        
+        // Memory Card View
+        private var memoryCard: some View {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("🧠 Memory of Gratitude")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                if let randomGratitude = randomGratitude {
+                    Text("On \(randomGratitude.date, style: .date), you wrote:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("\"\(randomGratitude.entry1)\"")
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                } else {
+                    Text("No memories yet.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.secondarySystemBackground))
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        }
 }
 
 //MARK: - Chip View
@@ -611,6 +746,12 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     private var existingEntry: DailyGratitude?
     
+    @FocusState private var focusedField: Field?
+        
+    enum Field {
+        case field1, field2, field3, field4
+    }
+    
     init(modelContext: ModelContext, entry: DailyGratitude? = nil, onDone: @escaping () -> Void) {
         self.modelContext = modelContext
         self.existingEntry = entry
@@ -643,19 +784,23 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 HStack {
                     Text("🌟")
                         .font(.title2)
-                    createStyledTextField("Gratitude Entry 1", text: $entry1)
+                    createStyledTextField(
+                        "Gratitude Entry 1",
+                        text: $entry1,
+                        field: .field1
+                    )
                 }
                 
                 HStack {
                     Text("❤️")
                         .font(.title2)
-                    createStyledTextField("Gratitude Entry 2", text: $entry2)
+                    createStyledTextField("Gratitude Entry 2", text: $entry2, field: .field2)
                 }
                 
                 HStack {
                     Text("🍃")
                         .font(.title2)
-                    createStyledTextField("Gratitude Entry 3", text: $entry3)
+                    createStyledTextField("Gratitude Entry 3", text: $entry3, field: .field3)
                 }
             }
             
@@ -665,12 +810,13 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                createStyledTextField("Notes. Write something here...", text: $notes, isMultiline: true)
+                createStyledTextField("Notes. Write something here...", text: $notes, isMultiline: true, field: .field4)
             }
             
             // Action Buttons
             HStack(spacing: 16) {
                 Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
                     Task { await dismissLastPopup() }
                 }) {
                     Text("Cancel")
@@ -690,12 +836,15 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
                 
                 Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
                     Task {
                         let result = await saveGratitudeEntry()
                         if result.isSuccess {
+                            HapticManager.shared.trigger(.success)
                             await dismissLastPopup()
                             onDone()
                         } else {
+                            HapticManager.shared.trigger(.error)
                             error = "Error saving entry. Please try again."
                         }
                     }
@@ -727,21 +876,24 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         .hideKeyboardOnDrag()
     }
     
-    // Helper for Styled Text Fields
-    func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
+    @FocusState private var isFocused: Bool
+
+    func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false, field: Field) -> some View {
         Group {
             if isMultiline {
                 TextField(placeholder, text: text, axis: .vertical)
                     .lineLimit(3...6)
+                    .focused($focusedField, equals: field) // Use appropriate field enum
             } else {
                 TextField(placeholder, text: text)
+                    .focused($focusedField, equals: field) // Use appropriate field enum
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.gray.opacity(colorScheme == .dark ? 0.2 : 0.1)) // Subtle tint for visibility
+                .fill(Color.gray.opacity(colorScheme == .dark ? 0.2 : 0.1))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20)
@@ -749,7 +901,10 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
         )
         .cornerRadius(20)
         .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
-        .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Ensure text color adapts
+        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        .onTapGesture {
+            focusedField = field // Use appropriate field enum
+        }
     }
     
     
@@ -788,7 +943,8 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     }
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
-        config.popupHorizontalPadding(24)
+        config
+            //.popupHorizontalPadding(24)
     }
 }
 
@@ -862,6 +1018,7 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
             // Action Buttons
             HStack(spacing: 16) {
                 Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
                     Task { await dismissLastPopup() }
                 }) {
                     Text("Cancel")
@@ -881,6 +1038,7 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
                 .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
                 
                 Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
                     deleteGratitudeEntry()
                     Task { await dismissLastPopup() }
                     
@@ -916,8 +1074,10 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
         modelContext.delete(entry)
         do {
             try modelContext.save()
+            HapticManager.shared.trigger(.success)
             print("Gratitude entry deleted successfully.")
         } catch {
+            HapticManager.shared.trigger(.error)
             print("Error deleting gratitude entry: \(error)")
         }
     }

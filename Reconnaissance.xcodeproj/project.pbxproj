@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
+		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		82D07F7B2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
 		82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
@@ -48,6 +50,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
+		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Reconnaissance Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F802D07D714000A3179 /* GratitudeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntry.swift; sourceTree = "<group>"; };
@@ -140,6 +144,8 @@
 		82D07FE02D08E5CA000A3179 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				824711BB2D0D445E005E44E7 /* StackedCarousel.swift */,
+				824711B92D0D3297005E44E7 /* ConfettiController.swift */,
 				82D080B92D09BECD000A3179 /* KeyboardExt.swift */,
 				82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */,
 				82D07FDB2D08E5CA000A3179 /* ResultExtensions.swift */,
@@ -288,8 +294,10 @@
 				82D07FE22D08E5CA000A3179 /* AppVersionHelpers.swift in Sources */,
 				82D07FE32D08E5CA000A3179 /* ViewModifiers.swift in Sources */,
 				82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */,
+				824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */,
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
+				824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */,
 				82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */,
 				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,

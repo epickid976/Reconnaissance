@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import NavigationTransitions
+import Toasts
 
 //MARK: Content View - App Entry Point
 
@@ -76,20 +77,12 @@ struct HomeTabView: View {
                 // Tab Content
                 if selectedTab == 0 {
                     GratitudeListView(path: $path)
+                        .installToast(position: .bottom)
                         .tag(0)
                 } else if selectedTab == 1 {
-                    NavigationStack {
-                        VStack {
-                            Text("Settings View Placeholder") // Placeholder
-                                .font(.headline)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                        .frame(maxHeight: .infinity)
-                        .tag(2)
-                        .navigationTitle("Settings View")
-                        .navigationBarTitleDisplayMode(.large)
-                    }
+                    SettingsView()
+                        .installToast(position: .bottom)
+                        .tag(1)
                 }
 
                 // Custom Tab Bar
@@ -117,6 +110,7 @@ struct HomeTabView: View {
                             isSelected: selectedTab == 0
                         ) {
                             withAnimation(.spring()) {
+                                HapticManager.shared.trigger(.lightImpact)
                                 selectedTab = 0
                             }
                         }
@@ -125,6 +119,7 @@ struct HomeTabView: View {
                             isSelected: selectedTab == 1
                         ) {
                             withAnimation(.spring()) {
+                                HapticManager.shared.trigger(.lightImpact)
                                 selectedTab = 1
                             }
                         }

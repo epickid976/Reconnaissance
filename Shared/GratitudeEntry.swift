@@ -10,21 +10,23 @@ import SwiftData
 import WatchConnectivity
 
 @Model
-class DailyGratitude: @unchecked Sendable{
+class DailyGratitude: @unchecked Sendable, Codable {
     var id: UUID = UUID() // Default value
     var date: Date = Date() // Default value
     var entry1: String = "" // Default value
     var entry2: String = "" // Default value
     var entry3: String = "" // Default value
-    var streak: Int = 0 // Add a streak property
-    var notes: String = "" // Add a notes property
+    var streak: Int = 0 // Default value
+    var notes: String = "" // Default value
     
-    init(entry1: String, entry2: String, entry3: String, date: Date = Date(), notes: String) {
+    init(entry1: String = "", entry2: String = "", entry3: String = "", date: Date = Date(), notes: String = "") {
+        self.id = UUID()
         self.entry1 = entry1
         self.entry2 = entry2
         self.entry3 = entry3
         self.date = date
         self.notes = notes
+        self.streak = 0
     }
     
     // Static Example Instance
@@ -45,9 +47,49 @@ class DailyGratitude: @unchecked Sendable{
     
     // Helper to adjust the date
     func withDateAdjusted(by days: Int) -> DailyGratitude {
-        let adjusted = self
-        adjusted.date = Calendar.current.date(byAdding: .day, value: days, to: Date()) ?? Date()
+        let adjusted = DailyGratitude(
+            entry1: self.entry1,
+            entry2: self.entry2,
+            entry3: self.entry3,
+            date: Calendar.current.date(byAdding: .day, value: days, to: self.date) ?? Date(),
+            notes: self.notes
+        )
+        adjusted.streak = self.streak
+        adjusted.id = self.id
         return adjusted
+    }
+    
+    // MARK: - Codable Conformance
+    enum CodingKeys: String, CodingKey {
+        case id
+        case date
+        case entry1
+        case entry2
+        case entry3
+        case streak
+        case notes
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        date = try container.decode(Date.self, forKey: .date)
+        entry1 = try container.decode(String.self, forKey: .entry1)
+        entry2 = try container.decode(String.self, forKey: .entry2)
+        entry3 = try container.decode(String.self, forKey: .entry3)
+        streak = try container.decode(Int.self, forKey: .streak)
+        notes = try container.decode(String.self, forKey: .notes)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(date, forKey: .date)
+        try container.encode(entry1, forKey: .entry1)
+        try container.encode(entry2, forKey: .entry2)
+        try container.encode(entry3, forKey: .entry3)
+        try container.encode(streak, forKey: .streak)
+        try container.encode(notes, forKey: .notes)
     }
 }
 

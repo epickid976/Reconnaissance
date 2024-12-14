@@ -124,3 +124,21 @@ class HeatmapViewModel {
         }
     }
 }
+
+struct CircularProgressView: View {
+    var progress: Double
+    var color: Color
+    var lineWidth: CGFloat
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(color.opacity(0.2), lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0.0, to: CGFloat(progress))
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut, value: progress)
+        }
+    }
+}

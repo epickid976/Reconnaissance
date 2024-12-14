@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import NavigationTransitions
+import UniformTypeIdentifiers
 
 // MARK: - Array Extensions
 
@@ -370,6 +371,8 @@ private struct ColumnViewPreferenceKey: EnvironmentKey {
 
 class ColumnViewModel: ObservableObject {
     
+    @AppStorage("name") var name = "mon ami(e)"
+    
     @AppStorage("columnViewPreference") var isColumnViewEnabled = true
 
     @AppStorage("hapticFeedback") var hapticFeedback = true
@@ -462,4 +465,86 @@ final class GratitudeViewState: ObservableObject {
     static let shared = GratitudeViewState()
 
     @Published var isShowingHistory: Bool = false
+}
+
+@MainActor
+func shareApp() {
+    let items: [Any] = ["Check out this app!", URL(string: "https://apps.apple.com/us/app/service-maps/id1664309103?l=fr-FR")!]
+        let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+
+        // Find the active UIWindowScene
+        if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+           let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+            
+            activityViewController.popoverPresentationController?.sourceView = rootVC.view // Required for iPad
+            rootVC.present(activityViewController, animated: true, completion: nil)
+
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                // Configure popover presentation for iPad
+                activityViewController.popoverPresentationController?.sourceView = rootVC.view
+                activityViewController.popoverPresentationController?.sourceRect = CGRect(
+                    x: UIScreen.main.bounds.width / 2.1,
+                    y: UIScreen.main.bounds.height / 1.3,
+                    width: 1,
+                    height: 1
+                )
+            }
+        }
+}
+
+
+
+@MainActor
+func presentShareSheet(with fileURL: URL) {
+    let items: [Any] = [fileURL]
+    let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+
+    // Find the active UIWindowScene
+    if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+       let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+
+        activityViewController.popoverPresentationController?.sourceView = rootVC.view // Required for iPad
+        rootVC.present(activityViewController, animated: true, completion: nil)
+
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // Configure popover presentation for iPad
+            activityViewController.popoverPresentationController?.sourceView = rootVC.view
+            activityViewController.popoverPresentationController?.sourceRect = CGRect(
+                x: UIScreen.main.bounds.width / 2.1,
+                y: UIScreen.main.bounds.height / 1.3,
+                width: 1,
+                height: 1
+            )
+        }
+    }
+}
+
+@MainActor
+func presentDocumentPicker(for format: String, completion: @escaping (URL) -> Void) {
+    let allowedTypes: [UTType] = format == "json" ? [.json] : [.commaSeparatedText]
+    let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: allowedTypes)
+    documentPicker.allowsMultipleSelection = false
+    documentPicker.delegate = DocumentPickerDelegate { url in
+        completion(url)
+    }
+
+    // Find the active UIWindowScene
+    if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+       let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+        rootVC.present(documentPicker, animated: true, completion: nil)
+    }
+}
+
+// Delegate for Document Picker
+class DocumentPickerDelegate: NSObject, UIDocumentPickerDelegate {
+    private let onPick: (URL) -> Void
+
+    init(onPick: @escaping (URL) -> Void) {
+        self.onPick = onPick
+    }
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else { return }
+        onPick(url)
+    }
 }

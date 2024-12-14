@@ -63,6 +63,7 @@ struct CustomDateRangePicker: View {
             HStack {
                 Button(action: {
                     withAnimation {
+                        HapticManager.shared.trigger(.lightImpact)
                         startDate = nil
                         endDate = nil
                     }
@@ -79,6 +80,7 @@ struct CustomDateRangePicker: View {
                 .buttonStyle(PlainButtonStyle())
                 
                 Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
                     onDone()
                 }) {
                     Text("Done")
@@ -104,6 +106,7 @@ struct CustomDateRangePicker: View {
         HStack {
             Button(action: {
                 withAnimation {
+                    HapticManager.shared.trigger(.lightImpact)
                     currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
                 }
             }) {
@@ -119,10 +122,12 @@ struct CustomDateRangePicker: View {
                         .onEnded { value in
                             if value.translation.width < 0 { // Swipe left
                                 withAnimation {
+                                    HapticManager.shared.trigger(.lightImpact)
                                     currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
                                 }
                             } else if value.translation.width > 0 { // Swipe right
                                 withAnimation {
+                                    HapticManager.shared.trigger(.lightImpact)
                                     currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
                                 }
                             }
@@ -133,6 +138,7 @@ struct CustomDateRangePicker: View {
 
             Button(action: {
                 withAnimation {
+                    HapticManager.shared.trigger(.lightImpact)
                     currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
                 }
             }) {
@@ -154,6 +160,7 @@ struct CustomDateRangePicker: View {
                             .fill(backgroundColor(for: day))
                     )
                     .onTapGesture {
+                        HapticManager.shared.trigger(.lightImpact)
                         handleDateSelection(day)
                     }
                     .scaleEffect(hoverDate == day ? 1.1 : 1) // Slight scale effect on hover
@@ -198,7 +205,7 @@ struct CustomDateRangePicker: View {
     }
     
     private func handleDateSelection(_ date: Date) {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred() // Add haptic feedback
+        HapticManager.shared.trigger(.lightImpact)
         if startDate == nil || (startDate != nil && endDate != nil) {
             startDate = date
             endDate = nil
