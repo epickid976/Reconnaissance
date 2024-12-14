@@ -481,18 +481,18 @@ struct GratitudeListView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("🎯 Milestones")
-                            .font(.subheadline)
+                            .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
                         
                         if gratitudes.count > 0 {
                             Text("🎉 \(gratitudes.count) entries!")
-                                .font(.caption)
+                                .font(.subheadline)
                                 .foregroundColor(.blue)
                         }
                         
                         Text("Logged \(gratitudes.count) entries so far.")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
                     
@@ -508,10 +508,10 @@ struct GratitudeListView: View {
                         
                         VStack(spacing: 2) {
                             Text("\(thisWeeksGratitudes.count)/7")
-                                .font(.caption)
+                                .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Text("Week Progress")
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -614,23 +614,23 @@ struct GratitudeListView: View {
         private var reflectionCard: some View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("📝 Reflection Summary")
-                    .font(.subheadline)
+                    .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
                 if let firstEntry = gratitudes.last {
                     Text("Started: \(firstEntry.date, style: .date)")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     if let mostRecent = gratitudes.first {
                         Text("Last entry: \(mostRecent.date, style: .relative)")
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
                 } else {
                     Text("Start your gratitude journey today!")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
             }
@@ -647,21 +647,21 @@ struct GratitudeListView: View {
         private var memoryCard: some View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("🧠 Memory of Gratitude")
-                    .font(.subheadline)
+                    .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
                 if let randomGratitude = randomGratitude {
                     Text("On \(randomGratitude.date, style: .date), you wrote:")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     Text("\"\(randomGratitude.entry1)\"")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.primary)
                 } else {
                     Text("No memories yet.")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
             }
