@@ -37,9 +37,15 @@ class HapticManager {
     // MARK: - Public Interface
     func trigger(_ type: HapticType) {
         // Check user preferences
+        #if os(iOS)
         if !preferencesViewModel.hapticFeedback {
             return
         }
+        #elseif os(watchOS)
+        if !preferencesViewModel.watchHapticFeedback {
+            return
+        }
+        #endif
         
         #if os(iOS)
         // iOS-specific haptics

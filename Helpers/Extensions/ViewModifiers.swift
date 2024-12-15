@@ -191,5 +191,5 @@ class ColumnViewModel: ObservableObject {
     @AppStorage("columnViewPreference") var isColumnViewEnabled = true
 
     @AppStorage("hapticFeedback") var hapticFeedback = true
-    
+    @AppStorage("watchHapticFeedback") var watchHapticFeedback = true
 }

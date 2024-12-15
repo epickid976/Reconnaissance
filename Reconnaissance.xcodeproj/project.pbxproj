@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		82146F6E2D0F8B5400F95A05 /* SettingRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82146F6D2D0F8B5100F95A05 /* SettingRows.swift */; };
+		82146F6F2D0F8B5D00F95A05 /* SettingRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82146F6D2D0F8B5100F95A05 /* SettingRows.swift */; };
+		82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */; };
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
@@ -51,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		82146F6D2D0F8B5100F95A05 /* SettingRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingRows.swift; sourceTree = "<group>"; };
 		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
 		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -154,6 +158,7 @@
 		82D07FE02D08E5CA000A3179 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				82146F6D2D0F8B5100F95A05 /* SettingRows.swift */,
 				824711BB2D0D445E005E44E7 /* StackedCarousel.swift */,
 				824711B92D0D3297005E44E7 /* ConfettiController.swift */,
 				82D080B92D09BECD000A3179 /* KeyboardExt.swift */,
@@ -311,6 +316,7 @@
 				82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */,
 				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,
+				82146F6E2D0F8B5400F95A05 /* SettingRows.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,7 +325,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */,
+				82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */,
 				824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */,
+				82146F6F2D0F8B5D00F95A05 /* SettingRows.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

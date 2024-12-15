@@ -23,12 +23,14 @@ struct Reconnaissance_Watch_Watch_AppApp: App {
 //MARK: - Watch Tab View
 
 struct WatchTabView: View {
+    
     var body: some View {
         NavigationStack {
             TabView {
                 TodayView()
-                PageView(title: "Stats", icon: "chart.bar.fill", description: "Your stats are here.")
-                PageView(title: "Settings", icon: "gearshape.fill", description: "Adjust your preferences.")
+                SummaryViews()
+                PageView(title: "Spaces", icon: "uiwindow.split.2x1", description: "Things to lift you up.")
+                WatchSettingsView()
             }
             .tabViewStyle(.verticalPage) // Enables the horizontal scrolling style
             .indexViewStyle(.page(backgroundDisplayMode: .automatic)) // Customize the index dots
@@ -36,7 +38,7 @@ struct WatchTabView: View {
     }
 }
 
-//MARK: - Page View
+//MARK: - Page View for Debugging
 
 struct PageView: View {
     let title: String
