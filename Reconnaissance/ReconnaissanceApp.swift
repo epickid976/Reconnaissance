@@ -10,7 +10,6 @@ import SwiftUI
 @main
 struct ReconnaissanceApp: App {
     //MARK: - Delegate
-    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     var body: some Scene {

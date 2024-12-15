@@ -7,7 +7,7 @@
 
 import SwiftUI
 import SwiftData
-
+import AuthenticationServices
 
 struct WatchSettingsView: View {
     @StateObject private var preferencesViewModel = ColumnViewModel()
@@ -92,7 +92,7 @@ struct WatchSettingsView: View {
                         Text("Are you sure you want to delete all data? This action cannot be undone.")
                     }
                 }
-               // .padding()
+                .padding(5)
             }
             .navigationTitle("Settings")
         }
@@ -126,6 +126,8 @@ struct WatchSettingsView: View {
                     Text("Here are your settings")
                         .font(.footnote) // Smaller subtitle font
                         .foregroundColor(.white.opacity(0.8))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
                 .padding()
             }
@@ -164,37 +166,48 @@ struct WatchPrivacyPolicyView: View {
     let privacyPolicyURL = URL(string: "https://servicemaps.ejvapps.online/privacy")!
     
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "globe")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.blue)
-            
-            Text("Privacy Policy")
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .padding()
-            
-            Text("View our privacy policy on your iPhone for more details.")
-                .font(.footnote)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-            
-            Button(action: {
-                // Redirect URL to paired iPhone
-                WKExtension.shared().openSystemURL(privacyPolicyURL)
-            }) {
-                Text("Open on iPhone")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.2))
+        ScrollView {
+            VStack(spacing: 16) {
+                Image(systemName: "globe")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
                     .foregroundColor(.blue)
-                    .cornerRadius(10)
+                
+                Text("Privacy Policy")
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                //.padding()
+                
+                Text("Link to our Privacy Policy and Security Practices.")
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                
+                Button(action: {
+                    // Redirect URL to paired iPhone
+                    let session = ASWebAuthenticationSession(
+                        url: privacyPolicyURL,
+                        callbackURLScheme: nil
+                    ) { _, _ in
+                        
+                    }
+                    
+                    session.prefersEphemeralWebBrowserSession = true
+                    
+                    session.start()
+                }) {
+                    Text("Open on iPhone")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.opacity(0.2))
+                        .foregroundColor(.blue)
+                        .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+            .padding()
         }
-        .padding()
     }
 }
 
@@ -230,9 +243,9 @@ struct WatchAboutAppView: View {
 struct WatchDeleteAllDataView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
-
+    
     @State private var showConfirmationAlert = false
-
+    
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "trash.fill")
@@ -270,7 +283,7 @@ struct WatchDeleteAllDataView: View {
             } message: {
                 Text("This action cannot be undone. Are you sure you want to delete all data?")
             }
-
+            
             Button(action: {
                 dismiss()
             }) {
@@ -286,7 +299,7 @@ struct WatchDeleteAllDataView: View {
         .navigationTitle("Delete All Data")
         .navigationBarTitleDisplayMode(.inline)
     }
-
+    
     private func deleteAllData() {
         Task {
             do {

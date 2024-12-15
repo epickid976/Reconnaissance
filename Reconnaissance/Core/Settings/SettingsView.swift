@@ -132,6 +132,26 @@ struct SettingsView: View {
                             }
                         ),
                         //FUTURE
+//                        GroupedPreferenceRow.Preference(
+//                            icon: "bell.fill",
+//                            title: "Custom Reminder",
+//                            iconColor: .orange,
+//                            action: {
+//                                HapticManager.shared.trigger(.lightImpact)
+//                                Task {
+////                                    let currentReminderTime = preferencesViewModel.customReminderTime ?? Date()
+////                                    await CentrePopup_CustomReminder(
+////                                        reminderTime: .constant(currentReminderTime),
+////                                        onSave: { newTime in
+////                                            preferencesViewModel.customReminderTime = newTime
+////                                            viewModel.scheduleCustomReminderNotification(for: newTime)
+////                                        },
+////                                        usingLargeText: sizeCategory.isAccessibilityCategory
+////                                    ).present()
+//                                }
+//                            }
+//                        )
+                        //FUTURE
                         //                        GroupedPreferenceRow.Preference(
                         //                            icon: "arrow.trianglehead.clockwise.icloud.fill",
                         //                            title: "iCloud Sync",
@@ -272,6 +292,7 @@ struct SettingsView: View {
                     
                     return preferences
                 }())
+                
             }
             
             VStack(alignment: .leading, spacing: 8) {

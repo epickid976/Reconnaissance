@@ -60,7 +60,7 @@ final class SettingsViewModel {
         
         for item in data {
             let formattedDate = dateFormatter.string(from: item.date)
-            let line = "\(item.id.uuidString),\(formattedDate),\"\(await escapeForCSV(item.entry1))\",\"\(await escapeForCSV(item.entry2))\",\"\(await escapeForCSV(item.entry3))\",\"\(await escapeForCSV(item.notes))\"\n"
+            let line = "\(item.id.uuidString),\(formattedDate),\"\(escapeForCSV(item.entry1))\",\"\(escapeForCSV(item.entry2))\",\"\(escapeForCSV(item.entry3))\",\"\(escapeForCSV(item.notes))\"\n"
             csvString.append(line)
         }
         

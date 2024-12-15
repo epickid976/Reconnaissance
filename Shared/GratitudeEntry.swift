@@ -190,3 +190,4 @@ func calculateStreaks(for gratitudes: [DailyGratitude]) -> [DailyGratitude] {
 
     return sortedGratitudes
 }
+
