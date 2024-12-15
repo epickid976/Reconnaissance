@@ -715,7 +715,6 @@ struct CalendarPopup: CenterPopup {
                 Task { await dismissLastPopup()}
             }
         }
-        .padding()
         .background(Color.secondarySystemBackground)
         .background(.ultraThinMaterial)
         .cornerRadius(20)

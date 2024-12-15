@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
+		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
 		82D07F7B2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
 		82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
@@ -65,6 +66,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		824711C12D0E9992005E44E7 /* Exceptions for "Reconnaissance" folder in "Reconnaissance Watch Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Core/Gratitude/GratitudeCell.swift,
+			);
+			target = 82D07F6D2D07D6ED000A3179 /* Reconnaissance Watch Watch App */;
+		};
 		82D07F862D07D796000A3179 /* Exceptions for "Reconnaissance" folder in "Reconnaissance" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -79,6 +87,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				82D07F862D07D796000A3179 /* Exceptions for "Reconnaissance" folder in "Reconnaissance" target */,
+				824711C12D0E9992005E44E7 /* Exceptions for "Reconnaissance" folder in "Reconnaissance Watch Watch App" target */,
 			);
 			path = Reconnaissance;
 			sourceTree = "<group>";
@@ -309,6 +318,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */,
+				824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -12,8 +12,47 @@ import SwiftData
 struct Reconnaissance_Watch_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WatchTabView()
                 .modelContainer(for: DailyGratitude.self)
         }
+    }
+}
+
+struct WatchTabView: View {
+    var body: some View {
+        TabView {
+            TodayView()
+            PageView(title: "Stats", icon: "chart.bar.fill", description: "Your stats are here.")
+            PageView(title: "Settings", icon: "gearshape.fill", description: "Adjust your preferences.")
+        }
+        .tabViewStyle(.verticalPage) // Enables the horizontal scrolling style
+        .indexViewStyle(.page(backgroundDisplayMode: .automatic)) // Customize the index dots
+    }
+}
+
+struct PageView: View {
+    let title: String
+    let icon: String
+    let description: String
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.blue)
+
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            Text(description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .padding()
     }
 }

@@ -11,6 +11,8 @@ import SwiftUI
 struct GratitudeCell: View {
     let gratitude: DailyGratitude
     let mainWindowSize: CGSize
+    
+    var isAppleWatch = false
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) var modelContext
@@ -31,19 +33,11 @@ struct GratitudeCell: View {
                     .overlay(
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                Text(gratitude.date, style: .date)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        Capsule()
-                                            .fill(.thinMaterial)
-                                    )
-                                    .background(
-                                        Capsule()
-                                            .fill(colorScheme == .light ? Color.gray.opacity(0.1) : Color.black.opacity(0.4))
-                                    )
+                                smallDateView(
+                                    for: gratitude.date,
+                                    isAppleWatch: isAppleWatch,
+                                    colorScheme: colorScheme
+                                )
                                 
                                 Spacer()
                                 
@@ -155,13 +149,41 @@ struct GratitudeCell: View {
     private var shadowColor: Color {
         colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3)
     }
+    
+    @ViewBuilder
+    private func smallDateView(for date: Date, isAppleWatch: Bool, colorScheme: ColorScheme) -> some View {
+        let dateString: String = {
+            if isAppleWatch {
+                let formatter = DateFormatter()
+                formatter.dateStyle = .short // Produces MM/DD/YY format
+                return formatter.string(from: date)
+            } else {
+                return date.formatted(date: .abbreviated, time: .omitted) // Default style
+            }
+        }()
+        
+        Text(dateString)
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule()
+                    .fill(.thinMaterial)
+            )
+            .background(
+                Capsule()
+                    .fill(colorScheme == .light ? Color.gray.opacity(0.1) : Color.black.opacity(0.4))
+            )
+    }
 }
 
 
 
 
 //MARK: - Preview
-
+#if DEBUG
+#if os(iOS)
 #Preview {
     
     ScrollView {
@@ -186,3 +208,5 @@ struct GratitudeCell: View {
         .padding()
     }
 }
+#endif
+#endif

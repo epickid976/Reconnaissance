@@ -10,6 +10,7 @@ import SwiftUI
 
 // MARK: - View Modifiers
 
+#if os(iOS)
 extension View {
     /// Clips the view to a specified corner radius for specific corners.
     /// - Parameters:
@@ -20,6 +21,7 @@ extension View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }
 }
+#endif
 
 extension View {
     // MARK: - Custom Spacers

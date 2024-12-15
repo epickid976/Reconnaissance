@@ -37,22 +37,24 @@ struct CustomDateRangePicker: View {
             // Calendar
             VStack(spacing: 10) {
                 calendarHeader()
-                
+
                 HStack(spacing: 0) {
                     ForEach(calendar.shortWeekdaySymbols, id: \.self) { symbol in
                         Text(symbol)
                             .font(.subheadline)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity) // Ensure weekday symbols are evenly spaced
                             .foregroundColor(.secondary)
                     }
                 }
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
                     ForEach(calendarDays(), id: \.self) { day in
                         calendarDayView(day: day)
                     }
                 }
-                .transition(.slide)
+                .frame(maxWidth: .infinity) // Expand grid to full width
+                .layoutPriority(1) // Prioritize layout for the grid
             }
+            .frame(maxWidth: .infinity) // Expand the calendar container
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.secondary.opacity(0.1))
@@ -97,6 +99,7 @@ struct CustomDateRangePicker: View {
             .padding(.horizontal)
         }
         .padding()
+        
     }
     
     // MARK: - Components
