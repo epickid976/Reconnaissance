@@ -183,3 +183,13 @@ struct CheckmarkToggleStyle: ToggleStyle {
         }
     }
 }
+
+class ColumnViewModel: ObservableObject {
+    
+    @AppStorage("name") var name = "mon ami(e)"
+    
+    @AppStorage("columnViewPreference") var isColumnViewEnabled = true
+
+    @AppStorage("hapticFeedback") var hapticFeedback = true
+    
+}

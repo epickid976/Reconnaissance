@@ -8,6 +8,8 @@
 import SwiftUI
 import SwiftData
 
+//MARK: - Main App
+
 @main
 struct Reconnaissance_Watch_Watch_AppApp: App {
     var body: some Scene {
@@ -18,17 +20,23 @@ struct Reconnaissance_Watch_Watch_AppApp: App {
     }
 }
 
+//MARK: - Watch Tab View
+
 struct WatchTabView: View {
     var body: some View {
-        TabView {
-            TodayView()
-            PageView(title: "Stats", icon: "chart.bar.fill", description: "Your stats are here.")
-            PageView(title: "Settings", icon: "gearshape.fill", description: "Adjust your preferences.")
+        NavigationStack {
+            TabView {
+                TodayView()
+                PageView(title: "Stats", icon: "chart.bar.fill", description: "Your stats are here.")
+                PageView(title: "Settings", icon: "gearshape.fill", description: "Adjust your preferences.")
+            }
+            .tabViewStyle(.verticalPage) // Enables the horizontal scrolling style
+            .indexViewStyle(.page(backgroundDisplayMode: .automatic)) // Customize the index dots
         }
-        .tabViewStyle(.verticalPage) // Enables the horizontal scrolling style
-        .indexViewStyle(.page(backgroundDisplayMode: .automatic)) // Customize the index dots
     }
 }
+
+//MARK: - Page View
 
 struct PageView: View {
     let title: String

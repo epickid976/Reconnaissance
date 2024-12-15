@@ -327,9 +327,11 @@ struct GratitudeListView: View {
                                                 Color.clear.preference(key: ViewOffsetKey.self,
                                                                        value: -$0.frame(in: .named("scroll")).origin.y)
                                             })
-                                            .onPreferenceChange(ViewOffsetKey.self) {
-                                                print("offset >> \($0)")
-                                                isScrollAtTop = $0 < 10
+                                            .onPreferenceChange(ViewOffsetKey.self) { newValue in
+                                                Task { @MainActor in
+                                                    print("offset >> \(newValue)")
+                                                    isScrollAtTop = newValue < 10
+                                                }
                                             }
                                         }
                                         Spacer()

@@ -11,7 +11,6 @@ import SwiftUI
 struct GratitudeCell: View {
     let gratitude: DailyGratitude
     let mainWindowSize: CGSize
-    
     var isAppleWatch = false
 
     @Environment(\.colorScheme) var colorScheme
@@ -21,7 +20,6 @@ struct GratitudeCell: View {
 
     var body: some View {
         ZStack {
-            // Front of the card
             if !isFlipped {
                 RoundedRectangle(cornerRadius: 20)
                     .fill(.ultraThinMaterial)
@@ -42,7 +40,7 @@ struct GratitudeCell: View {
                                 Spacer()
                                 
                                 Text("🔥 \(gratitude.streak) Day\(gratitude.streak > 1 ? "s" : "")")
-                                    .font(.caption)
+                                    .font(dynamicFont(for: .caption))
                                     .foregroundColor(.orange)
                                     .padding(6)
                                     .background(
@@ -60,21 +58,21 @@ struct GratitudeCell: View {
                                     Image(systemName: "star.fill")
                                         .foregroundColor(.yellow)
                                     Text(gratitude.entry1)
-                                        .font(.headline)
+                                        .font(dynamicFont(for: .headline))
                                         .foregroundColor(.primary)
                                 }
                                 HStack(spacing: 8) {
                                     Image(systemName: "heart.fill")
                                         .foregroundColor(.red)
                                     Text(gratitude.entry2)
-                                        .font(.subheadline)
+                                        .font(dynamicFont(for: .subheadline))
                                         .foregroundColor(.primary.opacity(0.8))
                                 }
                                 HStack(spacing: 8) {
                                     Image(systemName: "leaf.fill")
                                         .foregroundColor(.green)
                                     Text(gratitude.entry3)
-                                        .font(.subheadline)
+                                        .font(dynamicFont(for: .subheadline))
                                         .foregroundColor(.primary.opacity(0.8))
                                 }
                             }
@@ -82,9 +80,7 @@ struct GratitudeCell: View {
                         .padding()
                     )
                     .opacity(isFlipped ? 0 : 1) // Hide front when flipped
-
             } else {
-                // Back of the card showing notes
                 RoundedRectangle(cornerRadius: 20)
                     .fill(.ultraThinMaterial)
                     .overlay(
@@ -95,75 +91,105 @@ struct GratitudeCell: View {
                     .overlay(
                         VStack {
                             Text("Notes")
-                                .font(.headline)
+                                .font(dynamicFont(for: .headline))
                                 .foregroundColor(.primary)
                                 .padding(.bottom, 8)
-                                .rotationEffect(.degrees(360))  // Rotate back content
                                 .scaleEffect(x: -1, y: 1)      // Fix mirrored content
-                              
-                            ScrollView { // Use ScrollView to handle large text
+                            ScrollView {
                                 Text(gratitude.notes)
-                                    .font(.body)
+                                    .font(dynamicFont(for: .body))
                                     .foregroundColor(.secondary)
                                     .multilineTextAlignment(.center)
-                                    .rotationEffect(.degrees(360))  // Rotate back content
-                                    .scaleEffect(x: -1, y: 1)      // Fix mirrored content
-                                    //.padding()
                             }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure it fills the available space
+                            .scaleEffect(x: -1, y: 1)      // Fix mirrored content
                         }
                         .padding()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure the content fills the back card
-                        .rotationEffect(.degrees(180)) // Rotate back content to fix upside-down and mirrored text
                     )
+                    .rotationEffect(.degrees(180)) // Rotate back content to fix upside-down and mirrored text
                     .opacity(isFlipped ? 1 : 0) // Hide back when not flipped
             }
         }
-        .frame(width: mainWindowSize.width * 0.9, height: 140)
-        .rotation3DEffect(
-            .degrees(isFlipped ? 180 : 0),
-            axis: (x: 1, y: 0, z: 0)
+        .frame(
+            width: mainWindowSize.width * 0.9,
+            height: isAppleWatch ? dynamicHeight(for: mainWindowSize.width) : 140
         )
+        .rotation3DEffect(
+                    .degrees(isFlipped ? 180 : 0),
+                    axis: (x: 1, y: 0, z: 0)
+                )
         .animation(.easeInOut(duration: 0.6), value: isFlipped)
         .onTapGesture {
-            isFlipped.toggle() // Flip the card on tap
+            HapticManager.shared.trigger(.impact)
+            isFlipped.toggle()
         }
         .gesture(
             DragGesture(minimumDistance: 50, coordinateSpace: .local)
                 .onEnded { gesture in
-                    if gesture.translation.height < 0 { // Swipe up detected
+                    if gesture.translation.height < 0 {
                         isFlipped = true
-                    } else if gesture.translation.height > 0 { // Swipe down detected
+                    } else if gesture.translation.height > 0 {
                         isFlipped = false
                     }
                 }
         )
     }
 
-    // Subtle Border Color
+    // MARK: - Helpers
+
     private var borderColor: Color {
         colorScheme == .dark ? Color.gray.opacity(0.5) : Color.gray.opacity(0.3)
     }
 
-    // Shadow Color for Light/Dark Mode
     private var shadowColor: Color {
         colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3)
     }
+
+    private func dynamicFont(for textStyle: Font.TextStyle) -> Font {
+        if isAppleWatch {
+            // Adjust font sizes for specific Apple Watch models
+            if mainWindowSize.width > 200 {
+                // Apple Watch Ultra
+                return Font.system(textStyle)
+            } else if mainWindowSize.width > 150 {
+                // Apple Watch S9/S10 (42mm)
+                return Font.system(size: textStyle == .headline ? 12 : 10, weight: .regular)
+            } else {
+                // Apple Watch SE 2 (40mm)
+                return Font.system(size: textStyle == .headline ? 10 : 8, weight: .regular)
+            }
+        } else {
+            // Default font size for non-watchOS
+            return Font.system(textStyle)
+        }
+    }
     
+    private func dynamicHeight(for width: CGFloat) -> CGFloat {
+        if width < 180 {
+            // Apple Watch SE (40mm)
+            return 110
+        } else if width < 200 {
+            // Apple Watch S9/S10 (42mm)
+            return 120
+        } else {
+            // Apple Watch Ultra
+            return 140
+        }
+    }
+
     @ViewBuilder
     private func smallDateView(for date: Date, isAppleWatch: Bool, colorScheme: ColorScheme) -> some View {
         let dateString: String = {
             if isAppleWatch {
                 let formatter = DateFormatter()
-                formatter.dateStyle = .short // Produces MM/DD/YY format
+                formatter.dateStyle = .short
                 return formatter.string(from: date)
             } else {
-                return date.formatted(date: .abbreviated, time: .omitted) // Default style
+                return date.formatted(date: .abbreviated, time: .omitted)
             }
         }()
         
         Text(dateString)
-            .font(.caption)
+            .font(dynamicFont(for: .caption))
             .foregroundColor(.secondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)

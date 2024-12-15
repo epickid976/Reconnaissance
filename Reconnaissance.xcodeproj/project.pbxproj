@@ -70,6 +70,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Gratitude/GratitudeCell.swift,
+				HapticManager.swift,
 			);
 			target = 82D07F6D2D07D6ED000A3179 /* Reconnaissance Watch Watch App */;
 		};
