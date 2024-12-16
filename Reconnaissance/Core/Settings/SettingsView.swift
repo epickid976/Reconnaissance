@@ -62,7 +62,7 @@ struct SettingsView: View {
                 .ignoresSafeArea()
                 .cornerRadius(20)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-
+                
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         // Welcome Text
@@ -103,7 +103,7 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 10)
             .fixedSize(horizontal: false, vertical: true)
-
+            
             Divider()
                 .padding(.horizontal)
                 .background(Color.primary.opacity(0.2))
@@ -132,25 +132,25 @@ struct SettingsView: View {
                             }
                         ),
                         //FUTURE
-//                        GroupedPreferenceRow.Preference(
-//                            icon: "bell.fill",
-//                            title: "Custom Reminder",
-//                            iconColor: .orange,
-//                            action: {
-//                                HapticManager.shared.trigger(.lightImpact)
-//                                Task {
-////                                    let currentReminderTime = preferencesViewModel.customReminderTime ?? Date()
-////                                    await CentrePopup_CustomReminder(
-////                                        reminderTime: .constant(currentReminderTime),
-////                                        onSave: { newTime in
-////                                            preferencesViewModel.customReminderTime = newTime
-////                                            viewModel.scheduleCustomReminderNotification(for: newTime)
-////                                        },
-////                                        usingLargeText: sizeCategory.isAccessibilityCategory
-////                                    ).present()
-//                                }
-//                            }
-//                        )
+                        //                        GroupedPreferenceRow.Preference(
+                        //                            icon: "bell.fill",
+                        //                            title: "Custom Reminder",
+                        //                            iconColor: .orange,
+                        //                            action: {
+                        //                                HapticManager.shared.trigger(.lightImpact)
+                        //                                Task {
+                        ////                                    let currentReminderTime = preferencesViewModel.customReminderTime ?? Date()
+                        ////                                    await CentrePopup_CustomReminder(
+                        ////                                        reminderTime: .constant(currentReminderTime),
+                        ////                                        onSave: { newTime in
+                        ////                                            preferencesViewModel.customReminderTime = newTime
+                        ////                                            viewModel.scheduleCustomReminderNotification(for: newTime)
+                        ////                                        },
+                        ////                                        usingLargeText: sizeCategory.isAccessibilityCategory
+                        ////                                    ).present()
+                        //                                }
+                        //                            }
+                        //                        )
                         //FUTURE
                         //                        GroupedPreferenceRow.Preference(
                         //                            icon: "arrow.trianglehead.clockwise.icloud.fill",
@@ -171,20 +171,20 @@ struct SettingsView: View {
                         )
                     }
                     
-                    // Add iPad Column View for iPad only
-                    if UIDevice.current.userInterfaceIdiom == .pad {
-                        preferences.append(
-                            GroupedPreferenceRow.Preference(
-                                icon: "text.word.spacing",
-                                title: "iPad Column View",
-                                iconColor: .purple,
-                                toggleValue: $preferencesViewModel.isColumnViewEnabled
-                            )
-                        )
-                    }
+                    //                    // Add iPad Column View for iPad only
+                    //                    if UIDevice.current.userInterfaceIdiom == .pad {
+                    //                        preferences.append(
+                    //                            GroupedPreferenceRow.Preference(
+                    //                                icon: "text.word.spacing",
+                    //                                title: "iPad Column View",
+                    //                                iconColor: .purple,
+                    //                                toggleValue: $preferencesViewModel.isColumnViewEnabled
+                    //                            )
+                    //                        )
+                    //                    }
                     
                     return preferences
-                }())
+                }(), foregroundColor: .green)
             }
             
             // Preferences Section
@@ -505,7 +505,7 @@ struct CentrePopup_EditName: CenterPopup {
                         .cornerRadius(12)
                         .foregroundColor(.red)
                 }
-
+                
                 Button(action: {
                     HapticManager.shared.trigger(.success)
                     onSave(editedName)
@@ -697,19 +697,19 @@ struct CentrePopup_ImportExport: CenterPopup {
                 .padding(.bottom, 10)
             
             if isProcessingImport {
-                            // Importing View
-                            VStack(spacing: 16) {
-                                ProgressView("Importing...")
-                                    .progressViewStyle(CircularProgressViewStyle())
-                                    .padding()
-
-                                Text("Please wait while your data is being imported.")
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.primary)
-                                    .font(usingLargeText ? .headline : .body)
-                            }
-                            .transition(.opacity)
-                        }  else {
+                // Importing View
+                VStack(spacing: 16) {
+                    ProgressView("Importing...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding()
+                    
+                    Text("Please wait while your data is being imported.")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.primary)
+                        .font(usingLargeText ? .headline : .body)
+                }
+                .transition(.opacity)
+            }  else {
                 // Description
                 Text("""
             Choose your preferred file format for importing or exporting your gratitude data. You can select either JSON or CSV.

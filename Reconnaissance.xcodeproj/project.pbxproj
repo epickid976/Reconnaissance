@@ -15,6 +15,8 @@
 		8214706A2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470692D0FAEAC00F95A05 /* SpacesEntry.swift */; };
 		8214706B2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470692D0FAEAC00F95A05 /* SpacesEntry.swift */; };
 		821470762D0FD04700F95A05 /* WatchConfettiModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470742D0FD03100F95A05 /* WatchConfettiModifier.swift */; };
+		821470782D108A4800F95A05 /* CustomCircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470772D108A4400F95A05 /* CustomCircleButton.swift */; };
+		8214707E2D10A67800F95A05 /* AppFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8214707D2D10A67500F95A05 /* AppFileManager.swift */; };
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
@@ -63,6 +65,8 @@
 		82146F852D0F9EFB00F95A05 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		821470692D0FAEAC00F95A05 /* SpacesEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesEntry.swift; sourceTree = "<group>"; };
 		821470742D0FD03100F95A05 /* WatchConfettiModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConfettiModifier.swift; sourceTree = "<group>"; };
+		821470772D108A4400F95A05 /* CustomCircleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCircleButton.swift; sourceTree = "<group>"; };
+		8214707D2D10A67500F95A05 /* AppFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFileManager.swift; sourceTree = "<group>"; };
 		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
 		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,6 +171,8 @@
 		82D07FE02D08E5CA000A3179 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				8214707D2D10A67500F95A05 /* AppFileManager.swift */,
+				821470772D108A4400F95A05 /* CustomCircleButton.swift */,
 				821470742D0FD03100F95A05 /* WatchConfettiModifier.swift */,
 				82146F6D2D0F8B5100F95A05 /* SettingRows.swift */,
 				824711BB2D0D445E005E44E7 /* StackedCarousel.swift */,
@@ -320,8 +326,10 @@
 				82D07FE32D08E5CA000A3179 /* ViewModifiers.swift in Sources */,
 				8214706A2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */,
 				82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */,
+				821470782D108A4800F95A05 /* CustomCircleButton.swift in Sources */,
 				82146F942D0F9EFB00F95A05 /* HapticManager.swift in Sources */,
 				824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */,
+				8214707E2D10A67800F95A05 /* AppFileManager.swift in Sources */,
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
 				824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */,

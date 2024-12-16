@@ -8,6 +8,10 @@
 import SwiftUI
 import SwiftData
 import MijickPopups
+import NavigationTransition
+import NavigationTransitions
+import Toasts
+import SwipeActions
 
 //MARK: - Spaces View
 
@@ -24,6 +28,8 @@ struct SpacesView: View {
     @State private var currentScrollOffset: CGFloat = 0 // Track current offset for debounce
     @State var previousViewOffset: CGFloat = 0
     let minimumOffset: CGFloat = 60
+    
+    @Namespace private var namespace
     
     var body: some View {
         GeometryReader { proxy in
@@ -47,42 +53,130 @@ struct SpacesView: View {
             NavigationStack {
                 ZStack {
                     ScrollView {
-                        LazyVGrid(columns: columns, spacing: 20) {
-                            ForEach(sortedCategories) { category in
-                                NavigationLink(
-                                    destination: NavigationLazyView(ItemsView(
-                                        category: category
-                                    ))
-                                ) {
-                                    CategoryCell(category: category)
-                                        .id(category.id)
-                                        .transition(.customBackInsertion)
+                        if sortedCategories.isEmpty {
+                            VStack {
+                                Text("No Spaces yet.")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                    .padding()
+                                    .hSpacing(.center)
+                                Button {
+                                    Task {
+                                        HapticManager.shared.trigger(.lightImpact)
+                                        await CentrePopup_AddCategory(modelContext: modelContext) {
+                                        }
+                                        .present()
+                                    }
+                                } label: {
+                                    Image(systemName: "square.split.2x2")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.secondary)
                                 }
                             }
-                            .animation(.spring(), value: sortedCategories)
-                        }
-                        .padding()
-                        .background(GeometryReader {
-                            Color.clear.preference(key: ViewOffsetKey.self, value: -$0.frame(in: .named("scroll")).origin.y)
-                        }).onPreferenceChange(ViewOffsetKey.self) { currentOffset in
-                            Task { @MainActor in
-                                let offsetDifference: CGFloat = self.previousViewOffset - currentOffset
-                                if ( abs(offsetDifference) > minimumOffset) {
-                                    if offsetDifference > 0 {
-                                        DispatchQueue.main.async {
-                                            hideFloatingButton = false
+                            .vSpacing(.center)
+                        } else {
+                            SwipeViewGroup {
+                                LazyVGrid(columns: columns, spacing: 20) {
+                                    ForEach(sortedCategories) { category in
+                                        SwipeView {
+                                            NavigationLink(destination: NavigationLazyView(ItemsView(category: category )
+                                                .optionalViewModifier { content in
+                                                    if #available(iOS 18.0, *) {
+                                                        content
+                                                            .navigationTransition(.zoom(sourceID: "zoom\(category.id)", in: namespace))
+                                                    } else {
+                                                        content
+                                                    }
+                                                }
+                                                .installToast(position: .bottom))
+                                            ) {
+                                                CategoryCell(category: category)
+                                                    .id(category.id)
+                                                    .transition(.customBackInsertion)
+                                                    .optionalViewModifier { content in
+                                                        if #available(iOS 18.0, *) {
+                                                            content
+                                                                .matchedTransitionSource(id: "zoom\(category.id)", in: namespace)
+                                                        } else {
+                                                            content
+                                                        }
+                                                    }
+                                            }
+                                            .onTapHaptic(.lightImpact)
+                                        } trailingActions: { context in
+                                            VStack {
+                                                SwipeAction(
+                                                    systemImage: "trash",
+                                                    backgroundColor: .red
+                                                ) {
+                                                    HapticManager.shared.trigger(.lightImpact)
+                                                    DispatchQueue.main.async {
+                                                        context.state.wrappedValue = .closed
+                                                        Task {
+                                                            await CentrePopup_DeleteSpace(
+                                                                modelContext: modelContext,
+                                                                space: category
+                                                            ) {
+                                                                
+                                                            }.present()
+                                                        }
+                                                    }
+                                                }
+                                                .font(.title.weight(.semibold))
+                                                .foregroundColor(.white)
+                                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                                
+                                                SwipeAction(
+                                                    systemImage: "pencil",
+                                                    backgroundColor: Color.teal
+                                                ) {
+                                                    HapticManager.shared.trigger(.lightImpact)
+                                                    context.state.wrappedValue = .closed
+                                                    Task {
+                                                        await CentrePopup_AddCategory(
+                                                            modelContext: modelContext,
+                                                            category: category
+                                                        ) { }.present()
+                                                    }
+                                                }
+                                                .allowSwipeToTrigger()
+                                                .font(.title.weight(.semibold))
+                                                .foregroundColor(.white)
+                                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                            }
                                         }
-                                    } else {
-                                        hideFloatingButton = true
+                                        .swipeActionCornerRadius(20)
+                                        .swipeSpacing(5)
+                                        .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                                        .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                                        .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                                        .swipeMinimumDistance(25)
                                     }
-                                    
-                                    currentScrollOffset = currentOffset
-                                    self.previousViewOffset = currentOffset
+                                }
+                                .animation(.spring(), value: sortedCategories)
+                                .padding()
+                                .background(GeometryReader {
+                                    Color.clear.preference(key: ViewOffsetKey.self, value: -$0.frame(in: .named("scroll")).origin.y)
+                                }).onPreferenceChange(ViewOffsetKey.self) { currentOffset in
+                                    Task { @MainActor in
+                                        let offsetDifference: CGFloat = self.previousViewOffset - currentOffset
+                                        if ( abs(offsetDifference) > minimumOffset) {
+                                            if offsetDifference > 0 {
+                                                DispatchQueue.main.async {
+                                                    hideFloatingButton = false
+                                                }
+                                            } else {
+                                                hideFloatingButton = true
+                                            }
+                                            
+                                            currentScrollOffset = currentOffset
+                                            self.previousViewOffset = currentOffset
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    .navigationTitle("Spaces")
                     
                     MainButton(imageName: "plus", colorHex: "#1e6794", width: 60) {
                         Task {
@@ -99,16 +193,139 @@ struct SpacesView: View {
                     .padding()
                 }
                 
+                .navigationTitle("Spaces")
+                .optionalViewModifier { content in
+                    if #available(iOS 18.0, *) {
+                        content
+                    } else {
+                        content.navigationTransition(
+                            .zoom.combined(with: .fade(.in))
+                        )
+                    }
+                }
+                
             }
         }
     }
     
-    private func navigateToItems(for category: SpaceCategory) {
-        // Implement navigation to ItemsView with the selected category
+}
+
+//MARK: - Delete Spaces
+
+struct CentrePopup_DeleteSpace: CenterPopup {
+    @State var modelContext: ModelContext
+    @Environment(\.mainWindowSize) var mainWindowSize
+    @Environment(\.colorScheme) var colorScheme
+    
+    var space: SpaceCategory
+    var onDelete: () -> Void
+    
+    var body: some View {
+        createContent()
     }
     
-    private func addCategory() {
-        // Logic to add a new category
+    func createContent() -> some View {
+        VStack(spacing: 16) {
+            // Title
+            Text("Delete Space")
+                .font(.headline)
+                .padding(.bottom, 8)
+            
+            // Warning Message
+            Text("Are you sure you want to delete this space? This action cannot be undone.")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
+                .padding(.bottom, 16)
+            
+            // Display space content for reference
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(space.color.color.opacity(0.8))
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: space.icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.white)
+                        )
+                    
+                    Text(space.name)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+            }
+            .padding(.horizontal, 16)
+            
+            // Action Buttons
+            HStack(spacing: 16) {
+                Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.gray.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.gray.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+                
+                Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
+                    deleteSpace()
+                    Task { await dismissLastPopup() }
+                    
+                    onDelete()
+                }) {
+                    Text("Delete")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.red.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    func deleteSpace() {
+        modelContext.delete(space)
+        do {
+            try modelContext.save()
+            HapticManager.shared.trigger(.success)
+            print("Space deleted successfully.")
+        } catch {
+            HapticManager.shared.trigger(.error)
+            print("Error deleting space: \(error)")
+        }
     }
 }
 
@@ -166,9 +383,6 @@ struct CategoryCell: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .padding(.horizontal)
-        .onTapGesture {
-            HapticManager.shared.trigger(.lightImpact)
-        }
     }
 
     // MARK: - Helpers
@@ -243,10 +457,6 @@ struct CentrePopup_AddCategory: CenterPopup {
                 
                 // Icon Picker
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Category Icon")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
                     IconPickerView(selectedIcon: $selectedIcon, selectedColor: $selectedColor)
                 }
                 
@@ -391,6 +601,8 @@ struct IconPickerView: View {
     @Binding var selectedColor: CategoryColor
     @State private var isPickerActive = false // Tracks whether the grid picker is active
 
+    @Environment(\.colorScheme) var colorScheme
+    
     // List of icons to choose from
     private let icons: [String] = [
         "folder.fill", "book.fill", "star.fill", "tag.fill", "calendar",
@@ -441,13 +653,27 @@ struct IconPickerView: View {
                         .padding()
                     }
 
-                    Button("Cancel") {
+                    Button(action: {
+                        HapticManager.shared.trigger(.lightImpact)
                         withAnimation(.spring()) {
                             isPickerActive = false
                         }
+                    }) {
+                        Text("Close")
+                            .frame(maxWidth: 70)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule()
+                                    .fill(Color.red.opacity(0.1)) // Subtle red tint
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                            )
+                            .foregroundColor(.red)
                     }
-                    .padding(.top, 8)
-                    .foregroundColor(.red)
+                    .buttonStyle(PlainButtonStyle())
+                    .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
                 }
                 .transition(.asymmetric(
                     insertion: .opacity.combined(with: .scale(scale: 0.9)).animation(.spring()),

@@ -197,7 +197,7 @@ struct WatchPrivacyPolicyView: View {
                     
                     session.start()
                 }) {
-                    Text("Open on iPhone")
+                    Text("Open")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue.opacity(0.2))
