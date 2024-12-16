@@ -30,7 +30,6 @@ struct WatchTabView: View {
             TabView {
                 TodayView()
                 SummaryViews()
-                PageView(title: "Spaces", icon: "uiwindow.split.2x1", description: "Things to lift you up.")
                 WatchSettingsView()
             }
             .tabViewStyle(.verticalPage) // Enables the horizontal scrolling style

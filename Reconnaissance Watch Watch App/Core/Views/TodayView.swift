@@ -26,13 +26,29 @@ struct TodayView: View {
     @State private var isShowingAddView: Bool = false
     @State private var isShowingEditView: Bool = false
     
+    @State private var animation = false
+    
     var body: some View {
         GeometryReader { proxy in
             NavigationStack {
                 VStack {
                     // Custom Header
-                    headerView()
-                    
+                    ZStack {
+                        if animation {
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 12, height: 12)
+                                .modifier(ParticlesModifier())
+                                .offset(x: -100, y : -50)
+                            
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 12, height: 12)
+                                .modifier(ParticlesModifier())
+                                .offset(x: 60, y : 70)
+                        }
+                        headerView()
+                    }
                     if let today {
                         GratitudeCell(
                             gratitude: today,
@@ -69,7 +85,14 @@ struct TodayView: View {
                 .vSpacing(.top)
                 .animation(.easeInOut, value: today) // Trigger animation when `today` changes
                 .sheet(isPresented: $isShowingAddView) {
-                    AddGratitudeView()
+                    AddGratitudeView() {
+                        animation = true
+                    }
+                }
+            }
+            .onChange(of: today) { _, _ in
+                if today == nil {
+                    animation = false
                 }
             }
         }
@@ -88,7 +111,7 @@ struct TodayView: View {
             
             if let today {
                 // Edit Button
-                NavigationLink(destination: AddGratitudeView(gratitude: today)) {
+                NavigationLink(destination: AddGratitudeView(gratitude: today) {}) {
                     Image(systemName: "pencil")
                         .foregroundColor(.blue)
                         .padding(8)
@@ -137,9 +160,11 @@ struct AddGratitudeView: View {
     @State private var showError: Bool = false
     
     var gratitude: DailyGratitude? // Optional gratitude object for editing
+    var onDone: (() -> Void) // Closure to handle actions when adding
     
-    init(gratitude: DailyGratitude? = nil) {
+    init(gratitude: DailyGratitude? = nil, onDone: @escaping (() -> Void)) {
         self.gratitude = gratitude
+        self.onDone = onDone
         _entry1 = State(initialValue: gratitude?.entry1 ?? "")
         _entry2 = State(initialValue: gratitude?.entry2 ?? "")
         _entry3 = State(initialValue: gratitude?.entry3 ?? "")
@@ -220,6 +245,7 @@ struct AddGratitudeView: View {
             )
             modelContext.insert(newEntry)
             DailyGratitude.calculateAndUpdateStreak(for: newEntry, in: modelContext)
+            onDone() // Notify addition of a new entry
         }
         
         try? modelContext.save()
