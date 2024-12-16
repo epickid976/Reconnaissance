@@ -12,7 +12,7 @@ import WatchConnectivity
 @Model
 class DailyGratitude: @unchecked Sendable, Codable {
     var id: UUID = UUID() // Default value
-    var date: Date = Date() // Default value
+    var date: Date = Calendar.current.startOfDay(for: Date())
     var entry1: String = "" // Default value
     var entry2: String = "" // Default value
     var entry3: String = "" // Default value
@@ -24,7 +24,7 @@ class DailyGratitude: @unchecked Sendable, Codable {
         self.entry1 = entry1
         self.entry2 = entry2
         self.entry3 = entry3
-        self.date = date
+        self.date = Calendar.current.startOfDay(for: date)
         self.notes = notes
         self.streak = 0
     }

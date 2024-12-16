@@ -161,3 +161,53 @@ extension Color {
         UIColor(self)
     }
 }
+
+import SwiftUI
+
+extension Color {
+    // Convert Color to HEX string
+    func toHex() -> String? {
+        guard let components = UIColor(self).cgColor.components, components.count >= 3 else { return nil }
+        let r = components[0]
+        let g = components[1]
+        let b = components[2]
+        let a = components.count > 3 ? components[3] : 1.0
+        
+        if a < 1.0 {
+            return String(format: "#%02lX%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)), lroundf(Float(a * 255)))
+        } else {
+            return String(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+        }
+    }
+    
+    // Convert HEX string to Color
+    static func fromHex(_ hex: String) -> Color? {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.hasPrefix("#") ? String(hexSanitized.dropFirst()) : hexSanitized
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let r, g, b, a: Double
+        switch hexSanitized.count {
+        case 6: // RGB
+            (r, g, b, a) = (
+                Double((rgb & 0xFF0000) >> 16) / 255.0,
+                Double((rgb & 0x00FF00) >> 8) / 255.0,
+                Double(rgb & 0x0000FF) / 255.0,
+                1.0
+            )
+        case 8: // RGBA
+            (r, g, b, a) = (
+                Double((rgb & 0xFF000000) >> 24) / 255.0,
+                Double((rgb & 0x00FF0000) >> 16) / 255.0,
+                Double((rgb & 0x0000FF00) >> 8) / 255.0,
+                Double(rgb & 0x000000FF) / 255.0
+            )
+        default:
+            return nil
+        }
+
+        return Color(red: r, green: g, blue: b, opacity: a)
+    }
+}

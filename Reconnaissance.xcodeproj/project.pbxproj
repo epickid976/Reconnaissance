@@ -10,6 +10,8 @@
 		82146F6E2D0F8B5400F95A05 /* SettingRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82146F6D2D0F8B5100F95A05 /* SettingRows.swift */; };
 		82146F6F2D0F8B5D00F95A05 /* SettingRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82146F6D2D0F8B5100F95A05 /* SettingRows.swift */; };
 		82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDC2D08E5CA000A3179 /* AppVersionHelpers.swift */; };
+		8214706A2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470692D0FAEAC00F95A05 /* SpacesEntry.swift */; };
+		8214706B2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821470692D0FAEAC00F95A05 /* SpacesEntry.swift */; };
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
@@ -55,6 +57,7 @@
 
 /* Begin PBXFileReference section */
 		82146F6D2D0F8B5100F95A05 /* SettingRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingRows.swift; sourceTree = "<group>"; };
+		821470692D0FAEAC00F95A05 /* SpacesEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesEntry.swift; sourceTree = "<group>"; };
 		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
 		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -150,6 +153,7 @@
 		82D07F812D07D714000A3179 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				821470692D0FAEAC00F95A05 /* SpacesEntry.swift */,
 				82D07F802D07D714000A3179 /* GratitudeEntry.swift */,
 			);
 			path = Shared;
@@ -308,6 +312,7 @@
 			files = (
 				82D07FE22D08E5CA000A3179 /* AppVersionHelpers.swift in Sources */,
 				82D07FE32D08E5CA000A3179 /* ViewModifiers.swift in Sources */,
+				8214706A2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */,
 				82D07FE42D08E5CA000A3179 /* Color Extensions.swift in Sources */,
 				824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */,
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
@@ -326,6 +331,7 @@
 			files = (
 				82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */,
 				82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */,
+				8214706B2D0FAEB100F95A05 /* SpacesEntry.swift in Sources */,
 				824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */,
 				82146F6F2D0F8B5D00F95A05 /* SettingRows.swift in Sources */,
 			);

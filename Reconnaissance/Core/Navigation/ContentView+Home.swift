@@ -14,11 +14,11 @@ import Toasts
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-
+    
     var body: some View {
         HomeTabView() // Your tab view becomes the root container
     }
-
+    
     //MARK: - Debug Methods
     private func deleteAllEntities() {
         do {
@@ -33,7 +33,7 @@ struct ContentView: View {
             print("Error deleting entities: \(error)")
         }
     }
-
+    
     private func addEntitiesForPastYear() {
         let calendar = Calendar.current
         let today = Date()
@@ -54,7 +54,7 @@ struct ContentView: View {
                 )
             }
         }
-
+        
         do {
             try modelContext.save()
             print("Entities for the past year added.")
@@ -70,7 +70,7 @@ struct HomeTabView: View {
     @State private var selectedTab = 0
     @State private var path = NavigationPath() // Shared path for navigation
     @Environment(\.colorScheme) var colorScheme
-
+    
     var body: some View {
         NavigationStack(path: $path) {
             VStack(spacing: 0) {
@@ -80,24 +80,28 @@ struct HomeTabView: View {
                         .installToast(position: .bottom)
                         .tag(0)
                 } else if selectedTab == 1 {
-                    SettingsView()
+                    SpacesView()
                         .installToast(position: .bottom)
                         .tag(1)
+                } else if selectedTab == 2 {
+                    SettingsView()
+                        .installToast(position: .bottom)
+                        .tag(2)
                 }
-
+                
                 // Custom Tab Bar
                 ZStack {
                     // Background with Rounded Corners at the Top
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(
                             colorScheme == .dark
-                                ? Color.gray.opacity(0.2) // Softer gray for dark mode
-                                : Color.white // Crisp white for light mode
+                            ? Material.thick // Softer gray for dark mode
+                            : Material.thick // Crisp white for light mode
                         )
                         .shadow(
                             color: colorScheme == .dark
-                                ? .black.opacity(0.6) // Deeper shadow for dark mode
-                                : .gray.opacity(0.2), // Lighter shadow for light mode
+                            ? .black.opacity(0.6) // Deeper shadow for dark mode
+                            : .gray.opacity(0.2), // Lighter shadow for light mode
                             radius: 4,
                             x: 0,
                             y: -2
@@ -115,12 +119,22 @@ struct HomeTabView: View {
                             }
                         }
                         TabBarButton(
-                            icon: selectedTab == 1 ? "gearshape.fill" : "gearshape",
+                            icon: selectedTab == 1 ? "square.split.2x2.fill" : "square.split.2x2",
                             isSelected: selectedTab == 1
                         ) {
                             withAnimation(.spring()) {
                                 HapticManager.shared.trigger(.lightImpact)
                                 selectedTab = 1
+                            }
+                        }
+                        
+                        TabBarButton(
+                            icon: selectedTab == 2 ? "gearshape.fill" : "gearshape",
+                            isSelected: selectedTab == 2
+                        ) {
+                            withAnimation(.spring()) {
+                                HapticManager.shared.trigger(.lightImpact)
+                                selectedTab = 2
                             }
                         }
                     }
@@ -151,7 +165,7 @@ struct TabBarButton: View {
     let icon: String
     let isSelected: Bool
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
@@ -163,12 +177,12 @@ struct TabBarButton: View {
                     .font(.system(size: isSelected ? 24 : 20, weight: .bold))
                     .foregroundStyle(
                         isSelected
-                            ? AnyShapeStyle(LinearGradient(
-                                gradient: Gradient(colors: [.blue, .teal]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                              ))
-                            : AnyShapeStyle(Color.gray)
+                        ? AnyShapeStyle(LinearGradient(
+                            gradient: Gradient(colors: [.blue, .teal]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        : AnyShapeStyle(Color.gray)
                     )
                     .scaleEffect(isSelected ? 1.2 : 1.0)
                     .rotationEffect(.degrees(isSelected ? 10 : 0)) // Subtle rotation

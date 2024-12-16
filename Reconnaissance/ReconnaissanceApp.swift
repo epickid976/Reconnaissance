@@ -15,7 +15,7 @@ struct ReconnaissanceApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: DailyGratitude.self)
+                .modelContainer(for: [DailyGratitude.self, SpaceCategory.self, Item.self])
         }
     }
 }
