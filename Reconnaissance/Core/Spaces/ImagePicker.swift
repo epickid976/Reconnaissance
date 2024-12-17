@@ -43,7 +43,7 @@ struct ImagePicker: UIViewControllerRepresentable {
                     guard let self = self, let uiImage = image as? UIImage else { return }
                     Task {
                         await MainActor.run {
-                            self.parent.imageData = uiImage.jpegData(compressionQuality: 0.8)
+                            self.parent.imageData = uiImage.jpegData(compressionQuality: 1.0)
                         }
                     }
                 }

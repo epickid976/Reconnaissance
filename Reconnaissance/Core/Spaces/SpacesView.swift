@@ -17,7 +17,9 @@ import SwipeActions
 
 struct SpacesView: View {
     @Query private var categories: [SpaceCategory]
+    
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.presentToast) var presentToast
     
     var sortedCategories: [SpaceCategory] {
         categories.sorted { $0.name < $1.name }
@@ -29,7 +31,7 @@ struct SpacesView: View {
     @State var previousViewOffset: CGFloat = 0
     let minimumOffset: CGFloat = 60
     
-    @Namespace private var namespace
+    
     
     var body: some View {
         GeometryReader { proxy in
@@ -64,6 +66,11 @@ struct SpacesView: View {
                                     Task {
                                         HapticManager.shared.trigger(.lightImpact)
                                         await CentrePopup_AddCategory(modelContext: modelContext) {
+                                            let toast = ToastValue(
+                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                                message: NSLocalizedString("Category Added", comment: "")
+                                            )
+                                            presentToast(toast)
                                         }
                                         .present()
                                     }
@@ -80,27 +87,11 @@ struct SpacesView: View {
                                     ForEach(sortedCategories) { category in
                                         SwipeView {
                                             NavigationLink(destination: NavigationLazyView(ItemsView(category: category )
-                                                .optionalViewModifier { content in
-                                                    if #available(iOS 18.0, *) {
-                                                        content
-                                                            .navigationTransition(.zoom(sourceID: "zoom\(category.id)", in: namespace))
-                                                    } else {
-                                                        content
-                                                    }
-                                                }
                                                 .installToast(position: .bottom))
                                             ) {
                                                 CategoryCell(category: category)
                                                     .id(category.id)
                                                     .transition(.customBackInsertion)
-                                                    .optionalViewModifier { content in
-                                                        if #available(iOS 18.0, *) {
-                                                            content
-                                                                .matchedTransitionSource(id: "zoom\(category.id)", in: namespace)
-                                                        } else {
-                                                            content
-                                                        }
-                                                    }
                                             }
                                             .onTapHaptic(.lightImpact)
                                         } trailingActions: { context in
@@ -117,7 +108,11 @@ struct SpacesView: View {
                                                                 modelContext: modelContext,
                                                                 space: category
                                                             ) {
-                                                                
+                                                                let toast = ToastValue(
+                                                                    icon: Image(systemName: "trash.circle.fill").foregroundStyle(.red),
+                                                                    message: NSLocalizedString("Category Deleted", comment: "")
+                                                                )
+                                                                presentToast(toast)
                                                             }.present()
                                                         }
                                                     }
@@ -183,7 +178,11 @@ struct SpacesView: View {
                             await CentrePopup_AddCategory(
                                 modelContext: modelContext
                             ) {
-                                
+                                let toast = ToastValue(
+                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                    message: NSLocalizedString("Category Added", comment: "")
+                                )
+                                presentToast(toast)
                             }.present()
                         }
                     }
@@ -194,15 +193,9 @@ struct SpacesView: View {
                 }
                 
                 .navigationTitle("Spaces")
-                .optionalViewModifier { content in
-                    if #available(iOS 18.0, *) {
-                        content
-                    } else {
-                        content.navigationTransition(
-                            .zoom.combined(with: .fade(.in))
-                        )
-                    }
-                }
+                .navigationTransition(
+                    .zoom.combined(with: .fade(.in))
+                )
                 
             }
         }

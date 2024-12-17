@@ -9,14 +9,20 @@ import SwiftData
 import NavigationTransitions
 import MijickPopups
 import SwipeActions
+import Toasts
 
 struct ItemsView: View {
     let category: SpaceCategory
     
     @Query private var items: [Item]
     
+    var itemsOfCategory: [Item] {
+        items.filter { $0.categoryID == category.id }
+    }
+    
     @Environment(\.modelContext) private var modelContext
     @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.presentToast) var presentToast
     
     @State private var hideFloatingButton = false
     
@@ -28,13 +34,16 @@ struct ItemsView: View {
     
     @State private var showImage = false
     @State private var selectedImage: UIImage?
+    @State private var selectedItemId: UUID?
+    
+    @Namespace private var namespace
     
     var body: some View {
         GeometryReader { proxy in
             NavigationStack {
                 ZStack {
                     ScrollView {
-                        if items.isEmpty {
+                        if itemsOfCategory.isEmpty {
                             VStack {
                                 Text("No Items yet.")
                                     .font(.headline)
@@ -44,7 +53,16 @@ struct ItemsView: View {
                                 Button {
                                     Task {
                                         HapticManager.shared.trigger(.lightImpact)
-                                        //TODO: Add Item
+                                        await CentrePopup_AddItem(
+                                            modelContext: modelContext,
+                                            categoryID: category.id
+                                        ) {
+                                            let toast = ToastValue(
+                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                                message: NSLocalizedString("Item Added", comment: "")
+                                            )
+                                            presentToast(toast)
+                                        }.present()
                                     }
                                 } label: {
                                     Image(systemName: "tray.circle")
@@ -53,38 +71,56 @@ struct ItemsView: View {
                                 }
                             }
                             .vSpacing(.center)
-                        }
-                        SwipeViewGroup {
-                            LazyVStack {
-                                ForEach(items.filter { $0.categoryID == category.id }) { item in
-                                    SwipeView {
-                                        ItemCell(item: item, mainWindowSize: proxy.size)
-                                            .onTapGesture { handleItemTap(item: item)}
-                                    } trailingActions: { context in
-                                        SwipeAction(
-                                            systemImage: "trash",
-                                            backgroundColor: .red
-                                        ) {
-                                            HapticManager.shared.trigger(.lightImpact)
-                                            DispatchQueue.main.async {
-                                                context.state.wrappedValue = .closed
-                                                Task {
-                                                    await CentrePopup_DeleteItem(
-                                                        modelContext: modelContext,
-                                                        item: item
-                                                    ) { }.present()
+                        } else {
+                            SwipeViewGroup {
+                                Spacer()
+                                LazyVStack {
+                                    ForEach(itemsOfCategory) { item in
+                                        SwipeView {
+                                            ItemCell(item: item, mainWindowSize: proxy.size)
+                                                .onTapGesture {
+                                                    handleItemTap(item: item)
+                                                }
+                                                .optionalViewModifier { content in
+                                                    if #available(iOS 18.0, *) {
+                                                        content
+                                                            .matchedTransitionSource(id: item.id.uuidString, in: namespace)
+                                                    } else {
+                                                        content
+                                                    }
+                                                }
+                                        } trailingActions: { context in
+                                            SwipeAction(
+                                                systemImage: "trash",
+                                                backgroundColor: .red
+                                            ) {
+                                                HapticManager.shared.trigger(.lightImpact)
+                                                DispatchQueue.main.async {
+                                                    context.state.wrappedValue = .closed
+                                                    Task {
+                                                        await CentrePopup_DeleteItem(
+                                                            modelContext: modelContext,
+                                                            item: item
+                                                        ) {
+                                                            let toast = ToastValue(
+                                                                icon: Image(systemName: "trash.circle.fill").foregroundStyle(.red),
+                                                                message: NSLocalizedString("Item Deleted", comment: "")
+                                                            )
+                                                            presentToast(toast)
+                                                        }.present()
+                                                    }
                                                 }
                                             }
+                                            .font(.title.weight(.semibold))
+                                            .foregroundColor(.white)
                                         }
-                                        .font(.title.weight(.semibold))
-                                        .foregroundColor(.white)
+                                        .swipeActionCornerRadius(20)
+                                        .swipeSpacing(5)
+                                        .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                                        .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                                        .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                                        .swipeMinimumDistance(25)
                                     }
-                                    .swipeActionCornerRadius(20)
-                                    .swipeSpacing(5)
-                                    .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
-                                    .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
-                                    .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
-                                    .swipeMinimumDistance(25)
                                 }
                             }
                         }
@@ -125,24 +161,19 @@ struct ItemsView: View {
                             }
                         }
                     }
-                    .optionalViewModifier { content in
-                        if #available(iOS 18.0, *) {
-                            content
-                        } else {
-                            content
-                                .navigationTransition(
-                                    .zoom.combined(with: .fade(.in))
-                                )
-                        }
-                    }
                     
                     MainButton(imageName: "plus", colorHex: "#1e6794", width: 60) {
                         Task {
-                            //TODO: Add Item
                             await CentrePopup_AddItem(
                                 modelContext: modelContext,
                                 categoryID: category.id
-                            ) { }.present()
+                            ) {
+                                let toast = ToastValue(
+                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                    message: NSLocalizedString("Item Added", comment: "")
+                                )
+                                presentToast(toast)
+                            }.present()
                         }
                     }
                     .offset(y: hideFloatingButton ? 100 : 0)
@@ -151,20 +182,54 @@ struct ItemsView: View {
                     .padding()
                 }
             }
-            .fullScreenCover(isPresented: $showImage) {
-                if let image = selectedImage {
-                    VStack {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .edgesIgnoringSafeArea(.all)
-                        
-                        Button("Close") {
-                            showImage = false
+            .navigationDestination(isPresented: $showImage) {
+                if let selectedImage = selectedImage {
+                    FullScreenImageView(image: selectedImage)
+                        .optionalViewModifier { content in
+                            if #available(iOS 18.0, *) {
+                                content
+                                    .navigationTransition(.zoom(sourceID: "zoom\(selectedItemId?.uuidString ?? UUID().uuidString)", in: namespace))
+                            } else {
+                                content
+                            }
                         }
-                        .padding()
-                    }
                 }
+            }
+            .navigationTransition(
+                .zoom.combined(with: .fade(.in))
+            )
+        }
+    }
+    
+    struct FullScreenImageView: View {
+        let image: UIImage
+        
+        @Environment(\.presentationMode) private var presentationMode
+        
+        @State var backAnimation = false
+        @State var progress: CGFloat = 0.0
+        
+        var body: some View {
+            NavigationStack {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .background(Color.black)
+                    .ignoresSafeArea()
+                    .navigationBarBackButtonHidden()
+                    .toolbar {
+                        ToolbarItemGroup(placement: .topBarLeading) {
+                            HStack {
+                                Button("", action: {withAnimation { backAnimation.toggle(); HapticManager.shared.trigger(.lightImpact) };
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        Task { await dismissAllPopups() }
+                                        presentationMode.wrappedValue.dismiss()
+                                    }
+                                })
+                                .buttonStyle(CircleButtonStyle(imageName: "arrow.backward", background: .white.opacity(0), width: 40, height: 40, progress: $progress, animation: $backAnimation))
+                            }
+                        }
+                    }
             }
         }
     }
@@ -176,30 +241,73 @@ struct ItemsView: View {
     private func handleItemTap(item: Item) {
         switch item.type {
         case .document:
-            if let url = item.dataURL {
-                let documentController = UIDocumentInteractionController(url: url)
-                documentController.delegate = DocumentInteractionDelegate.shared
-                
-                DispatchQueue.main.async {
-                    let rootVC = DocumentInteractionDelegate.shared.documentInteractionControllerViewControllerForPreview(documentController)
+            Task {
+                if let url = item.dataURL {
+                    let iCloudDirectory = ICloudManager.shared.getICloudDirectory()
+                    let fileURL = iCloudDirectory?.appendingPathComponent(
+                        url.lastPathComponent)
                     
-                    if rootVC.presentedViewController == nil {
-                        documentController.presentPreview(animated: true)
-                    } else {
-                        rootVC.presentedViewController?.dismiss(animated: true) {
-                            documentController.presentPreview(animated: true)
+                    if let fileURL = fileURL, FileManager.default.fileExists(atPath: fileURL.path) {
+                        print("File exists in iCloud: \(fileURL)")
+                        let documentController = UIDocumentInteractionController(url: fileURL)
+                        documentController.delegate = DocumentInteractionDelegate.shared
+                        
+                        DispatchQueue.main.async {
+                            let rootVC = DocumentInteractionDelegate.shared.documentInteractionControllerViewControllerForPreview(documentController)
+                            
+                            if rootVC.presentedViewController == nil {
+                                documentController.presentPreview(animated: true)
+                            } else {
+                                rootVC.presentedViewController?.dismiss(animated: true) {
+                                    documentController.presentPreview(animated: true)
+                                }
+                            }
                         }
+                    } else {
+                        print("File not found in iCloud.")
                     }
+                    
+                    
                 }
             }
         case .image:
-            if let url = item.dataURL, let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
-                selectedImage = image
-                showImage = true
+            Task {
+                guard let icloudDirectory = ICloudManager.shared.getICloudDirectory(),
+                      let url = item.dataURL else {
+                    print("iCloud directory or dataURL is not available.")
+                    return
+                }
+
+                let fileURL = icloudDirectory.appendingPathComponent(url.lastPathComponent)
+
+                do {
+                    let imageData = try await withCheckedThrowingContinuation { continuation in
+                        DispatchQueue.global().async {
+                            if let data = try? Data(contentsOf: fileURL) {
+                                continuation.resume(returning: data)
+                            } else {
+                                continuation.resume(throwing: NSError(domain: "FileLoadError", code: -1))
+                            }
+                        }
+                    }
+                    if let image = UIImage(data: imageData) {
+                        await MainActor.run {
+                            selectedImage = image
+                            selectedItemId = item.id
+                            
+                            showImage = true
+                        }
+                    }
+                } catch {
+                    print("Failed to load image from iCloud directory: \(error)")
+                }
             }
         case .text:
             // Handle text if needed
-            break
+            Task {
+                await CentrePopup_TextPreview(text: item.text ?? "", title: item.name)
+                    .present()
+            }
         }
     }
 }
@@ -215,60 +323,135 @@ struct ItemCell: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            backgroundColor(for: item.type).opacity(0.1),
+                            Color.clear
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(borderColor, lineWidth: 1)
                 )
-                .shadow(color: shadowColor, radius: 6, x: 0, y: 4)
-                .overlay(
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            itemDateView(for: Date()) // Placeholder date for now
-                            Spacer()
-                            Text(item.type.rawValue.capitalized)
-                                .font(dynamicFont(for: .caption))
-                                .foregroundColor(typeColor(for: item.type))
-                                .padding(6)
-                                .background(
-                                    Capsule()
-                                        .fill(.thinMaterial)
-                                )
-                                .background(
-                                    Capsule()
-                                        .fill(colorScheme == .light ? Color.gray.opacity(0.1) : Color.black.opacity(0.4))
-                                )
-                        }
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 8) {
-                                contentPreview(for: item)
-                                    .frame(width: 40, height: 40)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                Text(item.name)
-                                    .font(dynamicFont(for: .headline))
-                                    .foregroundColor(.primary)
-                                    .lineLimit(1)
-                            }
-                            if let additionalInfo = additionalInfo(for: item) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "info.circle")
-                                        .foregroundColor(.blue)
-                                    Text(additionalInfo)
-                                        .font(dynamicFont(for: .subheadline))
-                                        .foregroundColor(.primary.opacity(0.8))
-                                        .lineLimit(2)
-                                }
-                            }
-                        }
-                    }
-                        .padding()
-                )
+                .shadow(color: shadowColor, radius: 4, x: 0, y: 2)
             
+            HStack(spacing: 12) {
+                // Left Side: Details
+                VStack(alignment: .leading, spacing: 8) {
+                    // Type Tag
+                    HStack {
+                        Text(item.type.rawValue.capitalized)
+                            .font(.caption)
+                            .foregroundColor(typeColor(for: item.type))
+                            .padding(6)
+                            .background(
+                                Capsule()
+                                    .fill(.ultraThinMaterial)
+                            )
+                        Spacer()
+                    }
+                    
+                    // Name
+                    Text(item.name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    // Additional Details
+                    switch item.type {
+                    case .document:
+                        Text(item.dataURL?.lastPathComponent ?? "Unknown Document")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    case .text:
+                        Text(item.text ?? "Empty Text")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    case .image:
+                        Text("Image File")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if item.type != .text {
+                    // Right Side: Content Preview
+                    contentPreview
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+            .padding()
         }
         .frame(
             width: mainWindowSize.width * 0.9,
-            height: 140
+            height: 150
         )
+    }
+    
+    // MARK: - Content Preview
+    
+    private var contentPreview: some View {
+        Group {
+            switch item.type {
+            case .document:
+                documentPreview
+            case .image:
+                imagePreview
+            case .text:
+                textPreview
+            }
+        }
+    }
+    
+    private var documentPreview: some View {
+        Group {
+            if let url = item.dataURL,
+               let thumbnail = generateThumbnail(for: url) {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "doc.text")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(typeColor(for: .document))
+                    .padding(20)
+            }
+        }
+    }
+    
+    private var imagePreview: some View {
+        Group {
+            if let icloudDirectory = ICloudManager.shared.getICloudDirectory(),
+               let dataURL = item.dataURL,
+               let imageData = try? Data(contentsOf: icloudDirectory.appendingPathComponent(dataURL.lastPathComponent, conformingTo: .image)),
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "photo")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(typeColor(for: .image))
+            }
+        }
+    }
+    
+    private var textPreview: some View {
+        Image(systemName: "text.bubble")
+            .resizable()
+            .scaledToFit()
+            .foregroundColor(typeColor(for: .text))
+            .padding(20)
     }
     
     // MARK: - Helpers
@@ -278,55 +461,7 @@ struct ItemCell: View {
     }
     
     private var shadowColor: Color {
-        colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3)
-    }
-    
-    private func dynamicFont(for textStyle: Font.TextStyle) -> Font {
-        Font.system(textStyle)
-    }
-    
-    @ViewBuilder
-    private func contentPreview(for item: Item) -> some View {
-        switch item.type {
-        case .document:
-            if let url = item.dataURL {
-                Text(url.lastPathComponent)
-                    .font(.caption)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .foregroundColor(.secondary)
-            } else {
-                Image(systemName: "doc.text")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(8)
-            }
-        case .image:
-            if let imageData = try? Data(contentsOf: item.dataURL!),
-               let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(8)
-            }
-        case .text:
-            if let text = item.text {
-                Text(text)
-                    .font(.caption)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .foregroundColor(.secondary)
-            } else {
-                Image(systemName: "text.bubble")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(8)
-            }
-        }
+        colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.2)
     }
     
     private func typeColor(for type: ItemType) -> Color {
@@ -337,44 +472,64 @@ struct ItemCell: View {
         }
     }
     
-    private func additionalInfo(for item: Item) -> String? {
-        switch item.type {
-        case .document:
-            return item.dataURL?.lastPathComponent
-        case .image:
-            return "Image File"
-        case .text:
-            return item.text
+    private func backgroundColor(for type: ItemType) -> Color {
+        switch type {
+        case .document: return .blue
+        case .image: return .green
+        case .text: return .orange
         }
     }
+}
+
+//MARK: - Text Popup
+
+struct CentrePopup_TextPreview: CenterPopup {
+    let text: String
+    let title: String
     
-    private func detailsForFlip(for item: Item) -> String? {
-        switch item.type {
-        case .document:
-            return "File Path: \(item.dataURL?.path ?? "Unknown")"
-        case .image:
-            return "Image File: \(item.dataURL?.lastPathComponent ?? "Unknown")"
-        case .text:
-            return "Text Content:\n\(item.text ?? "No Content")"
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Text(title)
+                .font(.headline)
+                .padding(.bottom, 8)
+            
+            ScrollView {
+                Text(text)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.secondarySystemBackground)
+            )
+            
+            Button(action: {
+                Task { await dismissLastPopup() }
+            }) {
+                Text("Close")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.blue.opacity(0.2))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+                    )
+                    .foregroundColor(.blue)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
         }
-    }
-    
-    @ViewBuilder
-    private func itemDateView(for date: Date) -> some View {
-        let dateString = date.formatted(date: .abbreviated, time: .omitted)
-        Text(dateString)
-            .font(dynamicFont(for: .caption))
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                Capsule()
-                    .fill(.thinMaterial)
-            )
-            .background(
-                Capsule()
-                    .fill(colorScheme == .light ? Color.gray.opacity(0.1) : Color.black.opacity(0.4))
-            )
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -468,6 +623,16 @@ struct CentrePopup_AddItem: CenterPopup {
             }
             .animation(.spring(), value: itemType)
             
+            // Error Message
+            if let error = error {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .bold()
+                    .multilineTextAlignment(.center)
+                    .animation(.spring(), value: error)
+            }
+            
             // Action Buttons
             HStack(spacing: 16) {
                 cancelButton
@@ -546,6 +711,7 @@ struct CentrePopup_AddItem: CenterPopup {
                     .scaledToFit()
                     .frame(height: 100)
                     .cornerRadius(10)
+                
             }
         }.id("image")
     }
@@ -602,9 +768,15 @@ struct CentrePopup_AddItem: CenterPopup {
             return
         }
         
-        if itemType == .image || itemType == .document {
+        if itemType == .image {
+            guard imageData != nil else {
+                error = "Image must be selected!"
+                HapticManager.shared.trigger(.error)
+                return
+            }
+        } else if itemType == .document {
             guard fileURL != nil else {
-                error = "File or image must be selected!"
+                error = "File must be selected!"
                 HapticManager.shared.trigger(.error)
                 return
             }
@@ -614,7 +786,7 @@ struct CentrePopup_AddItem: CenterPopup {
             name: itemName,
             type: itemType,
             categoryID: categoryID,
-            dataURL: fileURL,
+            dataURL: itemType == .document ? fileURL : nil,
             text: itemType == .text ? textContent : nil
         )
         
@@ -623,12 +795,37 @@ struct CentrePopup_AddItem: CenterPopup {
         try? modelContext.save()
         
         // Save to app's iCloud container
-        if AppFileManager.shared.isICloudAvailable() {
-            let iCloudSaveSuccessful = AppFileManager.shared.saveToiCloudContainer(item: newItem)
-            
-            if !iCloudSaveSuccessful {
-                print("Failed to save to iCloud container")
-                // Optionally handle iCloud save failure
+        Task {
+            if ICloudManager.shared.isICloudAvailable() {
+                do {
+                    if itemType == .document, let fileURL = newItem.dataURL {
+                        // Handle document upload
+                        let fileData = try Data(contentsOf: fileURL)
+                        let fileName = fileURL.lastPathComponent
+                        
+                        let success = await ICloudManager.shared.uploadFile(named: fileName, contents: fileData)
+                        if success {
+                            print("Document uploaded successfully.")
+                        } else {
+                            print("Failed to upload document.")
+                        }
+                        
+                    } else if itemType == .image, let imageData = imageData {
+                        // Handle image upload
+                        let fileName = "\(UUID().uuidString).jpg" // Generate a unique name for the image
+                        
+                        let success = await ICloudManager.shared.uploadFile(named: fileName, contents: imageData)
+                        if success {
+                            print("Image uploaded successfully.")
+                            newItem.dataURL = ICloudManager.shared.getICloudDirectory()?.appendingPathComponent(fileName)
+                            try? modelContext.save()
+                        } else {
+                            print("Failed to upload image.")
+                        }
+                    }
+                } catch {
+                    print("Error uploading file or image: \(error)")
+                }
             }
         }
         
@@ -801,7 +998,9 @@ struct CentrePopup_DeleteItem: CenterPopup {
                 .lineLimit(2)
                 .foregroundColor(.secondary)
         case .image:
-            if let imageData = try? Data(contentsOf: item.dataURL!),
+            if let icloudDirectory = ICloudManager.shared.getICloudDirectory(),
+               let dataURL = item.dataURL,
+               let imageData = try? Data(contentsOf: icloudDirectory.appendingPathComponent(dataURL.lastPathComponent, conformingTo: .image)),
                let uiImage = UIImage(data: imageData) {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -810,6 +1009,7 @@ struct CentrePopup_DeleteItem: CenterPopup {
                 Image(systemName: "photo")
                     .resizable()
                     .scaledToFit()
+                    .padding(8)
             }
         case .text:
             Text(item.text ?? "No Content")
@@ -820,3 +1020,5 @@ struct CentrePopup_DeleteItem: CenterPopup {
         }
     }
 }
+
+
