@@ -354,16 +354,17 @@ struct SettingsView: View {
                             ),
                             GroupedPreferenceRow.Preference(
                                 icon: "trash",
-                                title: "Delete All Data",
+                                title: "Delete Data",
                                 iconColor: .red,
                                 action: {
                                     HapticManager.shared.trigger(.lightImpact)
                                     Task {
-                                        await CentrePopup_DeleteAllData(usingLargeText: false) {
+                                        await CentrePopup_DeleteAllData(usingLargeText: false) { types in
                                             Task {
                                                 await viewModel
                                                     .deleteAllData(
-                                                        modelContext: modelContext
+                                                        modelContext: modelContext,
+                                                        for: types
                                                     ) // Call your SwiftData deletion logic
                                             }
                                         }
@@ -566,7 +567,9 @@ struct CentrePopup_EditName: CenterPopup {
 
 struct CentrePopup_DeleteAllData: CenterPopup {
     var usingLargeText: Bool
-    var onDeleteConfirmed: () -> Void // Callback for delete confirmation
+    var onDeleteConfirmed: ([DataType]) -> Void // Callback for delete confirmation with selected types
+    
+    @State private var selectedTypes: Set<DataType> = [] // Track selected types
     
     var body: some View {
         createContent().padding(12)
@@ -590,22 +593,62 @@ struct CentrePopup_DeleteAllData: CenterPopup {
             
             // Description
             Text("""
-            Are you sure you want to delete all data? This action cannot be undone, and all saved entries will be permanently removed.
+            Choose which data to delete. This action cannot be undone, and all selected entries will be permanently removed.
             """)
             .font(usingLargeText ? .footnote : .body)
             .foregroundColor(.secondary)
             .multilineTextAlignment(.center)
             .lineSpacing(5)
             
+            // Checkmark Options
+            VStack(spacing: 12) {
+                ForEach(DataType.allCases, id: \.self) { type in
+                    HStack {
+                        Text(type.rawValue)
+                            .foregroundColor(.primary)
+                            .font(.body)
+                        
+                        Spacer()
+                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(selectedTypes.contains(type) ? Color.red.opacity(0.2) : Color.gray.opacity(0.1))
+                                .frame(width: 24, height: 24)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(selectedTypes.contains(type) ? Color.red.opacity(0.8) : Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                                .animation(.easeInOut, value: selectedTypes)
+                            
+                            if selectedTypes.contains(type) {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.red)
+                                    .transition(.scale)
+                            }
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        toggleSelection(for: type)
+                    }
+                    .animation(.spring(), value: selectedTypes)
+                    .padding(.horizontal)
+                    
+                }
+            }
+            .padding(.vertical, 10)
+            .background(Color.gray.opacity(0.05))
+            .cornerRadius(12)
+            
             // Confirm Button
             Button(action: {
                 HapticManager.shared.trigger(.warning)
                 Task {
-                    onDeleteConfirmed()
+                    onDeleteConfirmed(Array(selectedTypes))
                     await dismissLastPopup()
                 }
             }) {
-                Text("Delete All Data")
+                Text("Delete Selected Data")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -620,6 +663,7 @@ struct CentrePopup_DeleteAllData: CenterPopup {
             }
             .buttonStyle(PlainButtonStyle())
             .shadow(color: Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+            .disabled(selectedTypes.isEmpty) // Disable button if no types selected
             
             // Dismiss Button
             Button(action: {
@@ -649,12 +693,25 @@ struct CentrePopup_DeleteAllData: CenterPopup {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
-        config
-            .tapOutsideToDismissPopup(true)
+    // Toggle selection for a data type
+    private func toggleSelection(for type: DataType) {
+        if selectedTypes.contains(type) {
+            selectedTypes.remove(type)
+        } else {
+            selectedTypes.insert(type)
+        }
     }
     
-    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config.tapOutsideToDismissPopup(true)
+    }
+}
+
+// Enum to represent data types
+enum DataType: String, CaseIterable {
+    case dailyGratitude = "Daily Gratitude"
+    case spaceCategory = "Space Category"
+    case item = "Item"
 }
 
 //MARK: - Import / Export Data Popup

@@ -13,18 +13,29 @@ import SwiftData
 final class SettingsViewModel {
     var presentPolicy = false
     
-    func deleteAllData(modelContext: ModelContext) async {
-        Task {
-            do {
-                let fetchDescriptor = FetchDescriptor<DailyGratitude>() // Replace `DailyGratitude` with your model name
-                let allEntries = try modelContext.fetch(fetchDescriptor)
-                
-                allEntries.forEach { modelContext.delete($0) }
-                
-                try modelContext.save()
-            } catch {
-                print("Error deleting all data: \(error.localizedDescription)")
+    func deleteAllData(modelContext: ModelContext, for types: [DataType]) async {
+        do {
+            for type in types {
+                switch type {
+                case .dailyGratitude:
+                    let fetchDescriptor = FetchDescriptor<DailyGratitude>()
+                    let allEntries = try modelContext.fetch(fetchDescriptor)
+                    allEntries.forEach { modelContext.delete($0) }
+                    
+                case .spaceCategory:
+                    let fetchDescriptor = FetchDescriptor<SpaceCategory>()
+                    let allEntries = try modelContext.fetch(fetchDescriptor)
+                    allEntries.forEach { modelContext.delete($0) }
+                    
+                case .item:
+                    let fetchDescriptor = FetchDescriptor<Item>()
+                    let allEntries = try modelContext.fetch(fetchDescriptor)
+                    allEntries.forEach { modelContext.delete($0) }
+                }
             }
+            try modelContext.save()
+        } catch {
+            print("Error deleting data: \(error.localizedDescription)")
         }
     }
     
