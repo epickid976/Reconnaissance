@@ -58,7 +58,7 @@ struct ItemsView: View {
                                             categoryID: category.id
                                         ) {
                                             let toast = ToastValue(
-                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
                                                 message: NSLocalizedString("Item Added", comment: "")
                                             )
                                             presentToast(toast)
@@ -169,7 +169,7 @@ struct ItemsView: View {
                                 categoryID: category.id
                             ) {
                                 let toast = ToastValue(
-                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
                                     message: NSLocalizedString("Item Added", comment: "")
                                 )
                                 presentToast(toast)
@@ -711,7 +711,7 @@ struct CentrePopup_AddItem: CenterPopup {
                     .scaledToFit()
                     .frame(height: 100)
                     .cornerRadius(10)
-                
+                    .hSpacing(.center)
             }
         }.id("image")
     }
@@ -992,11 +992,20 @@ struct CentrePopup_DeleteItem: CenterPopup {
     private func contentPreview(for item: Item) -> some View {
         switch item.type {
         case .document:
-            Text(item.dataURL?.lastPathComponent ?? "Unknown File")
-                .font(.caption)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .foregroundColor(.secondary)
+            Group {
+                if let url = item.dataURL,
+                   let thumbnail = generateThumbnail(for: url) {
+                    Image(uiImage: thumbnail)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image(systemName: "doc.text")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(typeColor(for: .document))
+                        .padding(20)
+                }
+            }
         case .image:
             if let icloudDirectory = ICloudManager.shared.getICloudDirectory(),
                let dataURL = item.dataURL,
@@ -1017,6 +1026,14 @@ struct CentrePopup_DeleteItem: CenterPopup {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .foregroundColor(.secondary)
+        }
+    }
+    
+    private func typeColor(for type: ItemType) -> Color {
+        switch type {
+        case .document: return .blue
+        case .image: return .green
+        case .text: return .orange
         }
     }
 }

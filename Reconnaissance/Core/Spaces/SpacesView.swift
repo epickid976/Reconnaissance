@@ -67,7 +67,7 @@ struct SpacesView: View {
                                         HapticManager.shared.trigger(.lightImpact)
                                         await CentrePopup_AddCategory(modelContext: modelContext) {
                                             let toast = ToastValue(
-                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
                                                 message: NSLocalizedString("Category Added", comment: "")
                                             )
                                             presentToast(toast)
@@ -179,7 +179,7 @@ struct SpacesView: View {
                                 modelContext: modelContext
                             ) {
                                 let toast = ToastValue(
-                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.red),
+                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
                                     message: NSLocalizedString("Category Added", comment: "")
                                 )
                                 presentToast(toast)
