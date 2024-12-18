@@ -17,6 +17,18 @@ struct ContentView: View {
     
     var body: some View {
         HomeTabView() // Your tab view becomes the root container
+            .onOpenURL { url in
+                        if url.scheme == "reconnaissance" && url.host == "addGratitude" {
+                            Task {
+                                await CentrePopup_AddGratitudeEntry(
+                                    modelContext: modelContext
+                                ) {
+                                    ConfettiController.showConfettiOverlay()
+                                }
+                                .present()
+                            }
+                        }
+                    }
     }
     
     //MARK: - Debug Methods

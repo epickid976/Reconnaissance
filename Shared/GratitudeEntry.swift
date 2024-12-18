@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftData
-import WatchConnectivity
 
 @Model
 class DailyGratitude: @unchecked Sendable, Codable {

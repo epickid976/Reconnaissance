@@ -305,7 +305,10 @@ struct ItemsView: View {
         case .text:
             // Handle text if needed
             Task {
-                await CentrePopup_TextPreview(text: item.text ?? "", title: item.name)
+                await CentrePopup_TextPreview(
+                    item: item,
+                    modelContext: modelContext
+                )
                     .present()
             }
         }
@@ -484,52 +487,140 @@ struct ItemCell: View {
 //MARK: - Text Popup
 
 struct CentrePopup_TextPreview: CenterPopup {
-    let text: String
-    let title: String
+    var modelContext: ModelContext // Directly passed ModelContext
+    @State private var isEditing: Bool = false // Toggle edit mode
+    @State private var editedText: String // Editable text state
     
-    @Environment(\.colorScheme) var colorScheme
+    let item: Item // Reference to the item being edited
+    
+    // Initialize editedText with the item's current text
+    init(item: Item, modelContext: ModelContext) {
+        self.item = item
+        self.modelContext = modelContext
+        self._editedText = State(initialValue: item.text ?? "")
+    }
     
     var body: some View {
         VStack(spacing: 16) {
-            Text(title)
+            Text("Edit Text")
                 .font(.headline)
                 .padding(.bottom, 8)
             
+            // Text Preview or Edit Mode
             ScrollView {
-                Text(text)
-                    .font(.body)
-                    .foregroundColor(.primary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                ZStack(alignment: .topLeading) {
+                    if isEditing {
+                        // Editable TextField
+                        createStyledTextField("Edit text...", text: $editedText, isMultiline: true)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                    } else {
+                        // Static Text View
+                        Text(editedText)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.secondarySystemBackground)
+                                    .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 4)
+                            )
+                            .transition(.move(edge: .leading).combined(with: .opacity))
+                    }
+                }
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isEditing)
             }
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.secondarySystemBackground)
-            )
+            .cornerRadius(20)
             
-            Button(action: {
-                Task { await dismissLastPopup() }
-            }) {
-                Text("Close")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.blue.opacity(0.2))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.blue.opacity(0.8), lineWidth: 1)
-                    )
-                    .foregroundColor(.blue)
+            // Buttons
+            HStack(spacing: 16) {
+                // Edit Button
+                Button(action: {
+                    withAnimation {
+                        if isEditing {
+                            saveChanges()
+                        }
+                        isEditing.toggle()
+                    }
+                }) {
+                    Text(isEditing ? "Done" : "Edit")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.blue.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                // Close Button
+                Button(action: {
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Close")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.red.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.red.opacity(0.8), lineWidth: 1)
+                        )
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(PlainButtonStyle())
-            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
         }
         .padding(16)
         .background(Color.secondarySystemBackground)
         .cornerRadius(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private func saveChanges() {
+        // Update the item's text and save to the model context
+        item.text = editedText
+        do {
+            try modelContext.save()
+            print("Changes saved successfully!")
+        } catch {
+            print("Failed to save changes: \(error)")
+        }
+    }
+    
+    private func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
+        Group {
+            if isMultiline {
+                TextField(placeholder, text: text, axis: .vertical)
+                    .lineLimit(3...6)
+            } else {
+                TextField(placeholder, text: text)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.gray.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(text.wrappedValue.isEmpty ? Color.secondary.opacity(0.3) : Color.blue.opacity(0.8), lineWidth: 1)
+        )
+        .cornerRadius(20)
+        .shadow(color: Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+    }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+        
     }
 }
 
@@ -858,6 +949,12 @@ struct CentrePopup_AddItem: CenterPopup {
         .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
         .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
     }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+        
+    }
 }
 
 //MARK: - Delete Popup
@@ -1035,6 +1132,12 @@ struct CentrePopup_DeleteItem: CenterPopup {
         case .image: return .green
         case .text: return .orange
         }
+    }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+        
     }
 }
 

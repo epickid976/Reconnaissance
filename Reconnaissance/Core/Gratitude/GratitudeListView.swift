@@ -9,6 +9,7 @@ import SwiftData
 import Charts
 import MijickPopups
 import SwipeActions
+import WidgetKit
 
 //MARK: - List View
 
@@ -392,6 +393,7 @@ struct GratitudeListView: View {
                 randomGratitude = gratitudes.randomElement()
             }
         }
+       
     }
     
     //MARK: - Header Section
@@ -933,6 +935,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
             }
             
             try modelContext.save()
+            WidgetCenter.shared.reloadAllTimelines()
             return .success(())
         } catch {
             return .failure(error)
@@ -1075,6 +1078,7 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
         modelContext.delete(entry)
         do {
             try modelContext.save()
+            WidgetCenter.shared.reloadAllTimelines()
             HapticManager.shared.trigger(.success)
             print("Gratitude entry deleted successfully.")
         } catch {
