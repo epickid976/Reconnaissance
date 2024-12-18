@@ -59,14 +59,22 @@ struct GratitudeTodayView: View {
     var entry: GratitudeProvider.Entry
     @Environment(\.widgetFamily) var widgetFamily
     @Environment(\.colorScheme) var colorScheme
-
+    
+    @Query var gratitudes: [DailyGratitude]
+    
+    var today: DailyGratitude? {
+        gratitudes.first(where: {
+            Calendar.current.isDate($0.date, inSameDayAs: Date())
+        })
+    }
+    
     var body: some View {
-        if let gratitude = entry.gratitude {
+        if let gratitude = today {
             VStack(alignment: .leading, spacing: spacing) {
                 if widgetFamily != .systemSmall {
                     // Top Row: Date and Streak (only for medium/large widgets)
                     HStack {
-                        Text(entry.date.formatted(date: .abbreviated, time: .omitted))
+                        Text(gratitude.date.formatted(date: .abbreviated, time: .omitted))
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -120,14 +128,34 @@ struct GratitudeTodayView: View {
         } else {
             Link(destination: URL(string: "reconnaissance://addGratitude")!) {
                 VStack(spacing: 12) {
-                    Text("No gratitude entries yet!")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-
-                    Label("Add Gratitude", systemImage: "plus.circle.fill")
-                        .font(.subheadline.bold())
-                        .foregroundColor(.blue)
-                        .padding(.top, 8)
+                    if widgetFamily == .systemSmall {
+                        VStack(spacing: 8) {
+                            Text("No Gratitude Entries Yet")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center) // Center text for small widget
+                            
+                            VStack(spacing: 4) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2) // Larger icon for visibility
+                                    .foregroundColor(.blue)
+                                
+                                Text("Add Gratitude")
+                                    .font(.caption.bold())
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    } else {
+                        VStack(spacing: 12) {
+                            Text("No Gratitude Entries Yet")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            
+                            Label("Add Gratitude", systemImage: "plus.circle.fill")
+                                .font(.subheadline.bold())
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
@@ -170,6 +198,7 @@ struct GratitudeTodayWidget: Widget {
         StaticConfiguration(kind: kind, provider: GratitudeProvider()) { entry in
             GratitudeTodayView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
+                .modelContainer(for: [DailyGratitude.self])
         }
         .configurationDisplayName("Gratitude Today")
         .description("View your daily gratitude entries.")
