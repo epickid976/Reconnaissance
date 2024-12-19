@@ -21,17 +21,21 @@ struct SpacesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.presentToast) var presentToast
     
+    // Check if the user has made any purchase
+    private var hasAccess: Bool {
+        !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
+    }
+    
     var sortedCategories: [SpaceCategory] {
         categories.sorted { $0.name < $1.name }
     }
     
     @State private var hideFloatingButton = false
-    
     @State private var currentScrollOffset: CGFloat = 0 // Track current offset for debounce
     @State var previousViewOffset: CGFloat = 0
     let minimumOffset: CGFloat = 60
     
-    
+    @State var showPaywallSheet = false
     
     var body: some View {
         GeometryReader { proxy in
@@ -54,153 +58,217 @@ struct SpacesView: View {
             
             NavigationStack {
                 ZStack {
-                    ScrollView {
-                        if sortedCategories.isEmpty {
-                            VStack {
-                                Text("No Spaces yet.")
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                    .padding()
-                                    .hSpacing(.center)
-                                Button {
-                                    Task {
-                                        HapticManager.shared.trigger(.lightImpact)
-                                        await CentrePopup_AddCategory(modelContext: modelContext) {
-                                            let toast = ToastValue(
-                                                icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
-                                                message: NSLocalizedString("Category Added", comment: "")
-                                            )
-                                            presentToast(toast)
-                                        }
-                                        .present()
-                                    }
-                                } label: {
-                                    Image(systemName: "square.split.2x2")
-                                        .font(.system(size: 60))
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .vSpacing(.center)
-                        } else {
-                            SwipeViewGroup {
-                                LazyVGrid(columns: columns, spacing: 20) {
-                                    ForEach(sortedCategories) { category in
-                                        SwipeView {
-                                            NavigationLink(destination: NavigationLazyView(ItemsView(category: category )
-                                                .installToast(position: .bottom))
-                                            ) {
-                                                CategoryCell(category: category)
-                                                    .id(category.id)
-                                                    .transition(.customBackInsertion)
-                                            }
-                                            .onTapHaptic(.lightImpact)
-                                        } trailingActions: { context in
-                                            VStack {
-                                                SwipeAction(
-                                                    systemImage: "trash",
-                                                    backgroundColor: .red
-                                                ) {
-                                                    HapticManager.shared.trigger(.lightImpact)
-                                                    DispatchQueue.main.async {
-                                                        context.state.wrappedValue = .closed
-                                                        Task {
-                                                            await CentrePopup_DeleteSpace(
-                                                                modelContext: modelContext,
-                                                                space: category
-                                                            ) {
-                                                                let toast = ToastValue(
-                                                                    icon: Image(systemName: "trash.circle.fill").foregroundStyle(.red),
-                                                                    message: NSLocalizedString("Category Deleted", comment: "")
-                                                                )
-                                                                presentToast(toast)
-                                                            }.present()
-                                                        }
-                                                    }
-                                                }
-                                                .font(.title.weight(.semibold))
-                                                .foregroundColor(.white)
-                                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                                                
-                                                SwipeAction(
-                                                    systemImage: "pencil",
-                                                    backgroundColor: Color.teal
-                                                ) {
-                                                    HapticManager.shared.trigger(.lightImpact)
-                                                    context.state.wrappedValue = .closed
-                                                    Task {
-                                                        await CentrePopup_AddCategory(
-                                                            modelContext: modelContext,
-                                                            category: category
-                                                        ) { }.present()
-                                                    }
-                                                }
-                                                .allowSwipeToTrigger()
-                                                .font(.title.weight(.semibold))
-                                                .foregroundColor(.white)
-                                                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                                            }
-                                        }
-                                        .swipeActionCornerRadius(20)
-                                        .swipeSpacing(5)
-                                        .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
-                                        .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
-                                        .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
-                                        .swipeMinimumDistance(25)
-                                    }
-                                }
-                                .animation(.spring(), value: sortedCategories)
-                                .padding()
-                                .background(GeometryReader {
-                                    Color.clear.preference(key: ViewOffsetKey.self, value: -$0.frame(in: .named("scroll")).origin.y)
-                                }).onPreferenceChange(ViewOffsetKey.self) { currentOffset in
-                                    Task { @MainActor in
-                                        let offsetDifference: CGFloat = self.previousViewOffset - currentOffset
-                                        if ( abs(offsetDifference) > minimumOffset) {
-                                            if offsetDifference > 0 {
-                                                DispatchQueue.main.async {
-                                                    hideFloatingButton = false
-                                                }
-                                            } else {
-                                                hideFloatingButton = true
-                                            }
-                                            
-                                            currentScrollOffset = currentOffset
-                                            self.previousViewOffset = currentOffset
-                                        }
-                                    }
-                                }
+                    if hasAccess {
+                        // Main Content (User has access)
+                        ScrollView {
+                            if sortedCategories.isEmpty {
+                                emptyView
+                            } else {
+                                mainContent(columns: columns)
                             }
                         }
-                    }
-                    
-                    MainButton(imageName: "plus", colorHex: "#1e6794", width: 60) {
-                        Task {
-                            await CentrePopup_AddCategory(
-                                modelContext: modelContext
-                            ) {
-                                let toast = ToastValue(
-                                    icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
-                                    message: NSLocalizedString("Category Added", comment: "")
-                                )
-                                presentToast(toast)
-                            }.present()
+                        
+                        // Floating Action Button
+                        MainButton(imageName: "plus", colorHex: "#1e6794", width: 60) {
+                            Task {
+                                await CentrePopup_AddCategory(
+                                    modelContext: modelContext
+                                ) {
+                                    let toast = ToastValue(
+                                        icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
+                                        message: NSLocalizedString("Category Added", comment: "")
+                                    )
+                                    presentToast(toast)
+                                }.present()
+                            }
                         }
+                        .offset(y: hideFloatingButton ? 100 : 0)
+                        .animation(.spring(), value: hideFloatingButton)
+                        .vSpacing(.bottom).hSpacing(.trailing)
+                        .padding()
+                    } else {
+                        // Blocked View (User has no access)
+                        blockedView
                     }
-                    .offset(y: hideFloatingButton ? 100 : 0)
-                    .animation(.spring(), value: hideFloatingButton)
-                    .vSpacing(.bottom).hSpacing(.trailing)
-                    .padding()
                 }
-                
                 .navigationTitle("Spaces")
                 .navigationTransition(
                     .zoom.combined(with: .fade(.in))
                 )
-                
+                .sheet(isPresented: $showPaywallSheet) {
+                    PaywallView()
+                        .presentationDragIndicator(.visible)
+                        .presentationCornerRadius(30) // Set the corner radius
+                }
             }
+            
         }
     }
     
+    @ViewBuilder
+    private var emptyView: some View {
+        VStack {
+            Text("No Spaces yet.")
+                .font(.headline)
+                .foregroundColor(.secondary)
+                .padding()
+                .hSpacing(.center)
+            Button {
+                Task {
+                    HapticManager.shared.trigger(.lightImpact)
+                    await CentrePopup_AddCategory(modelContext: modelContext) {
+                        let toast = ToastValue(
+                            icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
+                            message: NSLocalizedString("Category Added", comment: "")
+                        )
+                        presentToast(toast)
+                    }
+                    .present()
+                }
+            } label: {
+                Image(systemName: "square.split.2x2")
+                    .font(.system(size: 60))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .vSpacing(.center)
+    }
+    
+    @ViewBuilder
+    private func mainContent(columns: [GridItem]) -> some View {
+        SwipeViewGroup {
+            LazyVGrid(columns: columns, spacing: 20) {
+                ForEach(sortedCategories) { category in
+                    SwipeView {
+                        NavigationLink(destination: NavigationLazyView(ItemsView(category: category )
+                            .installToast(position: .bottom))
+                        ) {
+                            CategoryCell(category: category)
+                                .id(category.id)
+                                .transition(.customBackInsertion)
+                        }
+                        .onTapHaptic(.lightImpact)
+                    } trailingActions: { context in
+                        VStack {
+                            SwipeAction(
+                                systemImage: "trash",
+                                backgroundColor: .red
+                            ) {
+                                HapticManager.shared.trigger(.lightImpact)
+                                DispatchQueue.main.async {
+                                    context.state.wrappedValue = .closed
+                                    Task {
+                                        await CentrePopup_DeleteSpace(
+                                            modelContext: modelContext,
+                                            space: category
+                                        ) {
+                                            let toast = ToastValue(
+                                                icon: Image(systemName: "trash.circle.fill").foregroundStyle(.red),
+                                                message: NSLocalizedString("Category Deleted", comment: "")
+                                            )
+                                            presentToast(toast)
+                                        }.present()
+                                    }
+                                }
+                            }
+                            .font(.title.weight(.semibold))
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            
+                            SwipeAction(
+                                systemImage: "pencil",
+                                backgroundColor: Color.teal
+                            ) {
+                                HapticManager.shared.trigger(.lightImpact)
+                                context.state.wrappedValue = .closed
+                                Task {
+                                    await CentrePopup_AddCategory(
+                                        modelContext: modelContext,
+                                        category: category
+                                    ) { }.present()
+                                }
+                            }
+                            .allowSwipeToTrigger()
+                            .font(.title.weight(.semibold))
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        }
+                    }
+                    .swipeActionCornerRadius(20)
+                    .swipeSpacing(5)
+                    .swipeOffsetCloseAnimation(stiffness: 500, damping: 100)
+                    .swipeOffsetExpandAnimation(stiffness: 500, damping: 100)
+                    .swipeOffsetTriggerAnimation(stiffness: 500, damping: 100)
+                    .swipeMinimumDistance(25)
+                }
+            }
+            .animation(.spring(), value: sortedCategories)
+            .padding()
+        }
+    }
+    
+    @ViewBuilder
+    private var blockedView: some View {
+        VStack(spacing: 24) {
+            // Lock Icon
+            Image(systemName: "lock.circle.fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color.purple.opacity(0.8), Color.blue.opacity(0.8)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            
+            // Title
+            Text("Unlock Spaces")
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            // Description
+            Text("Access to Spaces requires a purchase. Unlock all features to continue.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 16)
+            
+            // Unlock Button
+            Button(action: {
+                Task {
+                    PurchaseManager.shared.fetchProducts()
+                    // Show a purchase sheet or navigate to a purchase view
+                    showPaywallSheet = true
+                }
+            }) {
+                Text("Unlock Now")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.blue.opacity(0.2))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+                    )
+                    .foregroundColor(.blue)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.horizontal, 16)
+            .shadow(color: Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .shadow(color: Color.gray.opacity(0.3), radius: 10, x: 0, y: 5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .vSpacing(.center)
+        .padding()
+    }
 }
 
 //MARK: - Delete Spaces

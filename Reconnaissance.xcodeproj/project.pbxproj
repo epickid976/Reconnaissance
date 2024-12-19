@@ -48,6 +48,9 @@
 		82F801EF2D146527008E5D09 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE02D124FE2008E5D09 /* WidgetKit.framework */; };
 		82F801F02D146527008E5D09 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE22D124FE2008E5D09 /* SwiftUI.framework */; };
 		82F801F92D146528008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		82F802012D147703008E5D09 /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F802002D1476FF008E5D09 /* PurchaseManager.swift */; };
+		82F802022D147703008E5D09 /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F802002D1476FF008E5D09 /* PurchaseManager.swift */; };
+		82F802032D147703008E5D09 /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F802002D1476FF008E5D09 /* PurchaseManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +138,7 @@
 		82F801682D13C735008E5D09 /* Actors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Actors.swift; sourceTree = "<group>"; };
 		82F8016F2D13C839008E5D09 /* UIScreenExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIScreenExt.swift; sourceTree = "<group>"; };
 		82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ReconnaissanceWatchWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		82F802002D1476FF008E5D09 /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
 		82F8FFE02D124FE2008E5D09 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		82F8FFE22D124FE2008E5D09 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -281,6 +285,7 @@
 		82D07F812D07D714000A3179 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				82F802002D1476FF008E5D09 /* PurchaseManager.swift */,
 				821470692D0FAEAC00F95A05 /* SpacesEntry.swift */,
 				82D07F802D07D714000A3179 /* GratitudeEntry.swift */,
 				82146F852D0F9EFB00F95A05 /* HapticManager.swift */,
@@ -532,6 +537,7 @@
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
 				824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */,
+				82F802022D147703008E5D09 /* PurchaseManager.swift in Sources */,
 				82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */,
 				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,
@@ -544,6 +550,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82F802012D147703008E5D09 /* PurchaseManager.swift in Sources */,
 				82146F9A2D0F9EFB00F95A05 /* HapticManager.swift in Sources */,
 				82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */,
 				82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */,
@@ -561,6 +568,7 @@
 				82F8010F2D12780E008E5D09 /* SpacesEntry.swift in Sources */,
 				82F8016A2D13C73B008E5D09 /* Actors.swift in Sources */,
 				82F800AB2D125FFF008E5D09 /* GratitudeEntry.swift in Sources */,
+				82F802032D147703008E5D09 /* PurchaseManager.swift in Sources */,
 				82F801712D13C850008E5D09 /* Color Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

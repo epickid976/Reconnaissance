@@ -12,6 +12,8 @@ import SwiftData
 @Observable
 final class SettingsViewModel {
     var presentPolicy = false
+    var showPaywallSheet: Bool = false
+    var showPurchasesOverview: Bool = false
     
     func deleteAllData(modelContext: ModelContext, for types: [DataType]) async {
         do {

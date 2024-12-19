@@ -35,6 +35,8 @@ struct SettingsView: View {
             NavigationStack {
                 ScrollView {
                     LazyVStack {
+                        //Ad
+                        paywallAdSection()
                         // Top Header
                         headerView(name: preferencesViewModel.name)
                         
@@ -44,6 +46,16 @@ struct SettingsView: View {
                     .vSpacing(.top)
                     .padding(.horizontal, 5)
                     .navigationTitle("Settings")
+                    .sheet(isPresented: $viewModel.showPaywallSheet) {
+                        PaywallView()
+                            .presentationDragIndicator(.visible)
+                            .presentationCornerRadius(30) // Set the corner radius
+                    }
+                    .sheet(isPresented: $viewModel.showPurchasesOverview) {
+                        PurchaseOverviewView()
+                            .presentationDragIndicator(.visible)
+                            .presentationCornerRadius(30)
+                    }
                 }
             }
         }
@@ -235,6 +247,15 @@ struct SettingsView: View {
                             }
                         ),
                         GroupedPreferenceRow.Preference(
+                            icon: "cart.fill",
+                            title: "Purchase Overview",
+                            iconColor: .blue,
+                            action: {
+                                HapticManager.shared.trigger(.lightImpact)
+                                viewModel.showPurchasesOverview = true // Toggle sheet presentation
+                            }
+                        ),
+                        GroupedPreferenceRow.Preference(
                             icon: "numbers.rectangle.fill",
                             title: "App Version - \(getAppVersion())",
                             iconColor: .teal,
@@ -382,15 +403,59 @@ struct SettingsView: View {
         .sheet(isPresented: $viewModel.presentPolicy) {
             PrivacyPolicy(sheet: true)
                 .presentationDragIndicator(.visible)
-                .optionalViewModifier { content in
-                    if #available(iOS 16.4, *) {
-                        content
-                            .presentationCornerRadius(25)
-                    }
-                }
+                .presentationCornerRadius(30) // Set the corner radius
         }
     }
     
+    @ViewBuilder
+    private func paywallAdSection() -> some View {
+        if PurchaseManager.shared.purchasedProductIdentifiers.isEmpty {
+            VStack(spacing: 12) {
+                // Ad Title
+                Text("Support & Unlock Premium")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                    .padding(.top, 8)
+
+                // Ad Description
+                Text("Access advanced features like Spaces and support the development of this app.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+
+                // Unlock Button
+                Button(action: {
+                    viewModel.showPaywallSheet = true
+                }) {
+                    Text("Unlock Premium")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.purple.opacity(0.8), Color.blue.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+                }
+                .padding(.horizontal, 16)
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.secondarySystemBackground)
+                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 3)
+            )
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+        }
+    }
 }
 
 //MARK: - About App Popup

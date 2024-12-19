@@ -97,6 +97,7 @@ struct PrivacyPolicy: View {
         }
         .navigationBarTitleDisplayMode(sheet ? .inline : .large)
         .background(Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all))
+        
     }
 }
 
