@@ -176,28 +176,39 @@ struct PaywallView: View {
             Button(action: {
                 Task {
                     await PurchaseManager.shared.purchase(product)
-                    if purchaseManager.purchaseError == nil {
-                        dismiss() // Dismiss the paywall if purchase is successful
-                    }
                 }
             }) {
-                Text(product.priceFormatted)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                if purchaseManager.purchasedProductIdentifiers.contains(product.productIdentifier) {
+                            // Show "Purchased" badge instead of price
+                            Text("Purchased")
+                                .font(.headline)
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.green.opacity(0.2))
+                                )
+                } else {
+                    Text(product.priceFormatted)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .cornerRadius(15)
                         )
-                        .cornerRadius(15)
-                    )
-                    .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+                        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
+                }
             }
             .padding(.horizontal, 20)
+            .disabled(purchaseManager.purchasedProductIdentifiers.contains(product.productIdentifier))
         }
         .padding()
         .background(
@@ -214,9 +225,6 @@ struct PaywallView: View {
         Button(action: {
             Task {
                 await PurchaseManager.shared.purchase(product)
-                if purchaseManager.purchaseError == nil {
-                    dismiss() // Dismiss the paywall if purchase is successful
-                }
             }
         }) {
             HStack {
@@ -226,9 +234,24 @@ struct PaywallView: View {
                 
                 Spacer()
                 
-                Text(product.priceFormatted)
-                    .font(.subheadline)
-                    .foregroundColor(.black.opacity(0.7))
+                if purchaseManager.purchasedProductIdentifiers.contains(product.productIdentifier) {
+                            // Show "Purchased" badge instead of price
+                            Text("Purchased")
+                                .font(.headline)
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.green.opacity(0.2))
+                                )
+                } else {
+                    
+                    
+                    Text(product.priceFormatted)
+                        .font(.subheadline)
+                        .foregroundColor(.black.opacity(0.7))
+                }
             }
             .padding()
             .background(
@@ -241,6 +264,7 @@ struct PaywallView: View {
                 .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 5)
             )
         }
+        .disabled(purchaseManager.purchasedProductIdentifiers.contains(product.productIdentifier))
     }
 }
 
