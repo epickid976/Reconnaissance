@@ -2,7 +2,7 @@
 //  ReconnaissanceWatchWidgets.swift
 //  ReconnaissanceWatchWidgets
 //
-//  Created by Jose Blanco on 12/18/24.
+//  Created by Jose Blanco on 12/19/24.
 //
 
 import WidgetKit
@@ -28,20 +28,15 @@ struct SimpleEntry: TimelineEntry {
     let date: Date
 }
 
-struct CircularShortcutWidgetView: View {
-    var entry: SimpleEntry
+struct ReconnaissanceWatchWidgetsEntryView: View {
+    var entry: Provider.Entry
 
     var body: some View {
-        Link(destination: URL(string: "reconnaissance://")!) { // Replace "reconnaissance://" with your app's URL scheme
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.2)) // Background
-                Image(systemName: "app.fill") // Replace with a relevant SF Symbol
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(.blue)
-            }
+        ZStack {
+            Image("100") // Replace "100" with your app icon's asset name
+                .resizable()
+                .scaledToFit() // Ensures the image scales correctly within the frame
+                .frame(width: 50, height: 50) // Adjust the size as needed
         }
     }
 }
@@ -52,10 +47,18 @@ struct ReconnaissanceWatchWidgets: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            CircularShortcutWidgetView(entry: entry)
+            ReconnaissanceWatchWidgetsEntryView(entry: entry)
+                .containerBackground(.clear, for: .widget) // Transparent background
         }
         .configurationDisplayName("App Shortcut")
         .description("Quickly open Reconnaissance.")
-        .supportedFamilies([.accessoryCircular])
+        .supportedFamilies([.accessoryCircular]) // Only accessoryCircular
     }
+}
+
+#Preview(as: .accessoryRectangular) {
+    ReconnaissanceWatchWidgets()
+} timeline: {
+    SimpleEntry(date: .now)
+    SimpleEntry(date: .now)
 }

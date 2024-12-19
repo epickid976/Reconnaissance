@@ -18,9 +18,5 @@
 	<array>
 		<string>group.com.Jose.Blanco.ReconnaissanceApp</string>
 	</array>
-	<key>CLKComplications</key>
-	<array>
-		<string>CLKComplicationFamilyAccessoryCircular</string>
-	</array>
 </dict>
 </plist>

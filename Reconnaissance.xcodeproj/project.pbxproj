@@ -45,9 +45,9 @@
 		82F8016A2D13C73B008E5D09 /* Actors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F801682D13C735008E5D09 /* Actors.swift */; };
 		82F801702D13C83E008E5D09 /* UIScreenExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F8016F2D13C839008E5D09 /* UIScreenExt.swift */; };
 		82F801712D13C850008E5D09 /* Color Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDA2D08E5CA000A3179 /* Color Extensions.swift */; };
-		82F8017B2D13D1B0008E5D09 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE02D124FE2008E5D09 /* WidgetKit.framework */; };
-		82F8017C2D13D1B0008E5D09 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE22D124FE2008E5D09 /* SwiftUI.framework */; };
-		82F801872D13D1B1008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 82F8017A2D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		82F801EF2D146527008E5D09 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE02D124FE2008E5D09 /* WidgetKit.framework */; };
+		82F801F02D146527008E5D09 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F8FFE22D124FE2008E5D09 /* SwiftUI.framework */; };
+		82F801F92D146528008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,11 +65,11 @@
 			remoteGlobalIDString = 82F800912D125F68008E5D09;
 			remoteInfo = ReconnaissanceWidgetsExtension;
 		};
-		82F801852D13D1B1008E5D09 /* PBXContainerItemProxy */ = {
+		82F801FE2D14691A008E5D09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 82D07F512D07D6C8000A3179 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 82F801792D13D1B0008E5D09;
+			remoteGlobalIDString = 82F801ED2D146527008E5D09;
 			remoteInfo = ReconnaissanceWatchWidgetsExtension;
 		};
 /* End PBXContainerItemProxy section */
@@ -103,7 +103,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				82F801872D13D1B1008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex in Embed Foundation Extensions */,
+				82F801F92D146528008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -134,7 +134,7 @@
 		82F8010E2D12739C008E5D09 /* ReconnaissanceWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReconnaissanceWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		82F801682D13C735008E5D09 /* Actors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Actors.swift; sourceTree = "<group>"; };
 		82F8016F2D13C839008E5D09 /* UIScreenExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIScreenExt.swift; sourceTree = "<group>"; };
-		82F8017A2D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ReconnaissanceWatchWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ReconnaissanceWatchWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		82F8FFE02D124FE2008E5D09 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		82F8FFE22D124FE2008E5D09 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -168,12 +168,12 @@
 			);
 			target = 82F800912D125F68008E5D09 /* ReconnaissanceWidgetsExtension */;
 		};
-		82F8018B2D13D1B1008E5D09 /* Exceptions for "ReconnaissanceWatchWidgets" folder in "ReconnaissanceWatchWidgetsExtension" target */ = {
+		82F801FD2D146528008E5D09 /* Exceptions for "ReconnaissanceWatchWidgets" folder in "ReconnaissanceWatchWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 82F801792D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
+			target = 82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -201,10 +201,10 @@
 			path = ReconnaissanceWidgets;
 			sourceTree = "<group>";
 		};
-		82F8017D2D13D1B0008E5D09 /* ReconnaissanceWatchWidgets */ = {
+		82F801F12D146527008E5D09 /* ReconnaissanceWatchWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				82F8018B2D13D1B1008E5D09 /* Exceptions for "ReconnaissanceWatchWidgets" folder in "ReconnaissanceWatchWidgetsExtension" target */,
+				82F801FD2D146528008E5D09 /* Exceptions for "ReconnaissanceWatchWidgets" folder in "ReconnaissanceWatchWidgetsExtension" target */,
 			);
 			path = ReconnaissanceWatchWidgets;
 			sourceTree = "<group>";
@@ -240,12 +240,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		82F801772D13D1B0008E5D09 /* Frameworks */ = {
+		82F801EB2D146527008E5D09 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82F8017C2D13D1B0008E5D09 /* SwiftUI.framework in Frameworks */,
-				82F8017B2D13D1B0008E5D09 /* WidgetKit.framework in Frameworks */,
+				82F801F02D146527008E5D09 /* SwiftUI.framework in Frameworks */,
+				82F801EF2D146527008E5D09 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,7 +260,7 @@
 				82D07F5B2D07D6C8000A3179 /* Reconnaissance */,
 				82D07F6F2D07D6ED000A3179 /* Reconnaissance Watch Watch App */,
 				82F800952D125F69008E5D09 /* ReconnaissanceWidgets */,
-				82F8017D2D13D1B0008E5D09 /* ReconnaissanceWatchWidgets */,
+				82F801F12D146527008E5D09 /* ReconnaissanceWatchWidgets */,
 				82D07F5A2D07D6C8000A3179 /* Products */,
 				82D07F812D07D714000A3179 /* Shared */,
 				82D07FE92D08E638000A3179 /* Frameworks */,
@@ -273,7 +273,7 @@
 				82D07F592D07D6C8000A3179 /* Reconnaissance.app */,
 				82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */,
 				82F800922D125F68008E5D09 /* ReconnaissanceWidgetsExtension.appex */,
-				82F8017A2D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */,
+				82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -374,7 +374,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				82F801862D13D1B1008E5D09 /* PBXTargetDependency */,
+				82F801FF2D14691A008E5D09 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				82D07F6F2D07D6ED000A3179 /* Reconnaissance Watch Watch App */,
@@ -408,26 +408,26 @@
 			productReference = 82F800922D125F68008E5D09 /* ReconnaissanceWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		82F801792D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension */ = {
+		82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 82F801882D13D1B1008E5D09 /* Build configuration list for PBXNativeTarget "ReconnaissanceWatchWidgetsExtension" */;
+			buildConfigurationList = 82F801FA2D146528008E5D09 /* Build configuration list for PBXNativeTarget "ReconnaissanceWatchWidgetsExtension" */;
 			buildPhases = (
-				82F801762D13D1B0008E5D09 /* Sources */,
-				82F801772D13D1B0008E5D09 /* Frameworks */,
-				82F801782D13D1B0008E5D09 /* Resources */,
+				82F801EA2D146527008E5D09 /* Sources */,
+				82F801EB2D146527008E5D09 /* Frameworks */,
+				82F801EC2D146527008E5D09 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				82F8017D2D13D1B0008E5D09 /* ReconnaissanceWatchWidgets */,
+				82F801F12D146527008E5D09 /* ReconnaissanceWatchWidgets */,
 			);
 			name = ReconnaissanceWatchWidgetsExtension;
 			packageProductDependencies = (
 			);
 			productName = ReconnaissanceWatchWidgetsExtension;
-			productReference = 82F8017A2D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */;
+			productReference = 82F801EE2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -449,7 +449,7 @@
 					82F800912D125F68008E5D09 = {
 						CreatedOnToolsVersion = 16.2;
 					};
-					82F801792D13D1B0008E5D09 = {
+					82F801ED2D146527008E5D09 = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -478,7 +478,7 @@
 				82D07F582D07D6C8000A3179 /* Reconnaissance */,
 				82D07F6D2D07D6ED000A3179 /* Reconnaissance Watch Watch App */,
 				82F800912D125F68008E5D09 /* ReconnaissanceWidgetsExtension */,
-				82F801792D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension */,
+				82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -505,7 +505,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		82F801782D13D1B0008E5D09 /* Resources */ = {
+		82F801EC2D146527008E5D09 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -565,7 +565,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		82F801762D13D1B0008E5D09 /* Sources */ = {
+		82F801EA2D146527008E5D09 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -585,10 +585,10 @@
 			target = 82F800912D125F68008E5D09 /* ReconnaissanceWidgetsExtension */;
 			targetProxy = 82F800A32D125F69008E5D09 /* PBXContainerItemProxy */;
 		};
-		82F801862D13D1B1008E5D09 /* PBXTargetDependency */ = {
+		82F801FF2D14691A008E5D09 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 82F801792D13D1B0008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
-			targetProxy = 82F801852D13D1B1008E5D09 /* PBXContainerItemProxy */;
+			target = 82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
+			targetProxy = 82F801FE2D14691A008E5D09 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -914,7 +914,7 @@
 			};
 			name = Release;
 		};
-		82F801892D13D1B1008E5D09 /* Debug */ = {
+		82F801FB2D146528008E5D09 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -941,11 +941,11 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
-		82F8018A2D13D1B1008E5D09 /* Release */ = {
+		82F801FC2D146528008E5D09 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -972,7 +972,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -1015,11 +1015,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		82F801882D13D1B1008E5D09 /* Build configuration list for PBXNativeTarget "ReconnaissanceWatchWidgetsExtension" */ = {
+		82F801FA2D146528008E5D09 /* Build configuration list for PBXNativeTarget "ReconnaissanceWatchWidgetsExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				82F801892D13D1B1008E5D09 /* Debug */,
-				82F8018A2D13D1B1008E5D09 /* Release */,
+				82F801FB2D146528008E5D09 /* Debug */,
+				82F801FC2D146528008E5D09 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

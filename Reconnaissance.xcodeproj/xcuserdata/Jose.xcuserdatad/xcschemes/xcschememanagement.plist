@@ -7,17 +7,17 @@
 		<key>Reconnaissance Watch Watch App.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>4</integer>
+			<integer>3</integer>
 		</dict>
 		<key>Reconnaissance.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>1</integer>
 		</dict>
 		<key>ReconnaissanceWatchWidgetsExtension.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>2</integer>
 		</dict>
 		<key>ReconnaissanceWidgetsExtension.xcscheme_^#shared#^_</key>
 		<dict>
@@ -27,6 +27,16 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>82D07F582D07D6C8000A3179</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>82D07F6D2D07D6ED000A3179</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>82F8FFDE2D124FE2008E5D09</key>
 		<dict>
 			<key>primary</key>
