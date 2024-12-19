@@ -12,9 +12,13 @@ import SwiftUI
 struct GratitudeWidgetBundle: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
-        GratitudeTodayWidget() // iOS 17-compatible widget
+        GratitudeTodayWidget()
+        MilestonesWidget()
+        ReflectionSummaryWidget()
+        MemoryOfGratitudeWidget()
+       // HeatmapWidget()
 
-        if #available(iOS 18.0, *) {
+        if #available(iOS 17.0, *) {
             ReconnaissanceWidgetsLiveActivity()
         }
     }

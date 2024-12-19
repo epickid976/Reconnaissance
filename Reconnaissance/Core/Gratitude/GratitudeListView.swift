@@ -816,6 +816,20 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 createStyledTextField("Notes. Write something here...", text: $notes, isMultiline: true, field: .field4)
             }
             
+            // Error Message
+            if let error = error {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity)) // Animation
+                    .animation(
+                        .easeInOut(duration: 0.3),
+                        value: error
+                    ) // Animation Duration
+            }
+
             // Action Buttons
             HStack(spacing: 16) {
                 Button(action: {
@@ -842,14 +856,14 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     HapticManager.shared.trigger(.lightImpact)
                     Task {
                         let result = await saveGratitudeEntry()
-                        if result.isSuccess {
-                            HapticManager.shared.trigger(.success)
-                            await dismissLastPopup()
-                            onDone()
-                        } else {
-                            HapticManager.shared.trigger(.error)
-                            error = "Error saving entry. Please try again."
-                        }
+                            if result.isSuccess {
+                                HapticManager.shared.trigger(.success)
+                                await dismissLastPopup()
+                                onDone()
+                            } else {
+                                HapticManager.shared.trigger(.error)
+                                error = "Error saving entry. Please try again."
+                            }
                     }
                 }) {
                     Text(existingEntry == nil ? "Save" : "Update")
@@ -912,6 +926,28 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     
     func saveGratitudeEntry() async -> Result<Void, Error> {
+        do {
+            // Fetch all gratitude entries
+            let gratitudes = try modelContext.fetch(FetchDescriptor<DailyGratitude>())
+            let calendar = Calendar.current
+
+            // Check if a gratitude entry exists for today
+            if gratitudes
+                .first(where: { calendar.isDateInToday($0.date) }) != nil {
+                // If `today` exists, return failure
+                
+                return .failure(ValidationError.todayEntryExists)
+            }
+
+            // Continue processing if no entry exists for today
+            // Add your logic for continuing here
+            print("No entry for today. Proceeding...")
+        } catch {
+            // Handle failure
+            print("Error: \(error)")
+            return .failure(error)
+        }
+        
         guard !entry1.isEmpty && !entry2.isEmpty && !entry3.isEmpty else {
             print("Cannot save: One or more entries are empty")
             return .failure(ValidationError.emptyEntries)
@@ -944,6 +980,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     enum ValidationError: Error {
         case emptyEntries
+        case todayEntryExists
     }
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {

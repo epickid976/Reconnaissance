@@ -206,23 +206,15 @@ struct GratitudeTodayWidget: Widget {
     }
 }
 
-
-//struct AddGratitudeIntent: AppIntent {
-//    static var title: LocalizedStringResource = "Add Gratitude Entry"
-//    static var description = IntentDescription("Opens the app to add a new gratitude entry.")
-//
-//    func perform() async throws -> some IntentResult {
-//        // Open your app using the URL scheme
-//        if let url = URL(string: "reconnaissance://addGratitude") {
-//            await UIApplication.shared.open(url)
-//        }
-//        return .result()
-//    }
-//}
-
 #Preview(as: .systemMedium) {
     GratitudeTodayWidget()
 } timeline: {
     GratitudeEntry(date: .now, gratitude: sampleGratitude)
     GratitudeEntry(date: .now, gratitude: nil)
+}
+
+var widgetBackground: some View {
+    RoundedRectangle(cornerRadius: 12)
+        .fill(Color(uiColor: UIColor.secondarySystemBackground)) // Adaptive background
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2) // Subtle shadow
 }
