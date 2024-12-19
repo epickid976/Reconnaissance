@@ -21,10 +21,12 @@ struct SpacesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.presentToast) var presentToast
     
-    // Check if the user has made any purchase
-    private var hasAccess: Bool {
-        !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
-    }
+//    // Check if the user has made any purchase
+//    private var hasAccess: Bool {
+//        !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
+//    }
+    
+    @State var hasAccess = !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
     
     var sortedCategories: [SpaceCategory] {
         categories.sorted { $0.name < $1.name }
@@ -100,6 +102,9 @@ struct SpacesView: View {
                         .presentationDragIndicator(.visible)
                         .presentationCornerRadius(30) // Set the corner radius
                 }
+            }
+            .onAppear {
+                PurchaseManager.shared.fetchProducts()
             }
             
         }

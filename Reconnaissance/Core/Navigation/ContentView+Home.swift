@@ -14,10 +14,14 @@ import Toasts
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    
     
     var body: some View {
-        HomeTabView() // Your tab view becomes the root container
-            .onOpenURL { url in
+        ZStack {
+            if hasSeenOnboarding {
+                HomeTabView() // Your tab view becomes the root container
+                    .onOpenURL { url in
                         if url.scheme == "reconnaissance" && url.host == "addGratitude" {
                             Task {
                                 await CentrePopup_AddGratitudeEntry(
@@ -29,6 +33,10 @@ struct ContentView: View {
                             }
                         }
                     }
+            } else {
+                OnboardingView()
+            }
+        }.animation(.spring(), value: hasSeenOnboarding)
     }
     
     //MARK: - Debug Methods
