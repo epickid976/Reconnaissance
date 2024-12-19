@@ -12,6 +12,7 @@ final class PurchaseManager: NSObject, ObservableObject {
     static let shared = PurchaseManager()
     @Published var products: [SKProduct] = []
     @Published var purchasedProductIdentifiers: Set<String> = []
+    @Published var purchaseError: PurchaseError? = nil
     
     private let productIDs: [String] = [
         "SuperEco",
@@ -63,7 +64,9 @@ extension PurchaseManager: @preconcurrency SKPaymentTransactionObserver {
                 SKPaymentQueue.default().finishTransaction(transaction)
             case .failed:
                 if let error = transaction.error {
-                    print("Transaction failed: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        self.purchaseError = PurchaseError(message: error.localizedDescription)
+                    }
                 }
                 SKPaymentQueue.default().finishTransaction(transaction)
             default:
@@ -71,4 +74,9 @@ extension PurchaseManager: @preconcurrency SKPaymentTransactionObserver {
             }
         }
     }
+}
+
+struct PurchaseError: Identifiable {
+    let id = UUID() // Unique identifier
+    let message: String
 }

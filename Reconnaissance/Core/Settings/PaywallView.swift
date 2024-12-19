@@ -9,9 +9,11 @@ import SwiftUI
 import StoreKit
 
 struct PaywallView: View {
+    @Environment(\.dismiss) var dismiss
+    
     @StateObject private var purchaseManager = PurchaseManager.shared
     @State private var currentCardIndex: Int = 0 // Track the current card/page index
-
+    
     var body: some View {
         ZStack {
             // Gradient Background
@@ -45,13 +47,13 @@ struct PaywallView: View {
                         .padding(.horizontal, 20)
                         .foregroundColor(.white.opacity(0.8))
                 }
-
+                
                 if UIScreen.main.bounds.width <= 375 {
                     // Paginated Cards for Smaller Screens
                     ZStack {
                         ForEach(Array(purchaseManager.products.enumerated()), id: \.offset) {
- index,
- product in
+                            index,
+                            product in
                             HStack {
                                 // Left Chevron
                                 Button(action: {
@@ -122,7 +124,7 @@ struct PaywallView: View {
                     }
                     .padding(.horizontal, 16)
                 }
-
+                
                 // Restore Purchases Button
                 Button(action: {
                     purchaseManager.restorePurchases()
@@ -149,10 +151,19 @@ struct PaywallView: View {
             .padding(.vertical)
         }
         .onAppear {
-            purchaseManager.fetchProducts()
+            Task {
+                purchaseManager.fetchProducts()
+            }
+        }
+        .alert(item: $purchaseManager.purchaseError) { error in
+            Alert(
+                title: Text("Purchase Failed"),
+                message: Text(error.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
-
+    
     // Card View for Smaller Screens
     @ViewBuilder
     private func paywallCard(for product: SKProduct) -> some View {
@@ -165,6 +176,9 @@ struct PaywallView: View {
             Button(action: {
                 Task {
                     await PurchaseManager.shared.purchase(product)
+                    if purchaseManager.purchaseError == nil {
+                        dismiss() // Dismiss the paywall if purchase is successful
+                    }
                 }
             }) {
                 Text(product.priceFormatted)
@@ -193,13 +207,16 @@ struct PaywallView: View {
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
+    
     // Purchase Option for Larger Screens
     @ViewBuilder
     private func purchaseOption(for product: SKProduct) -> some View {
         Button(action: {
             Task {
                 await PurchaseManager.shared.purchase(product)
+                if purchaseManager.purchaseError == nil {
+                    dismiss() // Dismiss the paywall if purchase is successful
+                }
             }
         }) {
             HStack {
@@ -238,10 +255,10 @@ extension SKProduct {
 
 struct PurchaseOverviewView: View {
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var purchases = PurchaseManager.shared.products
     @State private var purchasedIdentifiers = PurchaseManager.shared.purchasedProductIdentifiers
-
+    
     var body: some View {
         NavigationView {
             ScrollView {
