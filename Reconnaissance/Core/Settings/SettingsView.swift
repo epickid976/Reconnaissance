@@ -137,7 +137,7 @@ struct SettingsView: View {
                     var preferences: [GroupedPreferenceRow.Preference] = [
                         GroupedPreferenceRow.Preference(
                             icon: "globe",
-                            title: "Language",
+                            title: NSLocalizedString("Language", comment: ""),
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
                                 UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
@@ -176,7 +176,7 @@ struct SettingsView: View {
                         preferences.append(
                             GroupedPreferenceRow.Preference(
                                 icon: "iphone.homebutton.radiowaves.left.and.right",
-                                title: "Haptics",
+                                title: NSLocalizedString("Haptics", comment: ""),
                                 iconColor: .green,
                                 toggleValue: $preferencesViewModel.hapticFeedback
                             )
@@ -210,7 +210,7 @@ struct SettingsView: View {
                     let preferences: [GroupedPreferenceRow.Preference] = [
                         GroupedPreferenceRow.Preference(
                             icon: "star.fill",
-                            title: "Review App",
+                            title: NSLocalizedString("Review App", comment: ""),
                             iconColor: .yellow,
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
@@ -219,7 +219,7 @@ struct SettingsView: View {
                         ),
                         GroupedPreferenceRow.Preference(
                             icon: "lock.doc",
-                            title: "Privacy Policy",
+                            title: NSLocalizedString("Privacy Policy", comment: ""),
                             iconColor: .pink,
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
@@ -228,7 +228,7 @@ struct SettingsView: View {
                         ),
                         GroupedPreferenceRow.Preference(
                             icon: "square.and.arrow.up",
-                            title: "Share App",
+                            title: NSLocalizedString("Share App", comment: ""),
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
                                 shareApp()
@@ -236,7 +236,7 @@ struct SettingsView: View {
                         ),
                         GroupedPreferenceRow.Preference(
                             icon: "info.circle.fill",
-                            title: "About App",
+                            title: NSLocalizedString("About App", comment: ""),
                             iconColor: .indigo,
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
@@ -248,7 +248,7 @@ struct SettingsView: View {
                         ),
                         GroupedPreferenceRow.Preference(
                             icon: "cart.fill",
-                            title: "Purchase Overview",
+                            title: NSLocalizedString("Purchase Overview", comment: ""),
                             iconColor: .blue,
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
@@ -257,7 +257,7 @@ struct SettingsView: View {
                         ),
                         GroupedPreferenceRow.Preference(
                             icon: "numbers.rectangle.fill",
-                            title: "App Version - \(getAppVersion())",
+                            title: NSLocalizedString("App Version - \(getAppVersion())", comment: ""),
                             iconColor: .teal,
                             action: {
                                 HapticManager.shared.trigger(.lightImpact)
@@ -268,7 +268,7 @@ struct SettingsView: View {
                                                 DispatchQueue.main.async {
                                                     let toast = ToastValue(
                                                         icon: Image(systemName: "123.rectangle.fill").foregroundStyle(.green),
-                                                        message: "Update available!",
+                                                        message: NSLocalizedString("Update available!", comment: ""),
                                                         button: ToastButton(title: "Update", color: .green, action: {
                                                             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                                                 UIApplication.shared.open(URL(string: "https://apps.apple.com/us/app/service-maps/id1664309103")!)
@@ -282,7 +282,7 @@ struct SettingsView: View {
                                                 DispatchQueue.main.async {
                                                     let toast = ToastValue(
                                                         icon: Image(systemName: "123.rectangle.fill").foregroundStyle(.green),
-                                                        message: "App is up to date!"
+                                                        message: NSLocalizedString("App is up to date!", comment: "")
                                                     )
                                                     presentToast(toast)
                                                 }
@@ -303,7 +303,7 @@ struct SettingsView: View {
                                     HapticManager.shared.trigger(.error)
                                     let toast = ToastValue(
                                         icon: Image(systemName: "exclamationmark.warninglight.fill").foregroundStyle(.red),
-                                        message:"Error Checking for Updates"
+                                        message: NSLocalizedString("Error Checking for Updates", comment: "")
                                     )
                                     presentToast(toast)
                                 }
@@ -327,7 +327,7 @@ struct SettingsView: View {
                         let preferences: [GroupedPreferenceRow.Preference] = [
                             GroupedPreferenceRow.Preference(
                                 icon: "folder.fill",
-                                title: "Import / Export Data",
+                                title: NSLocalizedString("Import / Export Data", comment: ""),
                                 iconColor: .orange,
                                 action: {
                                     HapticManager.shared.trigger(.lightImpact)
@@ -375,7 +375,7 @@ struct SettingsView: View {
                             ),
                             GroupedPreferenceRow.Preference(
                                 icon: "trash",
-                                title: "Delete Data",
+                                title: NSLocalizedString("Delete Data", comment: ""),
                                 iconColor: .red,
                                 action: {
                                     HapticManager.shared.trigger(.lightImpact)

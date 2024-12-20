@@ -180,7 +180,7 @@ struct GratitudeListView: View {
                                                 ScrollViewReader { proxy in
                                                     ScrollView(.horizontal, showsIndicators: false) {
                                                         HStack(spacing: 10) {
-                                                            chipView(title: "Today", isSelected: selectedDateRange == .today) {
+                                                            chipView(title: NSLocalizedString("Today", comment: ""), isSelected: selectedDateRange == .today) {
                                                                 withAnimation(.easeInOut(duration: 0.3)) {
                                                                     selectedDateRange = .today
                                                                     proxy.scrollTo("Today", anchor: .center)
@@ -188,7 +188,7 @@ struct GratitudeListView: View {
                                                             }
                                                             .id("Today")
                                                             
-                                                            chipView(title: "Yesterday", isSelected: selectedDateRange == .yesterday) {
+                                                            chipView(title: NSLocalizedString("Yesterday", comment: ""), isSelected: selectedDateRange == .yesterday) {
                                                                 withAnimation(.easeInOut(duration: 0.3)) {
                                                                     selectedDateRange = .yesterday
                                                                     proxy.scrollTo("Yesterday", anchor: .center)
@@ -196,7 +196,7 @@ struct GratitudeListView: View {
                                                             }
                                                             .id("Yesterday")
                                                             
-                                                            chipView(title: "This Week", isSelected: selectedDateRange == .thisWeek) {
+                                                            chipView(title: NSLocalizedString("This Week", comment: ""), isSelected: selectedDateRange == .thisWeek) {
                                                                 withAnimation(.easeInOut(duration: 0.3)) {
                                                                     selectedDateRange = .thisWeek
                                                                     proxy.scrollTo("This Week", anchor: .center)
@@ -204,7 +204,7 @@ struct GratitudeListView: View {
                                                             }
                                                             .id("This Week")
                                                             
-                                                            chipView(title: "Last Week", isSelected: selectedDateRange == .lastWeek) {
+                                                            chipView(title: NSLocalizedString("Last Week", comment: ""), isSelected: selectedDateRange == .lastWeek) {
                                                                 withAnimation(.easeInOut(duration: 0.3)) {
                                                                     selectedDateRange = .lastWeek
                                                                     proxy.scrollTo("Last Week", anchor: .center)
@@ -212,7 +212,7 @@ struct GratitudeListView: View {
                                                             }
                                                             .id("Last Week")
                                                             
-                                                            chipView(title: "Custom Range", isSelected: selectedDateRange == .custom) {
+                                                            chipView(title: NSLocalizedString("Custom Range", comment: ""), isSelected: selectedDateRange == .custom) {
                                                                 withAnimation(.easeInOut(duration: 0.3)) {
                                                                     selectedDateRange = .custom
                                                                     Task {
@@ -788,7 +788,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     Text("🌟")
                         .font(.title2)
                     createStyledTextField(
-                        "Gratitude Entry 1",
+                        NSLocalizedString("Gratitude Entry 1", comment: ""),
                         text: $entry1,
                         field: .field1
                     )
@@ -797,13 +797,13 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                 HStack {
                     Text("❤️")
                         .font(.title2)
-                    createStyledTextField("Gratitude Entry 2", text: $entry2, field: .field2)
+                    createStyledTextField(NSLocalizedString("Gratitude Entry 2", comment: ""), text: $entry2, field: .field2)
                 }
                 
                 HStack {
                     Text("🍃")
                         .font(.title2)
-                    createStyledTextField("Gratitude Entry 3", text: $entry3, field: .field3)
+                    createStyledTextField(NSLocalizedString("Gratitude Entry 3", comment: ""), text: $entry3, field: .field3)
                 }
             }
             
@@ -813,7 +813,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                createStyledTextField("Notes. Write something here...", text: $notes, isMultiline: true, field: .field4)
+                createStyledTextField(NSLocalizedString("Notes. Write something here...", comment: ""), text: $notes, isMultiline: true, field: .field4)
             }
             
             // Error Message
@@ -862,7 +862,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                                 onDone()
                             } else {
                                 HapticManager.shared.trigger(.error)
-                                error = "Error saving entry. Please try again."
+                                error = NSLocalizedString("Error saving entry. Please try again.", comment: "")
                             }
                     }
                 }) {

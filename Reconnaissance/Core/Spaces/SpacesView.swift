@@ -83,7 +83,7 @@ struct SpacesView: View {
                                 ) {
                                     let toast = ToastValue(
                                         icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
-                                        message: NSLocalizedString("Category Added", comment: "")
+                                        message: NSLocalizedString("Space Added", comment: "")
                                     )
                                     presentToast(toast)
                                 }.present()
@@ -129,7 +129,7 @@ struct SpacesView: View {
                     await CentrePopup_AddCategory(modelContext: modelContext) {
                         let toast = ToastValue(
                             icon: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green),
-                            message: NSLocalizedString("Category Added", comment: "")
+                            message: NSLocalizedString("Space Added", comment: "")
                         )
                         presentToast(toast)
                     }
@@ -174,7 +174,7 @@ struct SpacesView: View {
                                         ) {
                                             let toast = ToastValue(
                                                 icon: Image(systemName: "trash.circle.fill").foregroundStyle(.red),
-                                                message: NSLocalizedString("Category Deleted", comment: "")
+                                                message: NSLocalizedString("Space Deleted", comment: "")
                                             )
                                             presentToast(toast)
                                         }.present()
@@ -509,18 +509,18 @@ struct CentrePopup_AddCategory: CenterPopup {
         ZStack {
             VStack(spacing: 16) {
                 // Dynamic Title
-                Text(existingCategory == nil ? "Add Category" : "Edit Category")
+                Text(existingCategory == nil ? "Add Space" : "Edit Space")
                     .font(.headline)
                     .padding(.bottom, 8)
                 
                 // Name TextField
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Category Name")
+                    Text("Space Name")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     createStyledTextField(
-                        "Enter category name",
+                        NSLocalizedString("Enter Space name", comment: ""),
                         text: $categoryName,
                         field: .name
                     )
@@ -533,7 +533,7 @@ struct CentrePopup_AddCategory: CenterPopup {
                 
                 // Color Picker
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Category Color")
+                    Text("Space Color")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -572,7 +572,7 @@ struct CentrePopup_AddCategory: CenterPopup {
                                 onDone()
                             } else {
                                 HapticManager.shared.trigger(.error)
-                                error = "Error saving category. Please try again."
+                                error = "Error saving space. Please try again."
                             }
                         }
                     }) {
@@ -626,7 +626,7 @@ struct CentrePopup_AddCategory: CenterPopup {
     
     func saveCategory() async -> Result<Void, Error> {
         guard !categoryName.isEmpty else {
-            print("Cannot save: Category name is empty")
+            print("Cannot save: Space name is empty")
             return .failure(ValidationError.emptyName)
         }
         

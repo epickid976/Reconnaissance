@@ -27,9 +27,9 @@ struct CustomDateRangePicker: View {
                     .fontWeight(.bold)
                 
                 HStack {
-                    dateLabel(title: "Start Date", date: startDate)
+                    dateLabel(title: NSLocalizedString("Start Date", comment: ""), date: startDate)
                     Spacer()
-                    dateLabel(title: "End Date", date: endDate)
+                    dateLabel(title: NSLocalizedString("End Date", comment: ""), date: endDate)
                 }
                 .padding(.horizontal)
             }
@@ -185,7 +185,7 @@ struct CustomDateRangePicker: View {
             Text(title)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text(date.map { DateFormatter.medium.string(from: $0) } ?? "Not selected")
+            Text(date.map { DateFormatter.medium.string(from: $0) } ?? NSLocalizedString("Not selected", comment: ""))
                 .font(.body)
         }
     }

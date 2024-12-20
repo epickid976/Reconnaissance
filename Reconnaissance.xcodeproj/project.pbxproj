@@ -148,6 +148,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Gratitude/GratitudeCell.swift,
+				Localizable.xcstrings,
 			);
 			target = 82D07F6D2D07D6ED000A3179 /* Reconnaissance Watch Watch App */;
 		};
@@ -169,6 +170,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Gratitude/HeatMap.swift,
+				Localizable.xcstrings,
 			);
 			target = 82F800912D125F68008E5D09 /* ReconnaissanceWidgetsExtension */;
 		};
@@ -176,6 +178,13 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+			);
+			target = 82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
+		};
+		82F8023D2D159C7D008E5D09 /* Exceptions for "Reconnaissance" folder in "ReconnaissanceWatchWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Localizable.xcstrings,
 			);
 			target = 82F801ED2D146527008E5D09 /* ReconnaissanceWatchWidgetsExtension */;
 		};
@@ -188,6 +197,7 @@
 				82D07F862D07D796000A3179 /* Exceptions for "Reconnaissance" folder in "Reconnaissance" target */,
 				824711C12D0E9992005E44E7 /* Exceptions for "Reconnaissance" folder in "Reconnaissance Watch Watch App" target */,
 				82F801672D13C70E008E5D09 /* Exceptions for "Reconnaissance" folder in "ReconnaissanceWidgetsExtension" target */,
+				82F8023D2D159C7D008E5D09 /* Exceptions for "Reconnaissance" folder in "ReconnaissanceWatchWidgetsExtension" target */,
 			);
 			path = Reconnaissance;
 			sourceTree = "<group>";
@@ -465,6 +475,8 @@
 			knownRegions = (
 				en,
 				Base,
+				fr,
+				"es-419",
 			);
 			mainGroup = 82D07F502D07D6C8000A3179;
 			minimizedProjectReferenceProxies = 1;
@@ -660,6 +672,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
 			};
@@ -717,6 +730,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				VALIDATE_PRODUCT = YES;
 			};

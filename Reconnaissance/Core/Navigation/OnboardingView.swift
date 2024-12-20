@@ -15,32 +15,32 @@ struct OnboardingView: View {
     
     private let onboardingData = [
         OnboardingItem(
-            title: "Welcome to Gratitude!",
-            description: "Reflect on your day and jot down three things you're grateful for.",
+            title: NSLocalizedString("Welcome to Gratitude!", comment: ""),
+            description: NSLocalizedString("Reflect on your day and jot down three things you're grateful for.", comment: ""),
             imageName: "sun.max",
             gradient: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]
         ),
         OnboardingItem(
-            title: "Track Your History",
-            description: "See all your past entries and relive your moments of gratitude.",
+            title: NSLocalizedString("Track Your History", comment: ""),
+            description: NSLocalizedString("See all your past entries and relive your moments of gratitude.", comment: ""),
             imageName: "calendar",
             gradient: [Color.green.opacity(0.3), Color.teal.opacity(0.3)]
         ),
         OnboardingItem(
-            title: "Unlock Spaces",
-            description: "Create Spaces to organize images, documents, and items that make you feel better.",
+            title: NSLocalizedString("Unlock Spaces", comment: ""),
+            description: NSLocalizedString("Create Spaces to organize images, documents, and items that make you feel better.", comment: ""),
             imageName: "folder",
             gradient: [Color.orange.opacity(0.3), Color.pink.opacity(0.3)]
         ),
         OnboardingItem(
-            title: "Widgets for Quick Access",
-            description: "Add widgets to your home screen for easy journaling.",
+            title: NSLocalizedString("Widgets for Quick Access", comment: ""),
+            description: NSLocalizedString("Add widgets to your home screen for easy journaling.", comment: ""),
             imageName: "rectangle.stack",
             gradient: [Color.cyan.opacity(0.3), Color.indigo.opacity(0.3)]
         ),
         OnboardingItem(
-            title: "Sync Across Devices",
-            description: "All your data syncs securely through iCloud.",
+            title: NSLocalizedString("Sync Across Devices", comment: ""),
+            description: NSLocalizedString("All your data syncs securely through iCloud.", comment: ""),
             imageName: "icloud",
             gradient: [Color.yellow.opacity(0.3), Color.blue.opacity(0.3)]
         )
@@ -74,7 +74,7 @@ struct OnboardingView: View {
                         dismiss()
                     }
                 }) {
-                    Text(currentPage < onboardingData.count - 1 ? "Next" : "Get Started")
+                    Text(currentPage < onboardingData.count - 1 ? NSLocalizedString("Next", comment: "") : NSLocalizedString("Get Started", comment: ""))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(

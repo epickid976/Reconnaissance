@@ -55,6 +55,10 @@ enum ItemType: String, Codable, CaseIterable {
     case document
     case image
     case text
+
+    var localized: String {
+        NSLocalizedString(self.rawValue, comment: "")
+    }
 }
 
 @Model

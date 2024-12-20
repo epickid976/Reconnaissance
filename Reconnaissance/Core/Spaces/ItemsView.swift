@@ -347,7 +347,7 @@ struct ItemCell: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Type Tag
                     HStack {
-                        Text(item.type.rawValue.capitalized)
+                        Text(item.type.localized.capitalized)
                             .font(.caption)
                             .foregroundColor(typeColor(for: item.type))
                             .padding(6)
@@ -667,7 +667,7 @@ struct CentrePopup_AddItem: CenterPopup {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                createStyledTextField("Enter item name", text: $itemName, field: .name)
+                createStyledTextField(NSLocalizedString("Enter item name", comment: ""), text: $itemName, field: .name)
             }
             
             // Item Type Picker
@@ -683,7 +683,7 @@ struct CentrePopup_AddItem: CenterPopup {
                                 itemType = type
                             }
                         }) {
-                            Text(type.rawValue.capitalized)
+                            Text(type.localized.capitalized)
                                 .font(.subheadline)
                                 .frame(maxWidth: .infinity)
                                 .padding(12)
@@ -744,7 +744,7 @@ struct CentrePopup_AddItem: CenterPopup {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
-            createStyledTextField("Enter text content", text: $textContent, isMultiline: true, field: .textContent)
+            createStyledTextField(NSLocalizedString("Enter text content", comment: ""), text: $textContent, isMultiline: true, field: .textContent)
         }
     }
     
