@@ -81,14 +81,14 @@ struct GratitudeTodayView: View {
 
                         Spacer()
 
-                        Text("🔥 \(gratitude.streak) Day\(gratitude.streak > 1 ? "s" : "")")
+                        Text(NSLocalizedString("🔥 \(gratitude.streak) Day\(gratitude.streak > 1 ? "s" : "")", comment: ""))
                             .font(.caption.bold())
                             .foregroundColor(.orange)
                             .lineLimit(1)
                     }
                 } else {
                     // Only Streak for small widget
-                    Text("🔥 \(gratitude.streak) Day\(gratitude.streak > 1 ? "s" : "")")
+                    Text(NSLocalizedString("🔥 \(gratitude.streak) Day\(gratitude.streak > 1 ? "s" : "")", comment: ""))
                         .font(.subheadline.bold())
                         .foregroundColor(.orange)
                 }
@@ -130,7 +130,7 @@ struct GratitudeTodayView: View {
                 VStack(spacing: 12) {
                     if widgetFamily == .systemSmall {
                         VStack(spacing: 8) {
-                            Text("No Gratitude Entries Yet")
+                            Text(NSLocalizedString("No Gratitude Entries Yet", comment: ""))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center) // Center text for small widget
@@ -140,18 +140,18 @@ struct GratitudeTodayView: View {
                                     .font(.title2) // Larger icon for visibility
                                     .foregroundColor(.blue)
                                 
-                                Text("Add Gratitude")
+                                Text(NSLocalizedString("Add Gratitude", comment: ""))
                                     .font(.caption.bold())
                                     .foregroundColor(.blue)
                             }
                         }
                     } else {
                         VStack(spacing: 12) {
-                            Text("No Gratitude Entries Yet")
+                            Text(NSLocalizedString("No Gratitude Entries Yet", comment: ""))
                                 .font(.headline)
                                 .foregroundColor(.secondary)
                             
-                            Label("Add Gratitude", systemImage: "plus.circle.fill")
+                            Label(NSLocalizedString("Add Gratitude", comment: ""), systemImage: "plus.circle.fill")
                                 .font(.subheadline.bold())
                                 .foregroundColor(.blue)
                         }

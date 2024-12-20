@@ -61,7 +61,7 @@ struct MilestonesWidgetView: View {
     @ViewBuilder
     private func smallWidget(totalEntries: Int, thisWeekCount: Int) -> some View {
         VStack(spacing: 8) {
-            Text("🎯 Milestones")
+            Text(NSLocalizedString("🎯 Milestones", comment: ""))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
@@ -73,11 +73,11 @@ struct MilestonesWidgetView: View {
             )
             .frame(width: 40, height: 40)
 
-            Text("\(thisWeekCount)/7")
+            Text(NSLocalizedString("\(thisWeekCount)/7", comment: ""))
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            Text("Week Progress")
+            Text(NSLocalizedString("Week Progress", comment: ""))
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .lineLimit(1)
@@ -93,7 +93,7 @@ struct MilestonesWidgetView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
-                Text("🎯 Milestones")
+                Text(NSLocalizedString("🎯 Milestones", comment: ""))
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -103,11 +103,11 @@ struct MilestonesWidgetView: View {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 8) {
                     // Total Entries
-                    Text("🎉 \(totalEntries) entries!")
+                    Text(NSLocalizedString("🎉 \(totalEntries) entries!", comment: ""))
                         .font(.subheadline)
                         .foregroundColor(.blue)
                     
-                    Text("Logged \(totalEntries) entries so far.")
+                    Text(NSLocalizedString("Logged \(totalEntries) entries so far.", comment: ""))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -123,11 +123,11 @@ struct MilestonesWidgetView: View {
                     )
                     .frame(width: 50, height: 50)
 
-                    Text("\(thisWeekCount)/7")
+                    Text(NSLocalizedString("\(thisWeekCount)/7", comment: ""))
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    Text("Week Progress")
+                    Text(NSLocalizedString("Week Progress", comment: ""))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

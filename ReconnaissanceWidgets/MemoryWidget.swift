@@ -44,7 +44,7 @@ struct MemoryWidgetView: View {
         let randomGratitude = gratitudes.randomElement()
 
         VStack(alignment: .leading, spacing: 8) {
-            Text("🧠 Memory of Gratitude")
+            Text(NSLocalizedString("🧠 Memory of Gratitude", comment: ""))
                 .font(widgetFamily == .systemSmall ? .subheadline : .headline)
                 .fontWeight(.semibold)
 
@@ -64,7 +64,7 @@ struct MemoryWidgetView: View {
                         .foregroundColor(.primary)
                 }
             } else {
-                Text("No memories yet.")
+                Text(NSLocalizedString("No memories yet.", comment: ""))
                     .font(widgetFamily == .systemSmall ? .caption : .subheadline)
                     .foregroundColor(.secondary)
             }

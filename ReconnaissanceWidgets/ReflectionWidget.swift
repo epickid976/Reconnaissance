@@ -47,7 +47,7 @@ struct ReflectionSummaryWidgetView: View {
         let lastEntryDate = gratitudes.first?.date
 
         VStack(alignment: .leading, spacing: 8) {
-            Text("📝 Reflection Summary")
+            Text(NSLocalizedString("📝 Reflection Summary", comment: ""))
                 .font(.headline)
                 .fontWeight(.semibold)
 
@@ -61,7 +61,7 @@ struct ReflectionSummaryWidgetView: View {
                         .foregroundColor(.secondary)
                 }
             } else {
-                Text("Start your gratitude journey today!")
+                Text(NSLocalizedString("Start your gratitude journey today!", comment: ""))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }

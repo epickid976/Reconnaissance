@@ -304,7 +304,20 @@
       }
     },
     "Add widgets to your home screen for easy journaling." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega widgets a tu pantalla de inicio para facilitar el diario."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez des widgets à votre écran d’accueil pour un journal facile."
+          }
+        }
+      }
     },
     "All fields are required!" : {
       "localizations" : {
@@ -323,7 +336,20 @@
       }
     },
     "All your data syncs securely through iCloud." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos tus datos se sincronizan de forma segura a través de iCloud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes vos données se synchronisent en toute sécurité via iCloud."
+          }
+        }
+      }
     },
     "App" : {
       "localizations" : {
@@ -342,7 +368,20 @@
       }
     },
     "App is up to date!" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡La aplicación está actualizada!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’application est à jour !"
+          }
+        }
+      }
     },
     "App Shortcut" : {
       "localizations" : {
@@ -649,10 +688,36 @@
       }
     },
     "Create Spaces to organize images, documents, and items that make you feel better." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea Espacios para organizar imágenes, documentos y elementos que te hagan sentir mejor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créez des Espaces pour organiser des images, des documents et des objets qui vous font vous sentir mieux."
+          }
+        }
+      }
     },
     "Custom Range" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rango Personalizado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plage Personnalisée"
+          }
+        }
+      }
     },
     "Delete" : {
       "localizations" : {
@@ -687,7 +752,20 @@
       }
     },
     "Delete Data" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les Données"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar Datos"
+          }
+        }
+      }
     },
     "Delete Gratitude Entry" : {
       "localizations" : {
@@ -898,16 +976,68 @@
       }
     },
     "End Date" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de finalización"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date de fin"
+          }
+        }
+      }
     },
     "Enter item name" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa el nombre del elemento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le nom de l’élément"
+          }
+        }
+      }
     },
     "Enter Space name" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa el nombre del Espacio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le nom de l’Espace"
+          }
+        }
+      }
     },
     "Enter text content" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingresa el contenido del texto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le contenu du texte"
+          }
+        }
+      }
     },
     "Entries" : {
       "localizations" : {
@@ -926,10 +1056,36 @@
       }
     },
     "Error Checking for Updates" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error al buscar actualizaciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur lors de la vérification des mises à jour"
+          }
+        }
+      }
     },
     "Error saving entry. Please try again." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error al guardar la entrada. Por favor, inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur lors de l’enregistrement de l’entrée. Veuillez réessayer."
+          }
+        }
+      }
     },
     "Export" : {
       "localizations" : {
@@ -1012,13 +1168,52 @@
       }
     },
     "Gratitude Entry 1" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrada de Gratitud 1"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrée de Gratitude 1"
+          }
+        }
+      }
     },
     "Gratitude Entry 2" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrada de Gratitud 2"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrée de Gratitude 2"
+          }
+        }
+      }
     },
     "Gratitude Entry 3" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrada de Gratitud 3"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrée de Gratitude 3"
+          }
+        }
+      }
     },
     "Gratitude Streaks" : {
       "localizations" : {
@@ -1053,7 +1248,20 @@
       }
     },
     "Haptics" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibraciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrations"
+          }
+        }
+      }
     },
     "Hello %@" : {
       "localizations" : {
@@ -1200,7 +1408,20 @@
       }
     },
     "Import / Export Data" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importar / Exportar Datos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importer / Exporter des Données"
+          }
+        }
+      }
     },
     "Importing..." : {
       "localizations" : {
@@ -1315,7 +1536,14 @@
       }
     },
     "Language" : {
-
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue"
+          }
+        }
+      }
     },
     "Last entry: %@" : {
       "localizations" : {
@@ -1334,7 +1562,20 @@
       }
     },
     "Last Week" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana Pasada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La Semaine Dernière"
+          }
+        }
+      }
     },
     "Leading" : {
       "localizations" : {
@@ -1545,7 +1786,20 @@
       }
     },
     "Not selected" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Seleccionado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas selectioné"
+          }
+        }
+      }
     },
     "Notes" : {
       "localizations" : {
@@ -1580,7 +1834,20 @@
       }
     },
     "Notes. Write something here..." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas. Escribe algo aqui…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes. Ecrivez quelque chose ici…"
+          }
+        }
+      }
     },
     "OK" : {
       "localizations" : {
@@ -1695,7 +1962,20 @@
       }
     },
     "Purchase Overview" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen de Compra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçu des Achats"
+          }
+        }
+      }
     },
     "Purchased" : {
       "localizations" : {
@@ -1762,7 +2042,20 @@
       }
     },
     "Reflect on your day and jot down three things you're grateful for." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reflexiona sobre tu día y anota tres cosas por las que estás agradecido."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réfléchissez à votre journée et notez trois choses pour lesquelles vous êtes reconnaissant."
+          }
+        }
+      }
     },
     "Reflection Summary" : {
       "localizations" : {
@@ -1797,7 +2090,20 @@
       }
     },
     "Review App" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evaluar la Aplicación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Évaluer l’Application"
+          }
+        }
+      }
     },
     "Review your gratitude journey." : {
       "localizations" : {
@@ -1832,7 +2138,20 @@
       }
     },
     "See all your past entries and relive your moments of gratitude." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ve todas tus entradas pasadas y revive tus momentos de gratitud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultez toutes vos entrées passées et revivez vos moments de gratitude."
+          }
+        }
+      }
     },
     "See History" : {
       "localizations" : {
@@ -1931,7 +2250,20 @@
       }
     },
     "Share App" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir la Aplicación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager l’Application"
+          }
+        }
+      }
     },
     "Space Added" : {
       "localizations" : {
@@ -2014,7 +2346,20 @@
       }
     },
     "Start Date" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de Inicio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date de Début"
+          }
+        }
+      }
     },
     "Start your gratitude journey today!" : {
       "localizations" : {
@@ -2097,7 +2442,20 @@
       }
     },
     "Sync Across Devices" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar entre Dispositivos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniser sur tous les Appareils"
+          }
+        }
+      }
     },
     "T %@" : {
       "localizations" : {
@@ -2260,7 +2618,20 @@
       }
     },
     "This Week" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta Semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette Semaine"
+          }
+        }
+      }
     },
     "Today" : {
       "localizations" : {
@@ -2311,7 +2682,20 @@
       }
     },
     "Track Your History" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sigue tu Historial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivez votre Historique"
+          }
+        }
+      }
     },
     "Track your milestones and weekly progress." : {
       "localizations" : {
@@ -2410,7 +2794,20 @@
       }
     },
     "Update available!" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Actualización disponible!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à jour disponible !"
+          }
+        }
+      }
     },
     "Version %@" : {
       "localizations" : {
@@ -2460,14 +2857,53 @@
         }
       }
     },
-    "Welcome to Gratitude!" : {
-
+    "Welcome to Reconnaissance!" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Bienvenido a Reconocimiento!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenue sur Reconnaissance !"
+          }
+        }
+      }
     },
     "Widgets for Quick Access" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets para Acceso Rápido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets pour un Accès Rapide"
+          }
+        }
+      }
     },
     "Yesterday" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier"
+          }
+        }
+      }
     },
     "Yesterday " : {
       "localizations" : {

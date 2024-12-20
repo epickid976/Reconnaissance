@@ -15,7 +15,7 @@ struct OnboardingView: View {
     
     private let onboardingData = [
         OnboardingItem(
-            title: NSLocalizedString("Welcome to Gratitude!", comment: ""),
+            title: NSLocalizedString("Welcome to Reconnaissance!", comment: ""),
             description: NSLocalizedString("Reflect on your day and jot down three things you're grateful for.", comment: ""),
             imageName: "sun.max",
             gradient: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]
