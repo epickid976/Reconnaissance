@@ -26,9 +26,11 @@ struct SpacesView: View {
 //        !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
 //    }
     
+    @StateObject var purchaseManager = PurchaseManager.shared
+    
     // Check if the user has made any purchase
     private var hasAccess: Bool {
-        !PurchaseManager.shared.purchasedProductIdentifiers.isEmpty
+        !purchaseManager.purchasedProductIdentifiers.isEmpty
     }
     
     var sortedCategories: [SpaceCategory] {

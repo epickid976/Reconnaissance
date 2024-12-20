@@ -10,8 +10,9 @@ import StoreKit
 @MainActor
 final class PurchaseManager: NSObject, ObservableObject {
     static let shared = PurchaseManager()
+    
     @Published var products: [SKProduct] = []
-    @Published var purchasedProductIdentifiers: Set<String> = []
+    @Published var isProUser: Bool = false
     @Published var purchaseError: PurchaseError? = nil
     
     private let productIDs: [String] = [
@@ -22,11 +23,16 @@ final class PurchaseManager: NSObject, ObservableObject {
         "UltimatePurchase"
     ]
     
+    var purchasedProductIdentifiers: Set<String> = []
+
     override private init() {
         super.init()
         SKPaymentQueue.default().add(self) // Observe transactions
+        loadPurchasedProducts()
         fetchProducts()
     }
+    
+    // MARK: - Public Methods
     
     func fetchProducts() {
         let request = SKProductsRequest(productIdentifiers: Set(productIDs))
@@ -42,8 +48,29 @@ final class PurchaseManager: NSObject, ObservableObject {
     func restorePurchases() {
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
+    
+    // MARK: - Private Methods
+    
+    private func loadPurchasedProducts() {
+        // Load purchase state from UserDefaults
+        let savedIdentifiers = UserDefaults.standard.stringArray(forKey: "purchasedProducts") ?? []
+        purchasedProductIdentifiers = Set(savedIdentifiers)
+        isProUser = !purchasedProductIdentifiers.isEmpty
+    }
+    
+    private func savePurchasedProduct(_ identifier: String) {
+        // Save new purchase to UserDefaults
+        purchasedProductIdentifiers.insert(identifier)
+        var savedIdentifiers = UserDefaults.standard.stringArray(forKey: "purchasedProducts") ?? []
+        if !savedIdentifiers.contains(identifier) {
+            savedIdentifiers.append(identifier)
+            UserDefaults.standard.set(savedIdentifiers, forKey: "purchasedProducts")
+        }
+        isProUser = !purchasedProductIdentifiers.isEmpty
+    }
 }
 
+// MARK: - SKProductsRequestDelegate
 extension PurchaseManager: SKProductsRequestDelegate {
     nonisolated func productsRequest(
         _ request: SKProductsRequest,
@@ -55,12 +82,13 @@ extension PurchaseManager: SKProductsRequestDelegate {
     }
 }
 
+// MARK: - SKPaymentTransactionObserver
 extension PurchaseManager: @preconcurrency SKPaymentTransactionObserver {
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
             switch transaction.transactionState {
             case .purchased, .restored:
-                purchasedProductIdentifiers.insert(transaction.payment.productIdentifier)
+                savePurchasedProduct(transaction.payment.productIdentifier)
                 SKPaymentQueue.default().finishTransaction(transaction)
             case .failed:
                 if let error = transaction.error {
@@ -74,9 +102,22 @@ extension PurchaseManager: @preconcurrency SKPaymentTransactionObserver {
             }
         }
     }
+    
+    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
+        // Called after all restore transactions are processed
+        var savedIdentifiers = UserDefaults.standard.stringArray(forKey: "purchasedProducts") ?? []
+        for identifier in purchasedProductIdentifiers {
+            if !savedIdentifiers.contains(identifier) {
+                savedIdentifiers.append(identifier)
+            }
+        }
+        UserDefaults.standard.set(savedIdentifiers, forKey: "purchasedProducts")
+        isProUser = !savedIdentifiers.isEmpty
+    }
 }
 
+// MARK: - Error Handling
 struct PurchaseError: Identifiable {
-    let id = UUID() // Unique identifier
+    let id = UUID()
     let message: String
 }
