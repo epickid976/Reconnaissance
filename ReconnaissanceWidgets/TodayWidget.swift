@@ -198,7 +198,7 @@ struct GratitudeTodayWidget: Widget {
         StaticConfiguration(kind: kind, provider: GratitudeProvider()) { entry in
             GratitudeTodayView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
-                .modelContainer(for: [DailyGratitude.self])
+                .modelContainer(SharedModelContainer.container)
         }
         .configurationDisplayName("Gratitude Today")
         .description("View your daily gratitude entries.")

@@ -16,7 +16,7 @@ struct Reconnaissance_Watch_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
             WatchTabView()
-                .modelContainer(for: DailyGratitude.self)
+                .modelContainer(SharedModelContainer.container)
         }
     }
 }

@@ -22,6 +22,9 @@
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
+		828405DD2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
+		828405DE2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
+		828405DF2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
 		82D07F7B2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
 		82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07F802D07D714000A3179 /* GratitudeEntry.swift */; };
@@ -123,6 +126,7 @@
 		821470872D110AA300F95A05 /* GenerateImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateImageThumbnail.swift; sourceTree = "<group>"; };
 		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
 		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
+		828405DC2D244A1B00ED4C73 /* ModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContainer.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Reconnaissance Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F802D07D714000A3179 /* GratitudeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntry.swift; sourceTree = "<group>"; };
@@ -295,6 +299,7 @@
 		82D07F812D07D714000A3179 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				828405DC2D244A1B00ED4C73 /* ModelContainer.swift */,
 				82F802002D1476FF008E5D09 /* PurchaseManager.swift */,
 				821470692D0FAEAC00F95A05 /* SpacesEntry.swift */,
 				82D07F802D07D714000A3179 /* GratitudeEntry.swift */,
@@ -545,6 +550,7 @@
 				821470782D108A4800F95A05 /* CustomCircleButton.swift in Sources */,
 				82146F942D0F9EFB00F95A05 /* HapticManager.swift in Sources */,
 				824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */,
+				828405DE2D244A2100ED4C73 /* ModelContainer.swift in Sources */,
 				8214707E2D10A67800F95A05 /* ICloudManager.swift in Sources */,
 				82D07FE52D08E5CA000A3179 /* Extensions.swift in Sources */,
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
@@ -563,6 +569,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82F802012D147703008E5D09 /* PurchaseManager.swift in Sources */,
+				828405DF2D244A2100ED4C73 /* ModelContainer.swift in Sources */,
 				82146F9A2D0F9EFB00F95A05 /* HapticManager.swift in Sources */,
 				82D07F832D07D723000A3179 /* GratitudeEntry.swift in Sources */,
 				82146F702D0F8C0000F95A05 /* AppVersionHelpers.swift in Sources */,
@@ -579,6 +586,7 @@
 			files = (
 				82F8010F2D12780E008E5D09 /* SpacesEntry.swift in Sources */,
 				82F8016A2D13C73B008E5D09 /* Actors.swift in Sources */,
+				828405DD2D244A2100ED4C73 /* ModelContainer.swift in Sources */,
 				82F800AB2D125FFF008E5D09 /* GratitudeEntry.swift in Sources */,
 				82F802032D147703008E5D09 /* PurchaseManager.swift in Sources */,
 				82F801712D13C850008E5D09 /* Color Extensions.swift in Sources */,
@@ -762,7 +770,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -798,7 +806,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -829,7 +837,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -863,7 +871,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -896,7 +904,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.ReconnaissanceWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -926,7 +934,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.ReconnaissanceWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -955,7 +963,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.watchkitapp.ReconnaissanceWatchWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -986,7 +994,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Jose.Blanco.Reconnaissance.watchkitapp.ReconnaissanceWatchWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;

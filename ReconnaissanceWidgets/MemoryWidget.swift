@@ -82,7 +82,7 @@ struct MemoryOfGratitudeWidget: Widget {
         StaticConfiguration(kind: kind, provider: GratitudeProvider()) { _ in
             MemoryWidgetView()
                 .containerBackground(.fill.tertiary, for: .widget)
-                .modelContainer(for: [DailyGratitude.self])
+                .modelContainer(SharedModelContainer.container)
         }
         .configurationDisplayName("Memory of Gratitude")
         .description("Recall a moment of gratitude.")

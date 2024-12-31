@@ -79,7 +79,7 @@ struct ReflectionSummaryWidget: Widget {
         StaticConfiguration(kind: kind, provider: ReflectionProvider()) { _ in
             ReflectionSummaryWidgetView()
                 .containerBackground(.fill.tertiary, for: .widget)
-                .modelContainer(for: [DailyGratitude.self])
+                .modelContainer(SharedModelContainer.container)
         }
         .configurationDisplayName("Reflection Summary")
         .description("Review your gratitude journey.")

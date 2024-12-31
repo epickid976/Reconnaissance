@@ -146,7 +146,7 @@ struct MilestonesWidget: Widget {
         StaticConfiguration(kind: kind, provider: GratitudeProvider()) { _ in
             MilestonesWidgetView()
                 .containerBackground(.fill.tertiary, for: .widget)
-                .modelContainer(for: [DailyGratitude.self])
+                .modelContainer(SharedModelContainer.container)
         }
         .configurationDisplayName("Milestones")
         .description("Track your milestones and weekly progress.")
