@@ -21,6 +21,7 @@ struct CustomDateRangePicker: View {
 
     var body: some View {
         VStack(spacing: 20) {
+            // Title & Selected Dates
             VStack {
                 Text("Select Date Range")
                     .font(.title3)
@@ -34,34 +35,59 @@ struct CustomDateRangePicker: View {
                 .padding(.horizontal)
             }
             
-            // Calendar
+            // Calendar with transitions
             VStack(spacing: 10) {
                 calendarHeader()
 
+                // Weekday symbols
                 HStack(spacing: 0) {
                     ForEach(calendar.shortWeekdaySymbols, id: \.self) { symbol in
                         Text(symbol)
                             .font(.subheadline)
-                            .frame(maxWidth: .infinity) // Ensure weekday symbols are evenly spaced
+                            .frame(maxWidth: .infinity)
                             .foregroundColor(.secondary)
                     }
                 }
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
-                    ForEach(calendarDays(), id: \.self) { day in
-                        calendarDayView(day: day)
+
+                // Days grid with swipe gestures
+                ZStack {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
+                        ForEach(calendarDays(), id: \.self) { day in
+                            calendarDayView(day: day)
+                        }
                     }
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading))
+                    )
                 }
-                .frame(maxWidth: .infinity) // Expand grid to full width
-                .layoutPriority(1) // Prioritize layout for the grid
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            if value.translation.width < 0 { // Swipe left
+                                withAnimation {
+                                    HapticManager.shared.trigger(.lightImpact)
+                                    currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
+                                }
+                            } else if value.translation.width > 0 { // Swipe right
+                                withAnimation {
+                                    HapticManager.shared.trigger(.lightImpact)
+                                    currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
+                                }
+                            }
+                        }
+                )
             }
-            .frame(maxWidth: .infinity) // Expand the calendar container
+            .animation(.spring(), value: currentMonth) // Ensure smooth animations for swipes
+            .frame(maxWidth: .infinity)
+            .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.secondary.opacity(0.1))
             )
             .padding(.horizontal)
             
-            // Buttons
+            // Action buttons
             HStack {
                 Button(action: {
                     withAnimation {
@@ -99,13 +125,11 @@ struct CustomDateRangePicker: View {
             .padding(.horizontal)
         }
         .padding()
-        
     }
     
-    // MARK: - Components
-    
+    // MARK: - Calendar Header
     @ViewBuilder
-    func calendarHeader() -> some View {
+    private func calendarHeader() -> some View {
         HStack {
             Button(action: {
                 withAnimation {
@@ -123,12 +147,14 @@ struct CustomDateRangePicker: View {
                 .gesture(
                     DragGesture()
                         .onEnded { value in
-                            if value.translation.width < 0 { // Swipe left
+                            if value.translation.width < 0 {
+                                // Swipe left: next month
                                 withAnimation {
                                     HapticManager.shared.trigger(.lightImpact)
                                     currentMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) ?? currentMonth
                                 }
-                            } else if value.translation.width > 0 { // Swipe right
+                            } else if value.translation.width > 0 {
+                                // Swipe right: previous month
                                 withAnimation {
                                     HapticManager.shared.trigger(.lightImpact)
                                     currentMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) ?? currentMonth
@@ -151,11 +177,13 @@ struct CustomDateRangePicker: View {
         .padding(.horizontal)
     }
     
+    // MARK: - Individual Day View
     private func calendarDayView(day: Date?) -> some View {
         Group {
             if let day = day {
                 Text("\(calendar.component(.day, from: day))")
                     .font(.subheadline)
+                    .fontWeight(calendar.isDateInToday(day) ? .semibold : .regular)
                     .foregroundColor(textColor(for: day))
                     .frame(width: 40, height: 40)
                     .background(
@@ -163,23 +191,32 @@ struct CustomDateRangePicker: View {
                             .fill(backgroundColor(for: day))
                     )
                     .onTapGesture {
-                        HapticManager.shared.trigger(.lightImpact)
-                        handleDateSelection(day)
+                        withAnimation {
+                            HapticManager.shared.trigger(.lightImpact)
+                            handleDateSelection(day)
+                        }
                     }
-                    .scaleEffect(hoverDate == day ? 1.1 : 1) // Slight scale effect on hover
+                    // Slight scale effect on hover (macOS/Catalyst)
+                    .scaleEffect(hoverDate == day ? 1.1 : 1)
                     .onHover { isHovering in
                         hoverDate = isHovering ? day : nil
                     }
             } else {
-                Color.clear // Placeholder for empty cells
+                Color.clear
             }
         }
     }
-
+    
+    // Customize text color for a day cell
     private func textColor(for date: Date) -> Color {
-        calendar.isDateInToday(date) ? .white : .primary
+        if calendar.isDateInToday(date) {
+            return .white
+        } else {
+            return .primary
+        }
     }
     
+    // Title + date label
     private func dateLabel(title: String, date: Date?) -> some View {
         VStack {
             Text(title)
@@ -187,13 +224,15 @@ struct CustomDateRangePicker: View {
                 .foregroundColor(.secondary)
             Text(date.map { DateFormatter.medium.string(from: $0) } ?? NSLocalizedString("Not selected", comment: ""))
                 .font(.body)
+                .fontWeight(.medium)
         }
     }
     
-    // MARK: - Logic
-    
+    // MARK: - Calendar Days Logic
     private func calendarDays() -> [Date?] {
-        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)) else { return [] }
+        guard let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: currentMonth)) else {
+            return []
+        }
         let daysInMonth = calendar.range(of: .day, in: .month, for: monthStart)?.count ?? 0
         let firstDayOffset = calendar.component(.weekday, from: monthStart) - calendar.firstWeekday
         let prevMonthPadding = firstDayOffset < 0 ? 7 + firstDayOffset : firstDayOffset
@@ -208,7 +247,7 @@ struct CustomDateRangePicker: View {
     }
     
     private func handleDateSelection(_ date: Date) {
-        HapticManager.shared.trigger(.lightImpact)
+        // Simple toggle logic:
         if startDate == nil || (startDate != nil && endDate != nil) {
             startDate = date
             endDate = nil
@@ -221,7 +260,7 @@ struct CustomDateRangePicker: View {
     
     private func backgroundColor(for date: Date) -> Color {
         if calendar.isDateInToday(date) {
-            return Color.green.opacity(0.5) // Highlight today's date
+            return Color.green.opacity(0.5)
         } else if date == startDate || date == endDate {
             return Color.blue.opacity(0.5)
         } else if let start = startDate, let end = endDate, date >= start && date <= end {
