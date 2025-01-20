@@ -220,6 +220,12 @@
         }
       }
     },
+    "Add" : {
+
+    },
+    "Add Custom Prompt" : {
+
+    },
     "Add Entry" : {
       "localizations" : {
         "es-419" : {
@@ -494,6 +500,18 @@
           }
         }
       }
+    },
+    "Authenticate" : {
+
+    },
+    "Authentication Failed" : {
+
+    },
+    "Authentication Required" : {
+
+    },
+    "Biometric Lock" : {
+
     },
     "Bottom %@" : {
       "localizations" : {
@@ -1849,6 +1867,9 @@
         }
       }
     },
+    "Notifications" : {
+
+    },
     "OK" : {
       "localizations" : {
         "es-419" : {
@@ -2184,6 +2205,9 @@
           }
         }
       }
+    },
+    "Select a Prompt" : {
+
     },
     "Select Date Range" : {
       "localizations" : {

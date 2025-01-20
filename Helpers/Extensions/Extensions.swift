@@ -521,3 +521,32 @@ class DocumentPickerDelegate: NSObject, UIDocumentPickerDelegate {
         onPick(url)
     }
 }
+
+//Determine Icon
+@MainActor
+func determineIconForLock() -> String {
+    switch AuthenticationManager.biometricType() {
+    case .face:
+        return "faceid"
+    case .touch:
+        return "touchid"
+    case .none:
+        return "lock"
+    }
+}
+
+extension Date {
+    /// Convert a `Date` to a `String`
+    func toAppStorageFormat() -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withColonSeparatorInTime]
+        return formatter.string(from: self)
+    }
+
+    /// Convert a `String` to a `Date`
+    static func fromAppStorageFormat(_ string: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate, .withTime, .withColonSeparatorInTime]
+        return formatter.date(from: string)
+    }
+}

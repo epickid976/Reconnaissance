@@ -22,6 +22,9 @@
 		824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711B92D0D3297005E44E7 /* ConfettiController.swift */; };
 		824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824711BB2D0D445E005E44E7 /* StackedCarousel.swift */; };
 		824711C22D0EA0A6005E44E7 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D07FDF2D08E5CA000A3179 /* ViewModifiers.swift */; };
+		8274CF082D3EB74400B9C62A /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8274CF062D3EB73B00B9C62A /* AuthenticationManager.swift */; };
+		8274CF0A2D3EC1E300B9C62A /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8274CF092D3EC1DE00B9C62A /* NotificationManager.swift */; };
+		8274CF0D2D3ECEE600B9C62A /* PromptsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8274CF0C2D3ECEE100B9C62A /* PromptsManager.swift */; };
 		828405DD2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
 		828405DE2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
 		828405DF2D244A2100ED4C73 /* ModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828405DC2D244A1B00ED4C73 /* ModelContainer.swift */; };
@@ -126,6 +129,9 @@
 		821470872D110AA300F95A05 /* GenerateImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateImageThumbnail.swift; sourceTree = "<group>"; };
 		824711B92D0D3297005E44E7 /* ConfettiController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiController.swift; sourceTree = "<group>"; };
 		824711BB2D0D445E005E44E7 /* StackedCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedCarousel.swift; sourceTree = "<group>"; };
+		8274CF062D3EB73B00B9C62A /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		8274CF092D3EC1DE00B9C62A /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		8274CF0C2D3ECEE100B9C62A /* PromptsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptsManager.swift; sourceTree = "<group>"; };
 		828405DC2D244A1B00ED4C73 /* ModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContainer.swift; sourceTree = "<group>"; };
 		82D07F592D07D6C8000A3179 /* Reconnaissance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reconnaissance.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82D07F6E2D07D6ED000A3179 /* Reconnaissance Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Reconnaissance Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -270,6 +276,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8274CF052D3EB71000B9C62A /* ManagerClasses */ = {
+			isa = PBXGroup;
+			children = (
+				8274CF0C2D3ECEE100B9C62A /* PromptsManager.swift */,
+				8274CF092D3EC1DE00B9C62A /* NotificationManager.swift */,
+				8274CF062D3EB73B00B9C62A /* AuthenticationManager.swift */,
+				82146F852D0F9EFB00F95A05 /* HapticManager.swift */,
+			);
+			path = ManagerClasses;
+			sourceTree = "<group>";
+		};
 		82D07F502D07D6C8000A3179 = {
 			isa = PBXGroup;
 			children = (
@@ -299,11 +316,11 @@
 		82D07F812D07D714000A3179 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				8274CF052D3EB71000B9C62A /* ManagerClasses */,
 				828405DC2D244A1B00ED4C73 /* ModelContainer.swift */,
 				82F802002D1476FF008E5D09 /* PurchaseManager.swift */,
 				821470692D0FAEAC00F95A05 /* SpacesEntry.swift */,
 				82D07F802D07D714000A3179 /* GratitudeEntry.swift */,
-				82146F852D0F9EFB00F95A05 /* HapticManager.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -549,6 +566,7 @@
 				821470882D110AAB00F95A05 /* GenerateImageThumbnail.swift in Sources */,
 				821470782D108A4800F95A05 /* CustomCircleButton.swift in Sources */,
 				82146F942D0F9EFB00F95A05 /* HapticManager.swift in Sources */,
+				8274CF0D2D3ECEE600B9C62A /* PromptsManager.swift in Sources */,
 				824711BA2D0D329B005E44E7 /* ConfettiController.swift in Sources */,
 				828405DE2D244A2100ED4C73 /* ModelContainer.swift in Sources */,
 				8214707E2D10A67800F95A05 /* ICloudManager.swift in Sources */,
@@ -556,6 +574,8 @@
 				82D07FE62D08E5CA000A3179 /* ResultExtensions.swift in Sources */,
 				824711BC2D0D4461005E44E7 /* StackedCarousel.swift in Sources */,
 				82F802022D147703008E5D09 /* PurchaseManager.swift in Sources */,
+				8274CF0A2D3EC1E300B9C62A /* NotificationManager.swift in Sources */,
+				8274CF082D3EB74400B9C62A /* AuthenticationManager.swift in Sources */,
 				82D080BA2D09BECD000A3179 /* KeyboardExt.swift in Sources */,
 				82D07FE82D08E5CA000A3179 /* UIDeviceExtension.swift in Sources */,
 				82D07F822D07D714000A3179 /* GratitudeEntry.swift in Sources */,

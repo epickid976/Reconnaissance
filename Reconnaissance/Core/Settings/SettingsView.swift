@@ -30,6 +30,25 @@ struct SettingsView: View {
     //MARK: - Properties
     @Query var gratitudes: [DailyGratitude]
     
+    @AppStorage("isBiometricEnabled") private var isBiometricEnabled: Bool = false
+    @AppStorage("isNotificationsEnabled") private var isNotificationsEnabled: Bool = false
+    
+    @AppStorage("customReminderTime") private var customReminderTimeString: String = {
+        // Default to 8:00 PM
+        let defaultDate = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date())!
+        return defaultDate.toAppStorageFormat()
+    }()
+
+    // Computed property to get/set the `Date`
+    private var customReminderTime: Date {
+        get {
+            Date.fromAppStorageFormat(customReminderTimeString) ?? Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date())!
+        }
+        set {
+            customReminderTimeString = newValue.toAppStorageFormat()
+        }
+    }
+    
     var body: some View {
         GeometryReader { proxy in
             NavigationStack {
@@ -56,6 +75,38 @@ struct SettingsView: View {
                             .presentationDragIndicator(.visible)
                             .presentationCornerRadius(30)
                     }
+                    
+                    .onChange(of: isBiometricEnabled) { newValue, _ in
+                        if newValue {
+                            Task {
+                                do {
+                                    let success = try await AuthenticationManager.shared.authenticateUser(localizedReason: "Enable biometric authentication for added security.")
+                                    if !success {
+                                        isBiometricEnabled = false
+                                    }
+                                } catch {
+                                    // Revert the toggle and provide user feedback
+                                    isBiometricEnabled = false
+                                    print("Authentication failed: \(error.localizedDescription)")
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: isNotificationsEnabled) { newValue, _ in
+                                    if newValue {
+                                        Task {
+                                            do {
+                                                try await NotificationManager.shared.requestPermission()
+                                                NotificationManager.shared.scheduleDailyReminder()
+                                            } catch {
+                                                isNotificationsEnabled = false
+                                                print("Failed to enable notifications: \(error.localizedDescription)")
+                                            }
+                                        }
+                                    } else {
+                                        NotificationManager.shared.cancelNotification(id: "dailyReminder")
+                                    }
+                                }
                 }
             }
         }
@@ -143,32 +194,13 @@ struct SettingsView: View {
                                 UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
                             }
                         ),
-                        //FUTURE
-                        //                        GroupedPreferenceRow.Preference(
-                        //                            icon: "bell.fill",
-                        //                            title: "Custom Reminder",
-                        //                            iconColor: .orange,
-                        //                            action: {
-                        //                                HapticManager.shared.trigger(.lightImpact)
-                        //                                Task {
-                        ////                                    let currentReminderTime = preferencesViewModel.customReminderTime ?? Date()
-                        ////                                    await CentrePopup_CustomReminder(
-                        ////                                        reminderTime: .constant(currentReminderTime),
-                        ////                                        onSave: { newTime in
-                        ////                                            preferencesViewModel.customReminderTime = newTime
-                        ////                                            viewModel.scheduleCustomReminderNotification(for: newTime)
-                        ////                                        },
-                        ////                                        usingLargeText: sizeCategory.isAccessibilityCategory
-                        ////                                    ).present()
-                        //                                }
-                        //                            }
-                        //                        )
-                        //FUTURE
-                        //                        GroupedPreferenceRow.Preference(
-                        //                            icon: "arrow.trianglehead.clockwise.icloud.fill",
-                        //                            title: "iCloud Sync",
-                        //                            toggleValue: $preferencesViewModel.hapticFeedback
-                        //                        )
+                        
+
+//                        GroupedPreferenceRow.Preference(
+//                            icon: "arrow.trianglehead.clockwise.icloud.fill",
+//                            title: "iCloud Sync",
+//                            toggleValue: $preferencesViewModel.hapticFeedback
+//                        )
                     ]
                     
                     // Add Haptics for iPhone only
@@ -182,6 +214,25 @@ struct SettingsView: View {
                             )
                         )
                     }
+                    
+                    preferences.append(
+                        GroupedPreferenceRow.Preference(
+                            icon: determineIconForLock(),
+                            title: NSLocalizedString("Biometric Lock", comment: ""),
+                            iconColor: .green,
+                            toggleValue: $isBiometricEnabled
+                        )
+                    )
+                    
+                    preferences.append(
+                        GroupedPreferenceRow.Preference(
+                            icon: "bell.fill",
+                            title: NSLocalizedString("Notifications", comment: ""),
+                            iconColor: .orange,
+                            toggleValue: $isNotificationsEnabled
+                        )
+                    )
+                    
                     
                     //                    // Add iPad Column View for iPad only
                     //                    if UIDevice.current.userInterfaceIdiom == .pad {
@@ -416,14 +467,14 @@ struct SettingsView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                     .padding(.top, 8)
-
+                
                 // Ad Description
                 Text("Access advanced features like Spaces and support the development of this app.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
-
+                
                 // Unlock Button
                 Button(action: {
                     viewModel.showPaywallSheet = true

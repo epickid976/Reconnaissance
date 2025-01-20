@@ -20,7 +20,8 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             if hasSeenOnboarding {
-                HomeTabView() // Your tab view becomes the root container
+                
+                SecureView()
                     .onOpenURL { url in
                         if url.scheme == "reconnaissance" && url.host == "addGratitude" {
                             Task {

@@ -814,6 +814,21 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
                     .foregroundColor(.secondary)
                 
                 createStyledTextField(NSLocalizedString("Notes. Write something here...", comment: ""), text: $notes, isMultiline: true, field: .field4)
+                
+                MiniOvalButton(
+                   label: "Optional Prompt",
+                   action: {
+                       Task {
+                           await CentrePopup_PromptList(
+                            prompts: PromptsManager.shared.prompts
+                           ) { selection in
+                               notes = "\(selection)\n\n"
+                           }.present()
+                       }
+                   },
+                   color: .blue,
+                   textColor: .blue
+                ).hSpacing(.center)
             }
             
             // Error Message
@@ -985,6 +1000,7 @@ struct CentrePopup_AddGratitudeEntry: CenterPopup {
     
     func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
         config
+            .tapOutsideToDismissPopup(true)
             //.popupHorizontalPadding(24)
     }
 }
@@ -1122,6 +1138,228 @@ struct CentrePopup_DeleteGratitudeEntry: CenterPopup {
             HapticManager.shared.trigger(.error)
             print("Error deleting gratitude entry: \(error)")
         }
+    }
+    
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+            //.popupHorizontalPadding(24)
+    }
+}
+
+//MARK: - Prompts Popup
+
+struct CentrePopup_PromptList: CenterPopup {
+    @State private var prompts: [String]
+    var onPromptSelected: (String) -> Void
+    @Environment(\.colorScheme) var colorScheme
+
+    init(prompts: [String], onPromptSelected: @escaping (String) -> Void) {
+        self._prompts = State(initialValue: prompts)
+        self.onPromptSelected = onPromptSelected
+    }
+
+    var body: some View {
+        createContent()
+    }
+
+    func createContent() -> some View {
+        VStack(spacing: 16) {
+            // Title
+            Text("Select a Prompt")
+                .font(.headline)
+                .padding(.bottom, 8)
+
+            // Prompt Grid
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 16)], spacing: 16) {
+                    ForEach(prompts, id: \.self) { prompt in
+                        Button(action: {
+                            HapticManager.shared.trigger(.lightImpact)
+                            onPromptSelected(prompt)
+                            Task { await dismissLastPopup() }
+                        }) {
+                            ZStack {
+                                // Background with gradient
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.blue.opacity(0.6), lineWidth: 1)
+                                    )
+                                    .shadow(
+                                        color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.gray.opacity(0.3),
+                                        radius: 6,
+                                        x: 0,
+                                        y: 4
+                                    )
+                                
+                                // Text
+                                Text(prompt)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .multilineTextAlignment(.center)
+                                    .padding(8)
+                                    .foregroundColor(.primary)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 80)
+                            .scaleEffect(0.95) // Slightly smaller by default
+                            .onHover { hovering in
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                    _ = hovering ? 1.05 : 1.0 // Optional for platforms supporting hover
+                                }
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+
+            HStack {
+                // Cancel Button
+                Button(action: {
+                    HapticManager.shared.trigger(.lightImpact)
+                    Task { await dismissLastPopup() }
+                }) {
+                    Text("Cancel")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.gray.opacity(0.2))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                        .foregroundColor(.primary)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 16)
+                
+                //TODO: Add Custom Prompt Button
+                // Add Custom Prompt Button
+//                Button(action: {
+//                    HapticManager.shared.trigger(.lightImpact)
+//                    // Show a custom prompt input field or perform the necessary action
+//                    showCustomPromptDialog()
+//                }) {
+//                    Text("Add Prompt")
+//                        .frame(maxWidth: .infinity)
+//                        .padding(.vertical, 16)
+//                        .multilineTextAlignment(.center)
+//                        .background(
+//                            RoundedRectangle(cornerRadius: 20)
+//                                .fill(Color.blue.opacity(0.2))
+//                        )
+//                        .overlay(
+//                            RoundedRectangle(cornerRadius: 20)
+//                                .stroke(Color.blue.opacity(0.8), lineWidth: 1)
+//                        )
+//                        .foregroundColor(.blue)
+//                }
+//                .buttonStyle(PlainButtonStyle())
+//                .padding(.horizontal, 16)
+            }
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .frame(maxWidth: .infinity, maxHeight: 600)
+    }
+
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config
+            .tapOutsideToDismissPopup(true)
+    }
+    
+    func showCustomPromptDialog() {
+        Task {
+            await CentrePopup_CustomPrompt { newPrompt in
+                prompts.append(newPrompt) // Add new prompt to the list
+                PromptsManager.shared
+                    .prompts.append(newPrompt)
+            }.present()
+        }
+    }
+}
+
+//MARK: - Custom Prompt Popup
+
+struct CentrePopup_CustomPrompt: CenterPopup {
+    var onPromptAdded: (String) -> Void
+    @State private var customPrompt: String = ""
+    @FocusState private var textfieldFocus: Bool
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Add Custom Prompt")
+                .font(.headline)
+            
+            createStyledTextField(
+                "Enter your custom prompt",
+                text: $customPrompt
+            )
+
+            Button(action: {
+                if !customPrompt.isEmpty {
+                    onPromptAdded(customPrompt)
+                    Task { await dismissLastPopup() }
+                }
+            }) {
+                Text("Add")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(12)
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding(16)
+        .background(Color.secondarySystemBackground)
+        .cornerRadius(20)
+    }
+    
+    func createStyledTextField(_ placeholder: String, text: Binding<String>, isMultiline: Bool = false) -> some View {
+        Group {
+            if isMultiline {
+                TextField(placeholder, text: text, axis: .vertical)
+                    .lineLimit(3...6)
+                    .focused( $textfieldFocus) // Use appropriate field enum
+            } else {
+                TextField(placeholder, text: text)
+                    .focused($textfieldFocus) // Use appropriate field enum
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.gray.opacity(colorScheme == .dark ? 0.2 : 0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(text.wrappedValue.isEmpty ? Color.secondary.opacity(0.3) : Color.blue.opacity(0.8), lineWidth: 1)
+        )
+        .cornerRadius(20)
+        .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.gray.opacity(0.3), radius: 6, x: 0, y: 4)
+        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        .onTapGesture {
+            textfieldFocus = true // Use appropriate field enum
+        }
+    }
+
+    func configurePopup(config: CenterPopupConfig) -> CenterPopupConfig {
+        config.tapOutsideToDismissPopup(true)
     }
 }
 
